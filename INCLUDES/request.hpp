@@ -6,7 +6,7 @@
 /*   By: rel-hach <rel-hach@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 17:10:47 by rel-hach          #+#    #+#             */
-/*   Updated: 2023/05/23 17:10:48 by rel-hach         ###   ########.fr       */
+/*   Updated: 2023/05/25 01:40:30 by rel-hach         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@
 #include <map>
 #include <vector>
 
-#define OK                  true
-#define KO                  false
+#define YES                 1
+#define NO                  0
 #define CRLFX2              "\r\n\r\n"
 #define VEC_OF_STRS         std::vector<std::string>
 #define MAP_OF_VECS         std::map<std::string, std::string>
@@ -33,6 +33,7 @@
 #define CONTENT_TYPE        "Content-Type"
 #define TRANSFER_ENCODING   "Transfer-Encoding"
 #define NOT_FOUND           "NOT_FOUND"
+#define GO_NEXT             1
 
 // METHODS
 
@@ -48,9 +49,17 @@ class request
         std::string                         http_request;
         std::string                         method;
         std::string                         http_ver;
-        std::string                         path;
+        std::string                         uri;
         std::string                         start_line;
         std::string                         headers;
+        std::string                         querry;
+
+
+        // ConfigFile data
+
+        std::string                         root;
+        VEC_OF_STRS                         locations;
+        
 
         //-------------------------------------------
 
@@ -59,30 +68,37 @@ class request
         std::string                         contentLenght;
         std::string                         transferEncoding;
         size_t                              position;
+        int                                 status;
         VEC_OF_STRS                         Headers;
         MAP_OF_VECS                         dictionary;
     public:
         request();
         ~request();
-        bool            Processing_HttpRequest( void );
+        int            Processing_HttpRequest( void );
         VEC_OF_STRS     Splitting_string(std::string str, std::string delim);
+        void            check_request( void );
         // START LINE CHECKING
-        bool            Checking_startLine( std::string startLine );
-        bool            Checking_methodIfSupported( void );
-        bool            Checking_httpVersion( void );
+        int            Checking_startLine ( std::string startLine );
+        int            Checking_methodIfSupported ( void );
+        int            Checking_httpVersion ( void );
+        int            Checking_uri ( void );
+        int            Decoding_url ( void );
+        int            Converting_hexaToDecimal ( std::string str );
+
+        int            LookingFor_uriInConfFile();
         // HEADERS CHECKING 
-        bool            Checking_headers( std::string heads);
-        bool            Checking_neededHeadersToStore( std::string key, std::string val );
+        int            Checking_headers( std::string heads);
+        int            Checking_neededHeadersToStore( std::string key, std::string val );
         // Knowing what user asking for
-        bool            Analysing_userRequest();
+        int            Analysing_userRequest();
         // GET
-        bool            Executing_GetCase();
+        int            Executing_GetCase();
         // file case | folder case 
-        bool            Executing_PostCase();
+        int            Executing_PostCase();
         //
-        bool            Checking_body();
-        // bool            Checking_ContentLenght();
-        bool            Executing_delete_case();
+        int            Checking_body();
+        // int            Checking_ContentLenght();
+        int            Executing_delete_case();
         // 
 
 
