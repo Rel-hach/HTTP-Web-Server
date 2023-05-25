@@ -6,7 +6,7 @@
 /*   By: rel-hach <rel-hach@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 17:10:47 by rel-hach          #+#    #+#             */
-/*   Updated: 2023/05/25 01:40:30 by rel-hach         ###   ########.fr       */
+/*   Updated: 2023/05/25 20:14:00 by rel-hach         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,16 +91,6 @@ class request
         int            Checking_neededHeadersToStore( std::string key, std::string val );
         // Knowing what user asking for
         int            Analysing_userRequest();
-        // GET
-        int            Executing_GetCase();
-        // file case | folder case 
-        int            Executing_PostCase();
-        //
-        int            Checking_body();
-        // int            Checking_ContentLenght();
-        int            Executing_delete_case();
-        // 
-
 
         // GETTERS AND SETTERS :
 
