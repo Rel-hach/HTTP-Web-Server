@@ -8,6 +8,9 @@
 
     request::~request() {}
 
+
+// split 
+
     VEC_OF_STRS     request::Splitting_string(std::string str, std::string delim)
     {
         VEC_OF_STRS splitted;
@@ -20,29 +23,11 @@
         return (splitted);
     }
 
-    /*
 
-        HTTP STATUS CODES :
+/*--------------------------------------------------------------------------------*/
 
-        200 OK
 
-        201 OK created
 
-        301 moved to new URL
-
-        304 Not modified
-
-        400 Bad request
-
-        401 Unauthorized
-
-        404 Not found
-
-        500 Internal server error
-
-    */
-
-// -----------------------------------------------------------------------
 
     int            request::Processing_HttpRequest( void )
     {
@@ -57,11 +42,13 @@
         }
     }
 
-// -----------------------------------------------------------------------
 
-// ----------------------------------------------------------------------
 
-    // START LINE CHECKING
+
+/*--------------------------------------- CHECKING THE FIRST LINE OF THE REQUEST -----------------------------------------*/
+
+
+
 
     int            request::Checking_startLine( std::string startLine )
     {
@@ -72,7 +59,7 @@
         uri         = vec.at(1);
         http_ver    = vec.at(2);
 
-        // checking if the Method is supported .. 
+        // checking if the Method is supported ..
 
         status = Checking_methodIfSupported();
         if (status != GO_NEXT)   return (Method_Not_Allowed);
@@ -82,22 +69,29 @@
         status = Checking_httpVersion();
         if (status != GO_NEXT)   return (HTTP_Version_Not_Supported);
 
-        /*
-            checking the URI ??
-        */
+        status = Checking_uri();
+        if (status != GO_NEXT) return (status);
 
         return (GO_NEXT);
     }
 
+
+
+
+// ---------------------------------FUNCTION : CONVERTING TO HEXADECIMAL -----------------------------------------------
+
+
+
+
     int    request::Converting_hexaToDecimal ( std::string str )
     {
-        int len = str.length();
+        int lenght = str.length();
         
         int base = 1;  
 
         int decimalVal = 0;  
     
-        for (int i = len - 1; i >= 0; i--) 
+        for (int i = lenght - 1; i >= 0; i--) 
         {
             if (str[i] >= '0' && str[i] <= '9') 
             {
@@ -112,6 +106,8 @@
         }
         return (decimalVal);
     }
+
+// ---------------------------------FUNCTION : DECODING URI -----------------------------------------------
 
     int            request::Decoding_url ()
     {
@@ -136,29 +132,35 @@
         }
     }
 
+
+// ---------------------------------FUNCTION : LOOK AFTER URI IN CONFIG FILE -----------------------------------------------
+
+
+
+    std::vector<std::map<std::string, std::map<std::string, std::string>>> VectorOfservers;
+
     int         request::LookingFor_uriInConfFile()
     {
-        // check if the uri in CONF file.
-
-        // algorithms :
-
-        /*
-            for example uri = a/b/c 
-            step 1 : get the /c and see if you can find it 
-            if no ?
-
-            step 2 : get the /b and see if you can find it
-
-            step 3 : get the /a and see if you can find it
-
-            if you find it ? then -> ignore it. delete it 
-
-            just 
-        */
+        VEC_OF_STRS splitted;
+        int count = std::count(uri.begin(), uri.end(), '/');
+        splitted = Splitting_string(uri, "/");
+        int i = 0;
+        if (count > 1)
+        {
+            for (i = 0; i < count; i++)
+                splitted[i].insert(splitted[i].begin(), '/');
+        }
+        
+        return (0);
     }
+
+
+// ---------------------------------FUNCTION : GET QUERRY FROM URI -----------------------------------------------
+
 
     int         request::Checking_uri()
     {
+        int status = GO_NEXT; 
         position = uri.find('?');
         if (position != std::string::npos)
         {
@@ -166,14 +168,23 @@
             uri = uri.substr(0, position);
         }
 
-        if (uri[0] != '/') //  || uri.find("&#%<>" the Uri must start with a / and doesn't have to contain those chars "&#%<>"
+        if (uri[0] != '/')
             return (Bad_Request);
 
-        Decoding_url();
+        status = Decoding_url();
+        if (status != GO_NEXT) return (Bad_Request);
+
+        status = LookingFor_uriInConfFile();
+        if (status != GO_NEXT) return (Not_Found);
 
             return (Not_Found);
         return (GO_NEXT);
     }
+
+
+
+/*-----------------------------------FUNCTION: CHECKING IF METHOD SUPPORTED---------------------------------------------*/
+
 
     int        request::Checking_methodIfSupported( void )
     {
@@ -183,23 +194,26 @@
         return (Method_Not_Allowed);
     }
 
-    void    Checking_uriIsThere( void )
-    {
-        
-    }
+
+
+/*---------------------------------FUNCTION: CHECKING HTTP VERSION-----------------------------------------------*/
+
+
 
     int        request::Checking_httpVersion( void )
     {
         if (http_ver.compare("HTTP/1.1"))
             return (GO_NEXT);
-        else
-            return (HTTP_Version_Not_Supported);
+        return (HTTP_Version_Not_Supported);
     }
 
-    // HEADERS CHECKING 
+
+/*----------------------------------FUNCTION : CHECKING HEADERS----------------------------------------------*/
+
+
     int            request::Checking_headers( std::string heads)
     {
-        Headers = Splitting_string(heads, "\r\n");
+        Headers =   Splitting_string(heads, "\r\n");
         VEC_OF_STRS::iterator it;
         for (it = Headers.begin(); it != Headers.end(); ++it)
         {
@@ -220,6 +234,10 @@
         return (OK);
     }
 
+
+// ---------------------------------FUNCTION : CHECKING IF THE HEADER WORTH TO BE STORED--------------------------------
+
+
     int        request::Checking_neededHeadersToStore( std::string key, std::string val )
     {
         // here we can add more headers .
@@ -229,7 +247,10 @@
         return (NO);
     }
 
-    // Knowing what user asking for
+
+
+// ------------------------------------------------------------------------------------------------------
+
 
     int        request::Analysing_userRequest()
     {
@@ -238,57 +259,17 @@
         setting_transferEncoding( this->dictionary );
         setting_contentType( this->dictionary );
 
-        if (host != NOT_FOUND and method == GET) // && 'uri' ---> exits in config file.
-            Executing_GetCase();
-        else if ( (host not_eq NOT_FOUND) and (contentLenght != NOT_FOUND) and (method == POST) )
-            Executing_PostCase();
-        else if (host not_eq NOT_FOUND and method == DELETE)  // && 'uri' to be deleted exist in config file ---> 
-            Executing_delete_case();
-
-        // then do a small checker function to check if everything is okay ? then execute 
-        /*
-            CASE 1 : GET
-                - Check if the file exit ? & host
-                - 
-
-
-        */
+        // if (host != NOT_FOUND and method == GET) // && 'uri' ---> exits in config file.
+        //     Executing_GetCase();
+        // else if ( (host not_eq NOT_FOUND) and (contentLenght != NOT_FOUND) and (method == POST) )
+        //     Executing_PostCase();
+        // else if (host not_eq NOT_FOUND and method == DELETE)  // && 'uri' to be deleted exist in config file ---> 
+        //     Executing_delete_case();
     }
 
-    // GET
 
-    int    get_path()
-    {
+// --------------------------------------------------------------------------------
 
-    }
-
-    void    request::check_request()
-    {
-
-    }
-
-    int        request::Executing_GetCase()
-    {
-        // Let's check if it's a valid request. 
-    }
-
-    // file case | folder case
- 
-    int        request::Executing_PostCase()
-    {
-
-    }
-
-    int        request::Executing_delete_case()
-    {
-
-    }
-
-    //
-    int        request::Checking_body()
-    {
-
-    }
 
     // int            Checking_ContentLenght();
 
