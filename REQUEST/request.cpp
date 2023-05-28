@@ -104,7 +104,7 @@
     {
         std::string allowd_ch = "abcdefghijklmnopqrstuvwxyzABCDEF\
         GHIJKLMNOPQRSTUVWXYZ0123456789!$&'()*+,/:;=?@[]-._~";
-        if (allowd_ch.find(c))
+        if (allowd_ch.find(c) != std::string::npos)
             return (GO_NEXT);
         else
             (Bad_Request);
