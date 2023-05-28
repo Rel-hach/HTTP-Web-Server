@@ -24,9 +24,7 @@
     }
 
 
-/*--------------------------------------------------------------------------------*/
-
-
+/*--------------------------------------    START OF THE PROCESS :  ------------------------------------------*/
 
 
     int            request::Processing_HttpRequest( void )
@@ -37,17 +35,14 @@
         {
             if ( status == Checking_startLine(vec.at(0).substr(0, position)) != GO_NEXT)
                 return status;
-            if (Checking_headers( vec.at(position + SKIP_CRLF)) == 1) return 1;
-            if (Analysing_userRequest() == 1) return (1);
+            if (Checking_headers( vec.at(position + SKIP_CRLF)) != GO_NEXT)
+                return (status);
+            if (Analysing_userRequest() != GO_NEXT)
+                return (status);
         }
     }
 
-
-
-
 /*--------------------------------------- CHECKING THE FIRST LINE OF THE REQUEST -----------------------------------------*/
-
-
 
 
     int            request::Checking_startLine( std::string startLine )
@@ -74,8 +69,6 @@
 
         return (GO_NEXT);
     }
-
-
 
 
 // ---------------------------------FUNCTION : CONVERTING TO HEXADECIMAL -----------------------------------------------
@@ -107,6 +100,16 @@
         return (decimalVal);
     }
 
+    int    allowed_chars(char c)
+    {
+        std::string allowd_ch = "abcdefghijklmnopqrstuvwxyzABCDEF\
+        GHIJKLMNOPQRSTUVWXYZ0123456789!$&'()*+,/:;=?@[]-._~";
+        if (allowd_ch.find(c))
+            return (GO_NEXT);
+        else
+            (Bad_Request);
+    }
+
 // ---------------------------------FUNCTION : DECODING URI -----------------------------------------------
 
     int            request::Decoding_url ()
@@ -124,35 +127,34 @@
                     uri[i] = decimal;
                 }
                 else
-                    return (Bad_Request);  
+                    return (Bad_Request);
             }
             if (!isascii(uri[i]))
                 return (Bad_Request);
-
+            if (allowed_chars(uri[i]) != GO_NEXT)
+                return(Bad_Request);
         }
     }
-
 
 // ---------------------------------FUNCTION : LOOK AFTER URI IN CONFIG FILE -----------------------------------------------
 
 
 
-    std::vector<std::map<std::string, std::map<std::string, std::string>>> VectorOfservers;
+    // std::vector<std::map<std::string, std::map<std::string, std::string>>> VectorOfservers;
 
-    int         request::LookingFor_uriInConfFile()
-    {
-        VEC_OF_STRS splitted;
-        int count = std::count(uri.begin(), uri.end(), '/');
-        splitted = Splitting_string(uri, "/");
-        int i = 0;
-        if (count > 1)
-        {
-            for (i = 0; i < count; i++)
-                splitted[i].insert(splitted[i].begin(), '/');
-        }
-        
-        return (0);
-    }
+    // int         request::LookingFor_uriInConfFile()
+    // {
+    //     VEC_OF_STRS splitted;
+    //     int i = 0;
+    //     int count = std::count(uri.begin(), uri.end(), '/');
+    //     splitted = Splitting_string(uri, "/");
+    //     if (count > 1)
+    //     {
+    //         for (i = 0; i < count; i++)
+    //             splitted[i].insert(splitted[i].begin(), '/');
+    //     }
+    //     return (0);
+    // }
 
 
 // ---------------------------------FUNCTION : GET QUERRY FROM URI -----------------------------------------------
@@ -174,22 +176,31 @@
         status = Decoding_url();
         if (status != GO_NEXT) return (Bad_Request);
 
-        status = LookingFor_uriInConfFile();
-        if (status != GO_NEXT) return (Not_Found);
+        if (uri.size() > 2048)
+            return (URI_Too_Long);
+
+        // status = LookingFor_uriInConfFile();
+        // if (status != GO_NEXT) return (Not_Found);
 
             return (Not_Found);
         return (GO_NEXT);
     }
 
 
+/* ------------------------------------------------------------------------------------------------------------------   */
+
+    int get_uri_location()
+    {
+
+    }
 
 /*-----------------------------------FUNCTION: CHECKING IF METHOD SUPPORTED---------------------------------------------*/
 
-
+               
     int        request::Checking_methodIfSupported( void )
     {
 
-        if (method == "GET" || method == "POST" || method == "HEAD")
+        if (method == "GET" || method == "POST" || method =="DELETE")
             return (GO_NEXT);
         return (Method_Not_Allowed);
     }
@@ -223,6 +234,8 @@
             {
                 couple.first = it->substr(0, position);
                 couple.second = it->substr(position + 2);
+                if (!couple.first[0] || !couple.second[0])
+                    return (Bad_Request);
                 if (Checking_neededHeadersToStore(couple.first, couple.second) == OK)
                     dictionary.insert(couple);
                 else
@@ -259,6 +272,10 @@
         setting_transferEncoding( this->dictionary );
         setting_contentType( this->dictionary );
 
+        if ((this->transferEncoding != "not_found") && (this->transferEncoding != "chunked"))
+            return (Bad_Request);
+        
+
         // if (host != NOT_FOUND and method == GET) // && 'uri' ---> exits in config file.
         //     Executing_GetCase();
         // else if ( (host not_eq NOT_FOUND) and (contentLenght != NOT_FOUND) and (method == POST) )
@@ -269,9 +286,6 @@
 
 
 // --------------------------------------------------------------------------------
-
-
-    // int            Checking_ContentLenght();
 
 
     std::string request::getting_host() const
@@ -334,10 +348,6 @@
             this->contentType = NOT_FOUND;
     }
 
-    
 
 
-
-    /*
-        
-    */
+    /* ------------------------------------------------------------------------ */
