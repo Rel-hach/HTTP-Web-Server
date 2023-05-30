@@ -6,7 +6,7 @@
 /*   By: rel-hach <rel-hach@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 17:10:47 by rel-hach          #+#    #+#             */
-/*   Updated: 2023/05/25 20:14:00 by rel-hach         ###   ########.fr       */
+/*   Updated: 2023/05/30 00:01:45 by rel-hach         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,38 +71,39 @@ class request
         int                                 status;
         VEC_OF_STRS                         Headers;
         MAP_OF_VECS                         dictionary;
-    public:
-        request();
-        ~request();
-        int            Processing_HttpRequest( void );
-        VEC_OF_STRS     Splitting_string(std::string str, std::string delim);
-        void            check_request( void );
+    public: 
+        request();  
+        ~request(); 
+        int              Processing_HttpRequest( void );
+        VEC_OF_STRS      Splitting_string(std::string str, std::string delim);
+        void             check_request( void );
         // START LINE CHECKING
-        int            Checking_startLine ( std::string startLine );
-        int            Checking_methodIfSupported ( void );
-        int            Checking_httpVersion ( void );
-        int            Checking_uri ( void );
-        int            Decoding_url ( void );
-        int            Converting_hexaToDecimal ( std::string str );
+        int             Checking_startLine ( std::string startLine );
+        int             Checking_methodIfSupported ( void );
+        int             Checking_httpVersion ( void );
+        int             Checking_uri ( void );
+        int             Decoding_url ( void );
+        int             Converting_hexaToDecimal ( std::string str );
 
-        int            LookingFor_uriInConfFile();
+        int             LookingFor_uriInConfFile();
         // HEADERS CHECKING 
-        int            Checking_headers( std::string heads);
-        int            Checking_neededHeadersToStore( std::string key, std::string val );
+        int             Checking_headers( std::string heads);
+        int             Checking_neededHeadersToStore( std::string key, std::string val );
         // Knowing what user asking for
-        int            Analysing_userRequest();
+        int             setting_headers();
+        int             executing_request();
 
         // GETTERS AND SETTERS :
 
-        std::string getting_host() const;
-        std::string getting_contentLenght() const;
-        std::string getting_transferEncoding() const;
-        std::string getting_contentType() const;
+        std::string     getting_host() const;
+        std::string     getting_contentLenght() const;
+        std::string     getting_transferEncoding() const;
+        std::string     getting_contentType() const;
 
-        void setting_host( MAP_OF_VECS& dictionary );
-        void setting_contentLenght( MAP_OF_VECS& dictionary );
-        void setting_transferEncoding( MAP_OF_VECS& dictionary );
-        void setting_contentType( MAP_OF_VECS& dictionary );
+        void            setting_host( MAP_OF_VECS& dictionary );
+        void            setting_contentLenght( MAP_OF_VECS& dictionary );
+        void            setting_transferEncoding( MAP_OF_VECS& dictionary );
+        void            setting_contentType( MAP_OF_VECS& dictionary );
 };
 
 #endif
