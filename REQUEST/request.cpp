@@ -37,8 +37,31 @@
                 return status;
             if (Checking_headers( vec.at(position + SKIP_CRLF)) != GO_NEXT)
                 return (status);
-            if (Analysing_userRequest() != GO_NEXT)
+            if (setting_headers() != GO_NEXT)
                 return (status);
+            if (executing_request() != GO_NEXT)
+                return (status);
+        }
+    }
+
+/*------------------------------------------------------------------------------------------------------------------------*/
+
+    int             request::executing_request()
+    {
+        if (this->method == GET)
+        {
+            // check if there is no errors
+            // prepare response !
+        }
+        else if (this ->method == "DELETE")
+        {
+            // check if there is no errors
+            // prepare response !
+        }
+        else if (this ->method == "POST")
+        {
+            // check if there is no errors
+            // prepare response !
         }
     }
 
@@ -261,27 +284,29 @@
     }
 
 
-
 // ------------------------------------------------------------------------------------------------------
 
 
-    int        request::Analysing_userRequest()
+    int        request::setting_headers()
     {
         setting_host( this->dictionary );
         setting_contentLenght( this->dictionary );
         setting_transferEncoding( this->dictionary );
         setting_contentType( this->dictionary );
 
-        if ((this->transferEncoding != "not_found") && (this->transferEncoding != "chunked"))
-            return (Bad_Request);
+        // if ((this->transferEncoding != "not_found") && (this->transferEncoding != "chunked"))
+        //     return (Bad_Request);
         
 
         // if (host != NOT_FOUND and method == GET) // && 'uri' ---> exits in config file.
-        //     Executing_GetCase();
+            // Executing_GetCase();
         // else if ( (host not_eq NOT_FOUND) and (contentLenght != NOT_FOUND) and (method == POST) )
         //     Executing_PostCase();
         // else if (host not_eq NOT_FOUND and method == DELETE)  // && 'uri' to be deleted exist in config file ---> 
         //     Executing_delete_case();
+
+        if (method == "GET")
+
     }
 
 
