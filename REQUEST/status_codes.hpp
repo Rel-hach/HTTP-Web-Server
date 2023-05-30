@@ -29,7 +29,7 @@
 /* Client Error */
 
 #define Bad_Request 400
-#define Unauthorized_Must_be_authenticated 401
+#define Unauthorized 401
 #define Payment_Required_Not_used_really 402
 #define Forbidden_Server_refuses_to_give_you_a_file_authentication_won_t_help 403
 #define Not_Found 404
@@ -42,7 +42,7 @@
 #define Lengh_Required 411
 #define Precondition_Failed 412
 #define Reqeust_Entity_Too_Large 413
-#define Unsupported_Media_Type 414
+#define URI_Too_Long 414
 #define Request_Range_Not_Satisfiable 415
 #define Expectation_Failed 416
 
@@ -57,3 +57,7 @@
 
 
 #endif
+
+
+
+//
