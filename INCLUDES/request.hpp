@@ -83,6 +83,7 @@ class request
         int             Checking_httpVersion ( void );
         int             Checking_uri ( void );
         int             Decoding_url ( void );
+        int             counting_Directories (std::string& uri);
         int             Converting_hexaToDecimal ( std::string str );
 
         int             LookingFor_uriInConfFile();
@@ -92,6 +93,7 @@ class request
         // Knowing what user asking for
         int             setting_headers();
         int             executing_request();
+
 
         // GETTERS AND SETTERS :
 

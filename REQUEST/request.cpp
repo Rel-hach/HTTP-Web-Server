@@ -1,4 +1,22 @@
-#include "../INCLUDES/request.hpp"
+#include "../INCLUDES/request.hpp"   int            request::Processing_HttpRequest( void )
+    {
+        request http;
+        http.http_request;
+        VEC_OF_STRS vec = Splitting_string (http_request, CRLFX2);
+        position = vec.at(0).find("\r\n");
+        if (position not_eq std::string::npos)
+        {
+            if ( status == Checking_startLine(vec.at(0).substr(0, position)) != GO_NEXT)
+                return status;
+            if (Checking_headers( vec.at(position + SKIP_CRLF)) != GO_NEXT)
+                return (status);
+            if (setting_headers() != GO_NEXT)
+                return (status);
+            if (executing_request() != GO_NEXT)
+                return (status);
+        }
+    }
+
 #include "status_codes.hpp"
 
     request::request()
@@ -27,22 +45,27 @@
 /*--------------------------------------    START OF THE PROCESS :  ------------------------------------------*/
 
 
-    int            request::Processing_HttpRequest( void )
+ 
+
+/*------------------------------------------------------------------------------------------------------------------------*/
+
+
+int     request::counting_Directories (std::string& uri)
+{
+    std::vector<std::string> paths = Splitting_string(uri, "/");
+    int count = 0;
+    
+    for (int i = 0; i < paths.size(); i++, count >= 0)
     {
-        VEC_OF_STRS vec = Splitting_string (http_request, CRLFX2);
-        position = vec.at(0).find("\r\n");
-        if (position not_eq std::string::npos)
-        {
-            if ( status == Checking_startLine(vec.at(0).substr(0, position)) != GO_NEXT)
-                return status;
-            if (Checking_headers( vec.at(position + SKIP_CRLF)) != GO_NEXT)
-                return (status);
-            if (setting_headers() != GO_NEXT)
-                return (status);
-            if (executing_request() != GO_NEXT)
-                return (status);
-        }
+        if (paths[i] == "..")
+            count--;
+        else
+            count++;
     }
+    if (count < 0)
+        return (Bad_Request);
+    return (count);
+}
 
 /*------------------------------------------------------------------------------------------------------------------------*/
 
@@ -202,6 +225,9 @@
         if (uri.size() > 2048)
             return (URI_Too_Long);
 
+        if (counting_Directories(uri) == Bad_Request)
+            return (Bad_Request);
+        
         // status = LookingFor_uriInConfFile();
         // if (status != GO_NEXT) return (Not_Found);
 
@@ -343,6 +369,8 @@
             this->contentLenght = NOT_FOUND;
     }
 
+
+
     void request::setting_contentLenght( MAP_OF_VECS& dictionary )
     {
         MAP_OF_VECS::iterator it;
@@ -353,6 +381,8 @@
             this->contentLenght = NOT_FOUND;
     }
 
+
+
     void request::setting_transferEncoding( MAP_OF_VECS& dictionary )
     {
         MAP_OF_VECS::iterator it;
@@ -362,6 +392,8 @@
         else
             this->transferEncoding = NOT_FOUND;
     }
+
+
 
     void request::setting_contentType( MAP_OF_VECS& HEADERS )
     {
