@@ -1,6 +1,11 @@
-#include "../INCLUDE/ListeningSocket.hpp"
+#include "../INCLUDES/ListeningSocket.hpp"
 
 
+int     Listeningsock::printing_error( std::string error )
+{
+    std::cerr << "Error : " << error << std::endl;
+    exit (EXIT_FAILURE);
+}
 
 
 void    Listeningsock::retrieving_hostAndPort(Server &infos)
@@ -9,14 +14,21 @@ void    Listeningsock::retrieving_hostAndPort(Server &infos)
     port = infos.port;
 }
 
-int     Listeningsock::creating_ListeningSockets( Server& servers )
+int     Listeningsock::creating_ListeningSockets( Server& serv )
 {
      int option = 1;
 
     // retrieving Host and Port
+    retrieving_hostAndPort( serv );
 
     if ((_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         printing_error("socket creation failed ");
+    
+    fcntl(_fd, F_SETFL, O_NONBLOCK);
+
+    // setting socket option 
+    if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) == -1)
+        printing_error("socket option could not be set .. ");
     
     _socketInfos.sin_family = AF_INET;
     _socketInfos.sin_port = htons(port);
