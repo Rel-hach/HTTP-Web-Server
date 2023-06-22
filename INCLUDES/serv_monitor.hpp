@@ -3,11 +3,10 @@
 
 
 #include "ListeningSocket.hpp"
-#include "status_codes.hpp"
+#include "request.hpp"
 #include <vector>
 #include <map>
 #include <poll.h>
-#include "request.hpp"
 
 #define EVENT_OCCURED       _ALLFDS[i].revents
 #define LISTENING_SOCKET    checking_ifServerSocket(_ALLFDS[i].fd, listeners)
@@ -30,13 +29,17 @@ class   Monitor
             void    starting_theProcess ( std::vector<Server> servers );
             bool    checking_ifServerSocket(int fd, std::vector<Listeningsock>& listener);
             int     getting_serverIndex(int fd, std::vector<Listeningsock> listeners);
-            bool    accepting_newClient( Server& server, Listeningsock& listener );
+            bool    accepting_newClient( int listenFd );
             void    initializing_request (int& clientFd, Server& index);
             void    receiving_clientRequest( int& connFd, size_t& i );
             bool    requestIsFullyReceived( request& request );
-            void    sending_responseToClient(int& fd, int& i);
+            void    sending_responseToClient(int& fd, size_t& i);
             void    writing_errorMessage( pollfd& fd, int i );
 };
+
+
+// ERROR PAGES :
+
 
 
 #endif
