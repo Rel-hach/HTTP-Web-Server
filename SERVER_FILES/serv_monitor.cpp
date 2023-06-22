@@ -1,12 +1,13 @@
-#include "../INCLUDES/serv_monitor.hpp"
+// made by : rel-hach
 
+#include "../INCLUDES/serv_monitor.hpp"
 
 
 void    Monitor::starting_theProcess ( std::vector<Server> servers )
 {
     std::vector<Listeningsock> listeners(servers.size());
 
-    for (int i = 0; i < servers.size(); i++)
+    for (size_t i = 0; i < servers.size(); i++)
     {
         int fd = listeners[i].creating_ListeningSockets(servers[i]);
         fcntl(fd, F_SETFL, O_NONBLOCK);
@@ -22,10 +23,9 @@ void    Monitor::starting_theProcess ( std::vector<Server> servers )
 
         if (ret < 0)
         {   std::cerr << "Poll function has been failed " << std::endl;
-            break ; }
+            break ;  }
 
-        size_t i = 0;
-        for (i = 0; i <_numOfFds; i++)
+        for (size_t i = 0; i <_numOfFds; i++)
         {
             if (LISTENING_SOCKET && EVENT_OCCURED & POLLIN)
             {
@@ -42,20 +42,22 @@ void    Monitor::starting_theProcess ( std::vector<Server> servers )
             else if (CONNECTING_SOCKET && EVENT_OCCURED & POLLIN)
             {
                 // getting server index 
-                int index = getting_serverIndex();
-                // receiving request from client
-                //receiving_clientRequest();
+                int index = getting_serverIndex(_ALLFDS[i].fd, listeners);
+                receiving_clientRequest(_ALLFDS[i].fd, i);
             }
 
             else if (CONNECTING_SOCKET && EVENT_OCCURED & POLLOUT)
             {
-                // socket is ready for writing
-                // sending request
+                //  socket is ready for writing
+                //  sending request
+                sending_responseToClient(_ALLFDS[i].fd, i);
+
 
                 // deleting fd from pollfds
                 // close fd
                 // delete request oject.
             }
+
             else
             {
                 // there is an error.
@@ -89,6 +91,9 @@ int     Monitor::getting_serverIndex(int fd, std::vector<Listeningsock> listener
     return (0);
 }
 
+
+// ------------------------------- [ACCEPTING]---------------
+
 bool    Monitor::accepting_newClient( Server& server, Listeningsock& listener )
 {
     int connFd = accept(listener._fd, NULL, NULL);
@@ -104,39 +109,124 @@ bool    Monitor::accepting_newClient( Server& server, Listeningsock& listener )
     return (false);
 }
 
-void    Monitor::receiving_clientRequest( int& FD, size_t& i, Server& server )
+// -----------------------------------------------------------
+
+
+
+
+// --------------------- [ RECEIVING ] ------------------------
+
+
+void    Monitor::receiving_clientRequest( int& connFd, size_t& i)
 {
-    // int  retValue;
+    int     ret;
+    char    buffer[1024 * 3];
 
-    // char    buffer[1024 * 3];
-    // std::memset(buffer, '\0', sizeof(buffer));
-    // retValue = recv(FD, buffer, strlen(buffer) - 1, 0);
-    // if (retValue > 0)
-    // {
-    //     _client[FD]._request.append(buffer, retValue);
-    //     _client[FD]._readBytes += retValue;
+    std::memset(buffer, '\0', sizeof(buffer));
+    ret = recv(connFd, buffer, strlen(buffer) - 1, 0);
+    if (ret > 0)
+    {   
+        _clients[connFd]._request.append(buffer, ret);
+        _clients[connFd]._readBytes += ret;
 
-    //     std::cout << _client[FD]._request << std::endl;
-    //     std::cout << _client[FD]._readBytes << std::endl;
-    //     // requestIsFullyReceived must be implemented
-    //     // if (requestIsFullyReceived(_client[FD]) && _client[FD]._isReceived == false)
-    //     // {
-    //     //     _client[FD].Processing_HttpRequest();
-    //     //     _client[FD]._requestIsParsed = true;
-    //     // }
-    //     if (_client[FD]._status != GO_NEXT || _client[FD]._errorFound == true)
-    //     {
-    //         // getting_errorPage must be imlemented
-    //         _client[FD]._response = getting_errorPage(_client[FD]._status);
-    //         _ALLFDS[i].events = POLLOUT;
+        // checking if the request reched its end.
+        if (requestIsFullyReceived(_clients[connFd]) && _clients[connFd]._isReceived == false)
+        {
+            _clients[connFd].Processing_HttpRequest();
+            _clients[connFd]._requestIsParsed = true;
+        }
+
+        // checking if there an errors after parsing the request.
+        if (_clients[connFd]._status != GO_NEXT || _clients[connFd]._errorFound == true)
+        {
+            _clients[connFd]._response = getting_errorPage(_clients[connFd]._status);
+            _ALLFDS[i].events = POLLOUT;
+        }
+
+        // ------------------------ POST CASE 
+
+        else if (_clients[connFd]._ischunked && _clients[connFd]._requestIsParsed == true)
+        {
+            _clients[connFd].unchunking();
+            if (_clients[connFd]._BodyIsFullyReceived == true)
+            {
+                // preparing_response ();
+                _ALLFDS[i].events = POLLOUT;
+            }
+        }
+        else if (_clients[connFd]._hasContentLength && _clients[connFd]._bytesToRead >= _clients[connFd]._readBytes && _clients[connFd]._requestIsParsed)
+        {
+            _clients[connFd]._BodyIsFullyReceived = true; // ghir zayed.
+            _ALLFDS[i].events = POLLOUT;
+        }
+        
+        // ----------------------------------------
+
+        else if (_clients[connFd]._method == GET && _clients[connFd]._requestIsParsed)
+        {
+            // handle GET case;
+
+            _ALLFDS[i].events = POLLOUT; 
+        }
+
+        else if (_clients[connFd]._method == DELETE && _clients[connFd]._requestIsParsed)
+        {
+            // handle Delete case;
+            // _clients[connFd]._response = handling response.
+            _clients[connFd]._response = getTest;
+            _ALLFDS[i].events = POLLOUT;
+        }
+    }
 }
-    //}
-//}
 
-void    Monitor::sending_responseToClient()
+// ----------------------------------------------
+
+bool    Monitor::requestIsFullyReceived( request& request )
 {
-
+    size_t ret = request._request.find("\r\n\r\n");
+    if ((ret != std::string::npos && request._isReceived) == false)
+    {
+        request._HeadRequest = request._request.substr(0, ret + 4);
+            request._request.erase(0, ret + 4);
+        request._isReceived = false;
+        return (true);
+    }
+    return (false);    
 }
+
+// ---------------------- [SENDING] ----------
+
+
+void    Monitor::sending_responseToClient( int& fd, int& i)
+{
+    size_t size = _clients[fd]._response.size();
+    if (send(fd, _clients[fd]._response.c_str(), size - 1, 0) == -1)
+    {
+        std::cout << "Sending fail .. " << std::endl;
+        std::vector<pollfd>::iterator it = _ALLFDS.begin() + i;
+        int to_close = it->fd;
+        _ALLFDS.erase(it);
+
+        std::map<int, request>::iterator it_map = _clients.find(fd);
+        _clients.erase(it_map);
+        close (to_close);
+    }
+
+    std::cout << "response is sent" << std::endl;
+    std::vector<pollfd>::iterator it = _ALLFDS.begin() + i;
+    int to_close = it->fd;
+    _ALLFDS.erase(it);
+    // if connection is not 'close' is keep alive
+    // initliaze request and don't close fd
+    std::map<int, request>::iterator it_map = _clients.find(fd);
+    _clients.erase(it_map);
+    close (to_close);
+}
+
+// --------------------------------------
+
+
+// -- error 
 
 void    Monitor::writing_errorMessage( pollfd& fd, int i)
 {
@@ -149,3 +239,42 @@ void    Monitor::writing_errorMessage( pollfd& fd, int i)
     std::vector<pollfd>::iterator it_p = _ALLFDS.begin() + i;
     _ALLFDS.erase(it_p);
 }
+
+
+
+// utils 
+
+
+char*    getting_errorPage(int status)
+{
+    switch (status)
+    {
+    case 400 :
+        return (Badreq);
+    
+    case 401 :
+        return (unauthorized);
+    
+    case 404 :
+        return (not_found);
+    
+    case 405 :
+        return (method_notAllowd);
+    
+    case 414 :
+        return (tooLong);
+    
+    case 500 :
+        return (internal_error);
+    
+    case 504 :
+        return (timeOut);
+    
+    case 505 :
+        return (httpVersionErr);
+    
+    default:
+        return (Badreq);
+    }
+}
+
