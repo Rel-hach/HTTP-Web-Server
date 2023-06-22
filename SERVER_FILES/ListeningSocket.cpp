@@ -3,6 +3,12 @@
 
 
 
+void    Listeningsock::retrieving_hostAndPort(Server &infos)
+{
+    host = infos.host;
+    port = infos.port;
+}
+
 int     Listeningsock::creating_ListeningSockets( Server& servers )
 {
      int option = 1;
