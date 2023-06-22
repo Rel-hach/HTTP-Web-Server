@@ -112,7 +112,7 @@
 // -----------------------------------
 
 
-    request::request(int fd, Server& conf)
+    request::request(Server& conf)
     {
         _request = "";
         _HeadRequest = "";
@@ -139,16 +139,16 @@
 
     void    request::Storing_convenientServerInfos(Server& config)
     {
-        conf.port = conf.port;
-        conf.autoindex = conf.autoindex;
-        conf.host = conf.host;
-        conf.root = conf.root;
-        conf.map_of_error_page = conf.map_of_error_page;
-        conf.server_name = conf.server_name;
-        conf.upload_path = conf.upload_path;
-        conf.vec_of_locations = conf.vec_of_locations;
-        conf.client_max_body_size = conf.client_max_body_size;
-        conf.serverChunk = conf.serverChunk;
+        conf.port = config.port;
+        conf.autoindex = config.autoindex;
+        conf.host = config.host;
+        conf.root = config.root;
+        conf.map_of_error_page = config.map_of_error_page;
+        conf.server_name = config.server_name;
+        conf.upload_path = config.upload_path;
+        conf.vec_of_locations = config.vec_of_locations;
+        conf.client_max_body_size = config.client_max_body_size;
+        conf.serverChunk = config.serverChunk;
     }
 
 
@@ -185,8 +185,6 @@ int                         request::Checking_startLine(std::string sline)
         std::cout << sline << std::endl;
         VEC_OF_STRS vec = Splitting_string(sline, " ");
         VEC_OF_STRS::iterator it;
-        std::cout << "vec.size : "<< vec.size() << std::endl;
-        std::cout << "method :"<< vec.at(0) << std::endl;
         if (vec.size() != 3) return (Bad_Request);
         this->_method = vec.at(0);
         this->_path = vec.at(1);
@@ -263,7 +261,7 @@ int                         request::Checking_startLine(std::string sline)
 
     int     request::counting_Directories (std::string& uri)
     {
-        normalize_uri(uri);
+        normalizing_uri(uri);
         std::vector<std::string> paths = Splitting_string(uri, "/");
         int count = 0;
 
