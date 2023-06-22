@@ -27,8 +27,9 @@ class Listeningsock
 
         // methods :
         
-        void    retrieving_hostAndPort(Server &infos);
         int     creating_ListeningSockets( Server& servers );
+        void    retrieving_hostAndPort( Server &infos );
+        int     printing_error( std::string error );
 };
 
 #endif
