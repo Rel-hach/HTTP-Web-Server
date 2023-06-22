@@ -14,22 +14,6 @@
 #define CONNECTING_SOCKET   !checking_ifServerSocket(_ALLFDS[i].fd, listeners)
 
 
-// just for testing 
-class Server
-{
-    int port;
-    in_addr host;
-    std::string server_name;
-    std::string root;
-    std::string autoindex;
-    std::string upload_path;
-    std::vector<std::string> index_vec;
-    std::size_t client_max_body_size;
-    std::map<int, std::string> map_of_error_page;
-    std::vector<std::map<std::string, std::string> > vec_of_locations;
-    std::string serverChunk;
-};
-
 
 class   Monitor
 {
@@ -48,8 +32,9 @@ class   Monitor
             int     getting_serverIndex(int fd, std::vector<Listeningsock> listeners);
             bool    accepting_newClient( Server& server, Listeningsock& listener );
             void    initializing_request (int& clientFd, Server& index);
-            void    receiving_clientRequest( int& connFd, size_t& i, Server& server );
-            void    sending_responseToClient();
+            void    receiving_clientRequest( int& connFd, size_t& i );
+            bool    requestIsFullyReceived( request& request );
+            void    sending_responseToClient(int& fd, int& i);
             void    writing_errorMessage( pollfd& fd, int i );
 };
 
