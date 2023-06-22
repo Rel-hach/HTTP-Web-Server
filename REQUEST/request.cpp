@@ -1,7 +1,10 @@
-#include "../INCLUDES/request.hpp"   int            request::Processing_HttpRequest( void )
+#include "../INCLUDES/request.hpp"   
+#include "status_codes.hpp"
+
+    int            request::Processing_HttpRequest( void )
     {
-        request http;
-        http.http_request;
+        size_t  position = 0;
+    
         VEC_OF_STRS vec = Splitting_string (http_request, CRLFX2);
         position = vec.at(0).find("\r\n");
         if (position not_eq std::string::npos)
@@ -16,8 +19,6 @@
                 return (status);
         }
     }
-
-#include "status_codes.hpp"
 
     request::request()
     {
@@ -35,7 +36,7 @@
         while ( (position = str.find(delim)) != std::string::npos )
         {
             splitted.push_back(str.substr(0, position));
-            str.erase(0, position + sizeof(delim));
+            str.erase(0, position + delim.size());
         } 
         splitted.push_back(str.substr(0));
         return (splitted);
@@ -320,17 +321,6 @@ int     request::counting_Directories (std::string& uri)
         setting_transferEncoding( this->dictionary );
         setting_contentType( this->dictionary );
 
-        // if ((this->transferEncoding != "not_found") && (this->transferEncoding != "chunked"))
-        //     return (Bad_Request);
-        
-
-        // if (host != NOT_FOUND and method == GET) // && 'uri' ---> exits in config file.
-            // Executing_GetCase();
-        // else if ( (host not_eq NOT_FOUND) and (contentLenght != NOT_FOUND) and (method == POST) )
-        //     Executing_PostCase();
-        // else if (host not_eq NOT_FOUND and method == DELETE)  // && 'uri' to be deleted exist in config file ---> 
-        //     Executing_delete_case();
-
         if (method == "GET")
 
     }
@@ -404,7 +394,5 @@ int     request::counting_Directories (std::string& uri)
         else
             this->contentType = NOT_FOUND;
     }
-
-
 
     /* ------------------------------------------------------------------------ */
