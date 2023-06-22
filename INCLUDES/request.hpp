@@ -14,11 +14,13 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
+#include "parse_config.hpp"
+#include "status_codes.hpp"
 #include <iostream>
 #include <string>
 #include <map>
 #include <vector>
-#include "status_codes.hpp"
+#include <sstream>
 
 
 #define CRLFX2              "\r\n\r\n"
@@ -42,7 +44,6 @@
 #define POST    "POST"
 
 
-class Server ;
 class request
 {
   public:
@@ -60,7 +61,7 @@ class request
     std::vector<std::string>     _headers;
     std::map<std::string, std::string> _mapHeaders;
 
-    Server          conf;
+    Server           conf;
 
     bool            _ischunked;
     bool            _requestIsParsed;
@@ -76,7 +77,8 @@ class request
     int             _status;
 
     // methods :
-                                request(int fd, Server& conf);
+                                request() {}
+                                request(Server& conf);
     void                        Storing_convenientServerInfos(Server& config);
     int                         Processing_HttpRequest();
     int                         Checking_startLine(std::string sline);
