@@ -12,6 +12,9 @@
 #include "cstring"
 
 
+class Monitor;
+class Server;
+
 class Listeningsock
 {
     public:
