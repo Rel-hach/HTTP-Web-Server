@@ -18,9 +18,9 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "status_codes.hpp"
 
-#define YES                 1
-#define NO                  0
+
 #define CRLFX2              "\r\n\r\n"
 #define VEC_OF_STRS         std::vector<std::string>
 #define MAP_OF_VECS         std::map<std::string, std::string>
@@ -42,11 +42,10 @@
 #define POST    "POST"
 
 
-
+class Server ;
 class request
 {
   public:
-    char            _buffer[1024 * N];
     std::string     _request;
     std::string     _HeadRequest;
     std::string     _BodyRequest;
@@ -77,6 +76,8 @@ class request
     int             _status;
 
     // methods :
+                                request(int fd, Server& conf);
+    void                        Storing_convenientServerInfos(Server& config);
     int                         Processing_HttpRequest();
     int                         Checking_startLine(std::string sline);
     int                         Checking_headers(std::string headers);
@@ -84,20 +85,19 @@ class request
     int                         counting_Directories (std::string& uri);
     void                        unchunking();
     void                        checking_connectionType();
-    void                        Storing_convenientServerInfos(Server &config);
     void                        checking_chunkedOrhasContentLength();
 
         // GETTERS AND SETTERS :
 
-        std::string     getting_host() const;
-        std::string     getting_contentLenght() const;
-        std::string     getting_transferEncoding() const;
-        std::string     getting_contentType() const;
+        // std::string     getting_host() const;
+        // std::string     getting_contentLenght() const;
+        // std::string     getting_transferEncoding() const;
+        // std::string     getting_contentType() const;
 
-        void            setting_host( MAP_OF_VECS& dictionary );
-        void            setting_contentLenght( MAP_OF_VECS& dictionary );
-        void            setting_transferEncoding( MAP_OF_VECS& dictionary );
-        void            setting_contentType( MAP_OF_VECS& dictionary );
+        // void            setting_host( MAP_OF_VECS& dictionary );
+        // void            setting_contentLenght( MAP_OF_VECS& dictionary );
+        // void            setting_transferEncoding( MAP_OF_VECS& dictionary );
+        // void            setting_contentType( MAP_OF_VECS& dictionary );
 };
 
 #endif
