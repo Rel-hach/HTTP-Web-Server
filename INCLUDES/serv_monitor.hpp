@@ -25,7 +25,12 @@ class   Monitor
 
         // methods :
 
-            void    starting ( std::vector<Server> servers );
+            void    starting_theProcess ( std::vector<Server> servers );
+            int     getting_serverIndex();
+            void    accepting_newClient();
+            void    receiving_clientRequest();
+            void    sending_responseToClient();
+            void    writing_errorMessage();
 };
 
 #endif
