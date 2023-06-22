@@ -7,6 +7,9 @@
 #include <map>
 #include <iostream>
 #include <poll.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include "cstring"
 
 
 class Listeningsock
@@ -25,7 +28,7 @@ class Listeningsock
         // methods :
         
         void    retrieve_hostAndPort(Server &infos);
-        int     createListeningSockets( Server& servers );
+        int     creating_ListeningSockets( Server& servers );
 };
 
 #endif
