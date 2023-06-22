@@ -45,55 +45,47 @@
 
 class request
 {
-    private:
-        std::string                         http_request;
-        std::string                         method;
-        std::string                         http_ver;
-        std::string                         uri;
-        std::string                         start_line;
-        std::string                         headers;
-        std::string                         querry;
+  public:
+    char            _buffer[1024 * N];
+    std::string     _request;
+    std::string     _HeadRequest;
+    std::string     _BodyRequest;
 
+    std::string     _method;
+    std::string     _path;
+    std::string     _httpVer;
+    std::string     _querry;
 
-        // ConfigFile data
+    std::string     _response;
+    std::string     _connectionType;
+    std::vector<std::string>     _headers;
+    std::map<std::string, std::string> _mapHeaders;
 
-        std::string                         root;
-        VEC_OF_STRS                         locations;
-        
+    Server          conf;
 
-        //-------------------------------------------
+    bool            _ischunked;
+    bool            _requestIsParsed;
+    bool            _hasContentLength;
+    bool            _BodyIsFullyReceived;
+    bool            _isReceived;
+    bool            _errorFound;
 
-        std::string                         host;
-        std::string                         contentType;
-        std::string                         contentLenght;
-        std::string                         transferEncoding;
-        size_t                              position;
-        int                                 status;
-        VEC_OF_STRS                         Headers;
-        MAP_OF_VECS                         dictionary;
-    public: 
-        request();  
-        ~request(); 
-        int              Processing_HttpRequest( void );
-        VEC_OF_STRS      Splitting_string(std::string str, std::string delim);
-        void             check_request( void );
-        // START LINE CHECKING
-        int             Checking_startLine ( std::string startLine );
-        int             Checking_methodIfSupported ( void );
-        int             Checking_httpVersion ( void );
-        int             Checking_uri ( void );
-        int             Decoding_url ( void );
-        int             counting_Directories (std::string& uri);
-        int             Converting_hexaToDecimal ( std::string str );
+    long long       _bytesToRead;
+    long long       _readBytes;
+    long long       _contentLength;
+    int             _connFd;
+    int             _status;
 
-        int             LookingFor_uriInConfFile();
-        // HEADERS CHECKING 
-        int             Checking_headers( std::string heads);
-        int             Checking_neededHeadersToStore( std::string key, std::string val );
-        // Knowing what user asking for
-        int             setting_headers();
-        int             executing_request();
-
+    // methods :
+    int                         Processing_HttpRequest();
+    int                         Checking_startLine(std::string sline);
+    int                         Checking_headers(std::string headers);
+    int                         Checking_uri(std::string& uri);
+    int                         counting_Directories (std::string& uri);
+    void                        unchunking();
+    void                        checking_connectionType();
+    void                        Storing_convenientServerInfos(Server &config);
+    void                        checking_chunkedOrhasContentLength();
 
         // GETTERS AND SETTERS :
 
