@@ -1,6 +1,19 @@
 #ifndef SERV_MONITOR_HPP
 #define SERV_MONITOR_HPP
 
+
+#include <ListeningSocket.hpp>
+#include <vector>
+#include <map>
+#include <poll.h>
+
+
+class Server
+{
+
+};
+
+
 class   Monitor
 {
     public:
