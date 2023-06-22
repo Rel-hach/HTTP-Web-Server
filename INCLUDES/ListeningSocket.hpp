@@ -27,7 +27,7 @@ class Listeningsock
 
         // methods :
         
-        void    retrieve_hostAndPort(Server &infos);
+        void    retrieving_hostAndPort(Server &infos);
         int     creating_ListeningSockets( Server& servers );
 };
 
