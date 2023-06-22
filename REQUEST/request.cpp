@@ -78,7 +78,7 @@
 // utils
 
 
-    int normalize_uri(std::string& uri)
+    int normalizing_uri(std::string& uri)
     {
         size_t position = uri.find("//");
 
@@ -91,6 +91,7 @@
     }
 
     // ------------------------------------------------
+
 
     VEC_OF_STRS             Splitting_string(std::string str, std::string delim)
     {
@@ -108,13 +109,55 @@
     }
 
 
+// -----------------------------------
+
+
+    request::request(int fd, Server& conf)
+    {
+        _request = "";
+        _HeadRequest = "";
+        _BodyRequest = "";
+
+        _method = "";
+        _path = "";
+        _httpVer = "";
+        _querry = "";
+        _response = "";
+
+        _status = 1;
+        _isReceived = false;
+        _ischunked = false;
+        _requestIsParsed = false;
+        _hasContentLength = false;
+        _BodyIsFullyReceived = false;
+        _errorFound = false;
+
+        _bytesToRead = 0;
+        _readBytes = 0;
+        Storing_convenientServerInfos(conf);
+    }
+
+    void    request::Storing_convenientServerInfos(Server& config)
+    {
+        conf.port = conf.port;
+        conf.autoindex = conf.autoindex;
+        conf.host = conf.host;
+        conf.root = conf.root;
+        conf.map_of_error_page = conf.map_of_error_page;
+        conf.server_name = conf.server_name;
+        conf.upload_path = conf.upload_path;
+        conf.vec_of_locations = conf.vec_of_locations;
+        conf.client_max_body_size = conf.client_max_body_size;
+        conf.serverChunk = conf.serverChunk;
+    }
+
 
 
 // -----------------------------------
 
 
-int     request::Processing_HttpRequest()
-{
+    int     request::Processing_HttpRequest()
+    {
         size_t position = this->_HeadRequest.find("\r\n");
 
         _status = GO_NEXT;
@@ -130,7 +173,7 @@ int     request::Processing_HttpRequest()
             checking_connectionType();
         }
         return (GO_NEXT);
-}
+    }
 
 
 // ------------------------------------------------------------------
