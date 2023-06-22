@@ -32,15 +32,21 @@ void    Monitor::starting_theProcess ( std::vector<Server> servers )
                 // getting server index ..
                 int index = getting_serverIndex (_ALLFDS[i].fd, listeners);
                 // accepting the new client 
-                accepting_newClient( servers[index], listeners[index]  );
+                if (accepting_newClient( servers[index], listeners[index] ))
+                {
+                    request Request(_ALLFDS[i].fd, servers[index]);
+                    _clients.insert(std::make_pair(_ALLFDS[i].fd, Request));
+                }
             }
+
             else if (CONNECTING_SOCKET && EVENT_OCCURED & POLLIN)
             {
                 // getting server index 
                 int index = getting_serverIndex();
                 // receiving request from client
-                receiving_clientRequest();
+                //receiving_clientRequest();
             }
+
             else if (CONNECTING_SOCKET && EVENT_OCCURED & POLLOUT)
             {
                 // socket is ready for writing
@@ -83,7 +89,7 @@ int     Monitor::getting_serverIndex(int fd, std::vector<Listeningsock> listener
     return (0);
 }
 
-void    Monitor::accepting_newClient( Server& server, Listeningsock& listener )
+bool    Monitor::accepting_newClient( Server& server, Listeningsock& listener )
 {
     int connFd = accept(listener._fd, NULL, NULL);
     if (connFd > 0)
@@ -91,15 +97,41 @@ void    Monitor::accepting_newClient( Server& server, Listeningsock& listener )
         _ALLFDS.push_back( {connFd, POLLIN, 0} );
         fcntl(connFd, F_SETFL, O_NONBLOCK);
         _numOfFds++;
+        return (true)
     }
     else
         close(connFd);
+    return (false);
 }
 
-void    Monitor::receiving_clientRequest( int& connFd, size_t& i, Server& server )
+void    Monitor::receiving_clientRequest( int& FD, size_t& i, Server& server )
 {
+    // int  retValue;
 
+    // char    buffer[1024 * 3];
+    // std::memset(buffer, '\0', sizeof(buffer));
+    // retValue = recv(FD, buffer, strlen(buffer) - 1, 0);
+    // if (retValue > 0)
+    // {
+    //     _client[FD]._request.append(buffer, retValue);
+    //     _client[FD]._readBytes += retValue;
+
+    //     std::cout << _client[FD]._request << std::endl;
+    //     std::cout << _client[FD]._readBytes << std::endl;
+    //     // requestIsFullyReceived must be implemented
+    //     // if (requestIsFullyReceived(_client[FD]) && _client[FD]._isReceived == false)
+    //     // {
+    //     //     _client[FD].Processing_HttpRequest();
+    //     //     _client[FD]._requestIsParsed = true;
+    //     // }
+    //     if (_client[FD]._status != GO_NEXT || _client[FD]._errorFound == true)
+    //     {
+    //         // getting_errorPage must be imlemented
+    //         _client[FD]._response = getting_errorPage(_client[FD]._status);
+    //         _ALLFDS[i].events = POLLOUT;
 }
+    //}
+//}
 
 void    Monitor::sending_responseToClient()
 {
@@ -117,7 +149,3 @@ void    Monitor::writing_errorMessage( pollfd& fd, int i)
     std::vector<pollfd>::iterator it_p = _ALLFDS.begin() + i;
     _ALLFDS.erase(it_p);
 }
-
-
-
-
