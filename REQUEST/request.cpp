@@ -1,129 +1,23 @@
-#include "../INCLUDES/request.hpp"   
-#include "status_codes.hpp"
+#include "../INCLUDES/request.hpp"
 
-    int            request::Processing_HttpRequest( void )
+
+    int    allowed_chars(char c)
     {
-        size_t  position = 0;
-    
-        VEC_OF_STRS vec = Splitting_string (http_request, CRLFX2);
-        position = vec.at(0).find("\r\n");
-        if (position not_eq std::string::npos)
-        {
-            if ( status == Checking_startLine(vec.at(0).substr(0, position)) != GO_NEXT)
-                return status;
-            if (Checking_headers( vec.at(position + SKIP_CRLF)) != GO_NEXT)
-                return (status);
-            if (setting_headers() != GO_NEXT)
-                return (status);
-            if (executing_request() != GO_NEXT)
-                return (status);
-        }
-    }
-
-    request::request()
-    {
-        this->position  = 0;
-    }
-
-    request::~request() {}
-
-
-// split 
-
-    VEC_OF_STRS     request::Splitting_string(std::string str, std::string delim)
-    {
-        VEC_OF_STRS splitted;
-        while ( (position = str.find(delim)) != std::string::npos )
-        {
-            splitted.push_back(str.substr(0, position));
-            str.erase(0, position + delim.size());
-        } 
-        splitted.push_back(str.substr(0));
-        return (splitted);
-    }
-
-
-/*--------------------------------------    START OF THE PROCESS :  ------------------------------------------*/
-
-
- 
-
-/*------------------------------------------------------------------------------------------------------------------------*/
-
-
-int     request::counting_Directories (std::string& uri)
-{
-    std::vector<std::string> paths = Splitting_string(uri, "/");
-    int count = 0;
-    
-    for (int i = 0; i < paths.size(); i++, count >= 0)
-    {
-        if (paths[i] == "..")
-            count--;
+        std::string allowd_ch = "abcdefghijklmnopqrstuvwxyzABCDEF\
+        GHIJKLMNOPQRSTUVWXYZ0123456789!$&'()*+,/:;=?@[]-._~";
+        if (allowd_ch.find(c) != std::string::npos)
+            return (GO_NEXT);
         else
-            count++;
-    }
-    if (count < 0)
-        return (Bad_Request);
-    return (count);
-}
-
-/*------------------------------------------------------------------------------------------------------------------------*/
-
-    int             request::executing_request()
-    {
-        if (this->method == GET)
-        {
-            // check if there is no errors
-            // prepare response !
-        }
-        else if (this ->method == "DELETE")
-        {
-            // check if there is no errors
-            // prepare response !
-        }
-        else if (this ->method == "POST")
-        {
-            // check if there is no errors
-            // prepare response !
-        }
-    }
-
-/*--------------------------------------- CHECKING THE FIRST LINE OF THE REQUEST -----------------------------------------*/
-
-
-    int            request::Checking_startLine( std::string startLine )
-    {
-        VEC_OF_STRS vec = Splitting_string(start_line, " ");
-        VEC_OF_STRS::iterator it;
-        if (vec.size() != 3) return (Bad_Request);
-        method      = vec.at(0);
-        uri         = vec.at(1);
-        http_ver    = vec.at(2);
-
-        // checking if the Method is supported ..
-
-        status = Checking_methodIfSupported();
-        if (status != GO_NEXT)   return (Method_Not_Allowed);
-
-        // checking if the HTTP version is supported ..
-
-        status = Checking_httpVersion();
-        if (status != GO_NEXT)   return (HTTP_Version_Not_Supported);
-
-        status = Checking_uri();
-        if (status != GO_NEXT) return (status);
+            return (400);
 
         return (GO_NEXT);
     }
 
 
-// ---------------------------------FUNCTION : CONVERTING TO HEXADECIMAL -----------------------------------------------
+// --------------------------------------------------------------------
 
 
-
-
-    int    request::Converting_hexaToDecimal ( std::string str )
+    int    Converting_hexaToDecimal ( std::string str )
     {
         int lenght = str.length();
         
@@ -147,19 +41,11 @@ int     request::counting_Directories (std::string& uri)
         return (decimalVal);
     }
 
-    int    allowed_chars(char c)
-    {
-        std::string allowd_ch = "abcdefghijklmnopqrstuvwxyzABCDEF\
-        GHIJKLMNOPQRSTUVWXYZ0123456789!$&'()*+,/:;=?@[]-._~";
-        if (allowd_ch.find(c) != std::string::npos)
-            return (GO_NEXT);
-        else
-            (Bad_Request);
-    }
 
-// ---------------------------------FUNCTION : DECODING URI -----------------------------------------------
+// -----------------------------------------------------------------------
 
-    int            request::Decoding_url ()
+
+    int            Decoding_url (std::string& uri)
     {
         int i = -1;
         int decimal;
@@ -181,46 +67,120 @@ int     request::counting_Directories (std::string& uri)
             if (allowed_chars(uri[i]) != GO_NEXT)
                 return(Bad_Request);
         }
+        return (GO_NEXT);
     }
 
-// ---------------------------------FUNCTION : LOOK AFTER URI IN CONFIG FILE -----------------------------------------------
+
+    // -------------------------------------------------- UTILS
 
 
 
-    // std::vector<std::map<std::string, std::map<std::string, std::string>>> VectorOfservers;
-
-    // int         request::LookingFor_uriInConfFile()
-    // {
-    //     VEC_OF_STRS splitted;
-    //     int i = 0;
-    //     int count = std::count(uri.begin(), uri.end(), '/');
-    //     splitted = Splitting_string(uri, "/");
-    //     if (count > 1)
-    //     {
-    //         for (i = 0; i < count; i++)
-    //             splitted[i].insert(splitted[i].begin(), '/');
-    //     }
-    //     return (0);
-    // }
+// utils
 
 
-// ---------------------------------FUNCTION : GET QUERRY FROM URI -----------------------------------------------
+    int normalize_uri(std::string& uri)
+    {
+        size_t position = uri.find("//");
+
+        while (position != std::string::npos)
+        {
+            uri.erase(position, 1);
+            position = uri.find("//");
+        }
+        return (1);
+    }
+
+    // ------------------------------------------------
+
+    VEC_OF_STRS             Splitting_string(std::string str, std::string delim)
+    {
+        size_t position = 0;
+
+        // GET / HTTP/1.1
+        VEC_OF_STRS splitted;
+        while ( (position = str.find(delim)) != std::string::npos )
+        {
+            splitted.push_back(str.substr(0, position));
+            str.erase(0, position + delim.size());
+        }
+        splitted.push_back(str.substr(0));
+        return (splitted);
+    }
 
 
-    int         request::Checking_uri()
+
+
+// -----------------------------------
+
+
+int     request::Processing_HttpRequest()
+{
+        size_t position = this->_HeadRequest.find("\r\n");
+
+        _status = GO_NEXT;
+        if (position not_eq std::string::npos)
+        {
+            if ((Checking_startLine(_HeadRequest.substr(0, position)) != GO_NEXT))
+                return (_status);
+
+            if ((_status == Checking_headers(this->_HeadRequest.substr(position + SKIP_CRLF))) != GO_NEXT)
+                return (_status); 
+
+            checking_chunkedOrhasContentLength();
+            checking_connectionType();
+        }
+        return (GO_NEXT);
+}
+
+
+// ------------------------------------------------------------------
+
+int                         request::Checking_startLine(std::string sline)
+{
+        int retStatus;
+
+        std::cout << sline << std::endl;
+        VEC_OF_STRS vec = Splitting_string(sline, " ");
+        VEC_OF_STRS::iterator it;
+        std::cout << "vec.size : "<< vec.size() << std::endl;
+        std::cout << "method :"<< vec.at(0) << std::endl;
+        if (vec.size() != 3) return (Bad_Request);
+        this->_method = vec.at(0);
+        this->_path = vec.at(1);
+        this->_httpVer = vec.at(2);
+        std::cout << "path :" << vec.at(1) << std::endl;
+
+
+        if (this->_method != "GET" && this->_method != "POST" && this->_method != "DELETE")
+            return (Method_Not_Allowed);
+        
+        if (this->_httpVer != SUPPORTED_HTTP_VER)
+            return (HTTP_Version_Not_Supported);
+
+        if ((retStatus = Checking_uri(_path)) != GO_NEXT)
+            return (retStatus);
+
+        return (GO_NEXT);   
+}
+
+
+// ----------------------------------------------------------------------
+
+
+    int         request::Checking_uri(std::string& uri)
     {
         int status = GO_NEXT; 
-        position = uri.find('?');
+        size_t position = uri.find('?');
         if (position != std::string::npos)
         {
-            querry = uri.substr(position + 1);
+            _querry = uri.substr(position + 1);
             uri = uri.substr(0, position);
         }
 
         if (uri[0] != '/')
             return (Bad_Request);
 
-        status = Decoding_url();
+        status = Decoding_url( uri );
         if (status != GO_NEXT) return (Bad_Request);
 
         if (uri.size() > 2048)
@@ -229,170 +189,166 @@ int     request::counting_Directories (std::string& uri)
         if (counting_Directories(uri) == Bad_Request)
             return (Bad_Request);
         
-        // status = LookingFor_uriInConfFile();
-        // if (status != GO_NEXT) return (Not_Found);
-
-            return (Not_Found);
+        
         return (GO_NEXT);
     }
+ 
+
+    // -----------------------------------------------
+
+    /*
+
+    Having multiple slashes in a URI (path) can cause issues with how the URI is 
+    interpreted and resolved by servers and clients. 
+    This is because the presence of multiple slashes can create ambiguity
+    about the structure of the URI, making it difficult to determine the intended resource.
+
+    For example, consider the URI "example.com//path/to/resource".
+    This URI contains two slashes between the domain name and the start of the path component, 
+    which may be interpreted differently by different servers and clients. Some servers and clients may treat this as a 
+    relative URI with an empty path component, while others may interpret it as an absolute URI 
+    with a double slash indicating the root directory.
+
+    To avoid these kinds of ambiguities, it is generally recommended to normalize URIs 
+    by removing any unnecessary or redundant slashes. This can be done using a simple string 
+    manipulation function that replaces consecutive slashes with a single slash.
+    
+    */
 
 
-/* ------------------------------------------------------------------------------------------------------------------   */
+    // ------------------------------------------------
 
-    int get_uri_location()
+    int     request::counting_Directories (std::string& uri)
     {
+        normalize_uri(uri);
+        std::vector<std::string> paths = Splitting_string(uri, "/");
+        int count = 0;
 
+        // /root/aaa/bbb/cccc /../../aaa 
+        
+        for (size_t i = 0; i < paths.size(); i++)
+        {
+            if (paths[i] == "..")
+                count--;
+            else
+                count++;
+        }
+        if (count < 0)
+            return (Bad_Request);
+        return (count);
     }
 
-/*-----------------------------------FUNCTION: CHECKING IF METHOD SUPPORTED---------------------------------------------*/
 
-               
-    int        request::Checking_methodIfSupported( void )
+
+    // ------------------------------------------------------- UTILS
+
+
+
+
+    // --------------------------------------------- UTILS
+
+
+
+    // ---------------------------------------------------------
+
+
+    int     request::Checking_headers(std::string heads)
     {
-
-        if (method == "GET" || method == "POST" || method =="DELETE")
-            return (GO_NEXT);
-        return (Method_Not_Allowed);
-    }
-
-
-
-/*---------------------------------FUNCTION: CHECKING HTTP VERSION-----------------------------------------------*/
-
-
-
-    int        request::Checking_httpVersion( void )
-    {
-        if (http_ver.compare("HTTP/1.1"))
-            return (GO_NEXT);
-        return (HTTP_Version_Not_Supported);
-    }
-
-
-/*----------------------------------FUNCTION : CHECKING HEADERS----------------------------------------------*/
-
-
-    int            request::Checking_headers( std::string heads)
-    {
-        Headers =   Splitting_string(heads, "\r\n");
+        this->_headers = Splitting_string(heads, "\r\n");
         VEC_OF_STRS::iterator it;
-        for (it = Headers.begin(); it != Headers.end(); ++it)
+        for (it = this->_headers.begin(); it != this->_headers.end(); ++it)
         {
             std::pair<std::string, std::string> couple;
-            int position = it->find(":");
+            size_t position = it->find(":");
             if (position != std::string::npos)
             {
                 couple.first = it->substr(0, position);
                 couple.second = it->substr(position + 2);
                 if (!couple.first[0] || !couple.second[0])
                     return (Bad_Request);
-                if (Checking_neededHeadersToStore(couple.first, couple.second) == OK)
-                    dictionary.insert(couple);
-                else
-                    continue;
+                this->_mapHeaders.insert(couple);
             }
             else
                 return (Bad_Request);
         }
-        return (OK);
+
+        return (GO_NEXT);
     }
 
+    // ------------------------------------------------------------ 
 
-// ---------------------------------FUNCTION : CHECKING IF THE HEADER WORTH TO BE STORED--------------------------------
 
+void        request::checking_chunkedOrhasContentLength()
+{
+    int nline;
+    std::string contentLength;
+    std::stringstream iss;
 
-    int        request::Checking_neededHeadersToStore( std::string key, std::string val )
+    size_t pos = this->_HeadRequest.find("Transfer-Encoding: chunked");
+    if (pos != std::string::npos)
+        this->_ischunked = true;
+
+    pos = this->_HeadRequest.find("Content-Length: ");
+    if (pos != std::string::npos)
     {
-        // here we can add more headers .
-        if (key == "Host" || key == "Content-Type" ||
-            key == "Content-Lenght" || key == "Transfer-Encoding")
-            return (YES);
-        return (NO);
+        nline = this->_HeadRequest.find('\n', pos);
+        contentLength = this->_HeadRequest.substr(pos + 16, nline);
+        iss << contentLength;
+        iss >> this->_contentLength;
+        this->_bytesToRead = _contentLength + this->_HeadRequest.length();
+        this->_hasContentLength = true;
     }
+    
+    if (_ischunked && _hasContentLength)
+        _errorFound = true;
+    if (_method != POST && (_ischunked || _hasContentLength))
+        _errorFound = true;
+}
+
+// -----------------------------------------
 
 
-// ------------------------------------------------------------------------------------------------------
+void    request::checking_connectionType()
+{
+    size_t ret1 = this->_HeadRequest.find("Connection: keep-alive");
+    size_t ret2 = this->_HeadRequest.find("Connection: close");
+
+    if (ret1 != std::string::npos)
+        _connectionType = "keep-alive";
+    else if (ret2 != std::string::npos)
+        _connectionType = "close";
+    else
+         _connectionType = "keep-alive";
+}
 
 
-    int        request::setting_headers()
+
+// ------------------------------------------------------------------
+
+
+void request::unchunking()
+{
+    std::ostringstream oss;
+
+    std::istringstream iss(_request);
+    std::string line;
+    while (std::getline(iss, line))
     {
-        setting_host( this->dictionary );
-        setting_contentLenght( this->dictionary );
-        setting_transferEncoding( this->dictionary );
-        setting_contentType( this->dictionary );
+        long size = strtol(line.c_str(), NULL, 16);
+        if (size == 0)
+        {
+            _BodyIsFullyReceived = true;
+            break;
+        }
+        std::string chunk__request(size, ' ');
+        if (!iss.read(&chunk__request[0], size))
+            break;
+        oss << chunk__request;
 
-        if (method == "GET")
+        iss.ignore(2);
 
+        _request.erase(0, line.length() + size + 4);
     }
-
-
-// --------------------------------------------------------------------------------
-
-
-    std::string request::getting_host() const
-    {
-        return (host);
-    }
-
-    std::string request::getting_contentLenght() const
-    {
-        return (contentLenght);
-    }
-
-    std::string request::getting_transferEncoding() const
-    {
-        return (transferEncoding);
-    }
-
-    std::string request::getting_contentType() const
-    {
-        return (contentType);
-    }
-
-    void request::setting_host( MAP_OF_VECS& dictionary )
-    {
-        MAP_OF_VECS::iterator it;
-        it = dictionary.find(HOST);
-        if (it != dictionary.end())
-            this->host = it->second;
-        else
-            this->contentLenght = NOT_FOUND;
-    }
-
-
-
-    void request::setting_contentLenght( MAP_OF_VECS& dictionary )
-    {
-        MAP_OF_VECS::iterator it;
-        it = dictionary.find(CONTENT_LENGHT);
-        if (it != dictionary.end())
-            this->contentLenght = it->second;
-        else
-            this->contentLenght = NOT_FOUND;
-    }
-
-
-
-    void request::setting_transferEncoding( MAP_OF_VECS& dictionary )
-    {
-        MAP_OF_VECS::iterator it;
-        it = dictionary.find(TRANSFER_ENCODING);
-        if (it != dictionary.end())
-            this->transferEncoding = it->second;
-        else
-            this->transferEncoding = NOT_FOUND;
-    }
-
-
-
-    void request::setting_contentType( MAP_OF_VECS& HEADERS )
-    {
-        MAP_OF_VECS::iterator it;
-        it = HEADERS.find(CONTENT_TYPE);
-        if (it != HEADERS.end())
-            this->contentType = it->second;
-        else
-            this->contentType = NOT_FOUND;
-    }
-
-    /* ------------------------------------------------------------------------ */
+    this->_BodyRequest += oss.str();
+    oss.clear();
+}
