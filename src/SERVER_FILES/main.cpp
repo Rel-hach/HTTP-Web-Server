@@ -1,4 +1,4 @@
-#include "INCLUDES/serv_monitor.hpp"
+#include "../../inc/serv_monitor.hpp"
 
 int main() 
 {

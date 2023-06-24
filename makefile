@@ -16,7 +16,9 @@ $(Name) : $(OBJ) #$(SRC_HEADERS)
 	$(CC) $^ -o $@
 
 $(OBJDIR)/%.o : %.cpp
+	echo "Creating object directory..."
 	@mkdir -p $(@D)
+	echo "building $@..."
 	$(CC) $(CFLAGS) $(INCLUDES) -c $^ -o $@
 
 clean :

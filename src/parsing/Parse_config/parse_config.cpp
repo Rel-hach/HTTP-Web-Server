@@ -1,4 +1,4 @@
-#include "../INCLUDES/parse_config.hpp"
+#include "../../../inc/parse_config.hpp"
 
 void trim(std::string &str)
 {
