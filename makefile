@@ -1,19 +1,23 @@
 Name = Webserv
 
-CXX = c++
+CC = c++
 
-CXXFLAGS = -Wall -Wextra -Werror
-
-SRC = main.cpp Parse_config/parse_config.cpp SERVER_FILES/serv_monitor.cpp REQUEST/request.cpp SERVER_FILES/ListeningSocket.cpp
-
-SRC_HEADERS = INCLUDES/parse_config.hpp INCLUDES/serv_monitor.hpp INCLUDES/ListeningSocket.hpp INCLUDES/request.hpp
-
-OBJ = $(SRC:.cpp=.o)
+CFLAGS			= -Wall -Wextra -Werror -std=c++98
+INCLUDES 		= -I./inc/
+SRCDIR 			= src
+OBJDIR 			= build
+SRC 		= $(shell find $(SRCDIR) -name "*.cpp")
+OBJ 		= $(SRC:%.cpp=$(OBJDIR)/%.o)
 
 all : $(Name)
 
-$(Name) : $(OBJ) $(SRC_HEADERS)
-	$(CXX) $(CXXFLAGS) $(OBJ) -o $@
+$(Name) : $(OBJ) #$(SRC_HEADERS)
+	echo "Compiling..."
+	$(CC) $^ -o $@
+
+$(OBJDIR)/%.o : %.cpp
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $^ -o $@
 
 clean :
 	rm -f $(OBJ)
