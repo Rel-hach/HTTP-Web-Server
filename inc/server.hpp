@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 #include "location.hpp"
 
 class server
@@ -25,8 +26,9 @@ public:
 	std::string error_page;
 	std::vector<std::string> methods;
 	std::vector<std::string> cgi_extensions;
-	
+	std::string client_max_body_size;
 	std::vector<location> locations;
+	std::map<int, std::string> error_pages;
 	// vector location *location;
 protected:
 private:

@@ -1,34 +1,87 @@
 #include "../../../inc/server.hpp"
 #include <fstream>
+#include <map>
 #include <string>
 #include <vector>
+#include <sstream>
 
-
-void fill_server(std::vector<server> &servers, std::string line){
+void fill_server(server &server, std::string line){
 	std::string key;
 	std::string value;
-	key = line.substr(0, line.find('='));
-	value = line.substr(line.find('=') + 1, line.length());
+	char eq;
+	std::stringstream ss(line);
+	ss >> key;
+	ss >> eq;
+	ss >> value;
+	std::cout << "keyuuu = " << key << std::endl;
+	std::cout << "valueuuu = " << value << std::endl;
+//	key = line.substr(0, line.find('='));
+//	value = line.substr(line.find('=') + 1, line.length());
 	if (key == "host")
-		servers.back().host = value;
+		server.host = value;
 	else if (key == "port")
-		servers.back().port = std::stoi(value);
+		server.port = std::stoi(value);
 	else if (key == "server_name")
-		servers.back().server_names.push_back(value);
+		server.server_names.push_back(value);
 	else if (key == "root")
-		servers.back().root = value;
+		server.root = value;
 	else if (key == "index")
-		servers.back().index = value;
+		server.index = value;
 	else if (key == "autoindex")
-		servers.back().autoindex = value;
+		server.autoindex = value;
 	else if (key == "upload_path")
-		servers.back().upload_path = value;
+		server.upload_path = value;
 	else if (key == "error_page")
-		servers.back().error_page = value;
+		server.error_page = value;
 	else if (key == "methods")
-		servers.back().methods.push_back(value);
+		server.methods.push_back(value);
 	else if (key == "cgi_extensions")
-		servers.back().cgi_extensions.push_back(value);
+		server.cgi_extensions.push_back(value);
+	else if (key == "client_max_body_size")
+		server.client_max_body_size = value;
+	else 
+		throw std::invalid_argument("Error: invalid server key");
+}
+
+void fill_location(location &location, std::string line){
+	std::string key;
+	std::string value;
+	char eq;
+	std::stringstream ss(line);
+	ss >> key;
+	ss >> eq;
+	ss >> value;
+	std::cout << "key = " << key << std::endl;
+	std::cout << "value = " << value << std::endl;
+//	key = line.substr(0, line.find('='));
+//	value = line.substr(line.find('=') + 1, line.length());
+	if (key == "uri")
+		location.uri = value;
+	else if (key == "allow_methods")
+		location.allow_methods.push_back(value);
+	else if (key == "cgi_path")
+		location.cgi_path = value;
+	else if (key == "autoindex")
+		location.autoindex = value;
+	else if (key == "return_code")
+		location.return_code = value;
+	else
+		throw std::invalid_argument("Error: invalid location key");
+}
+
+void fill_error_page(std::map<int , std::string> error_page, std::string line){
+	int key;
+	std::string value;
+	char eq;
+	std::stringstream ss(line);
+	ss >> key;
+	ss >> eq;
+	ss >> value;
+	std::cout << "key = " << key << std::endl;
+	std::cout << "value = " << value << std::endl;
+	if (key < 400 || key > 599)
+		throw std::invalid_argument("Error: invalid error_page key");
+	error_page[key] = value;
 }
 
 std::vector<server> parse_server(std::string config_file){
@@ -37,38 +90,114 @@ std::vector<server> parse_server(std::string config_file){
 	std::string key;
 	std::string value;
 	std::vector<server> servers;
+	std::stringstream ss;
 
 	try {
 		file.open(config_file);
 		while (std::getline(file, line)){
-			if (line[0] == '#')
+			ss.str("");
+			ss.clear();
+			ss << line;
+			ss >> key;
+			if (line[0] == '#' || line.empty())
 				continue;
-			if (line == "[[server]]"){
+			else if (key == "[[server]]"){
+				std::cout << "found server" << std::endl;
 				servers.push_back(server());
 				while (std::getline(file, line)){
-					if (line[0] == '#')
+					ss.str("");
+					ss.clear();
+					ss << line;
+					ss >> key;
+					if (line[0] == '#' || line.empty())
 						continue;
-					else if (line == "[[server]]")
+					else if (key == "[[server]]" || key == "[[server.location]]" || key == "[[server.error_page]]")
+						// fhad loop an7taj ghir line no need l key
 						break;
-					else if (line == "[[location]]"){
-						servers.back().locations.push_back(location());
-						while (std::getline(file, line)){
-							if (line[0] == '#')
-								continue;
-							else if (line == "[[location]]")
-								break;
-							fill_location(servers.back().locations.back(), line);
+					else if (key == "[[server.location]]"){
+							std::cout << "found location" << std::endl;
+							servers.back().locations.push_back(location());
+							while (std::getline(file, line)){
+								ss.str("");
+								ss.clear();
+								ss << line;
+								ss >> key;
+								if (line[0] == '#' || line.empty())
+									continue;
+								else if (key == "[[server.location]]" || key == "[[server]]" || key == "[[server.error_page]]")
+									break;
+								fill_location(servers.back().locations.back(), line);
+							}
 						}
+					else if (key == "[[server.error_page]]"){
+							std::cout << "found error_page" << std::endl;
+							while (std::getline(file, line)){
+								ss.clear();
+								ss << line;
+								ss >> key;
+								if (line[0] == '#' || line.empty())
+									continue;
+								else if (key == "[[server.error_page]]" || key == "[[server]]" || key == "[[server.location]]")
+									break;
+								fill_error_page(servers.back().error_pages, line);
+							}
+							//TODO: fill error_page
+						}
+					std::cout << "line = " << line << std::endl;
 					fill_server(servers.back(), line);
-					}
-						
 				}
 			}
 		}
 	}
 	catch (const std::exception&) {
 		std::cout << "Error: could not open/read file" << std::endl;
-		exit(1);
+	//	exit(1);
 	}
 	return servers;
+}
+//	try {
+//		file.open(config_file);
+//		while (std::getline(file, line)){
+//			if (line[0] == '#' || line.empty())
+//				continue;
+//			else if (line == "[[server]]"){
+//				std::cout << "found server" << std::endl;
+//				servers.push_back(server());
+//				while (std::getline(file, line)){
+//					if (line[0] == '#' || line.empty())
+//						continue;
+//					else if (line == "[[server]]")
+//						break;
+//
+//
+//
+//					else if (line == "[[location]]"){
+//						std::cout << "found location" << std::endl;
+//						servers.back().locations.push_back(location());
+//						while (std::getline(file, line)){
+//							if (line[0] == '#')
+//								continue;
+//							else if (line == "[[location]]")
+//								break;
+//							fill_location(servers.back().locations.back(), line);
+//						}
+//					}
+//
+//
+//
+//					std::cout << "line = " << line << std::endl;
+//					fill_server(servers.back(), line);
+//						
+//				}
+//			}
+//		}
+//	}
+
+int main (int argc, char *argv[])
+{
+	std::vector<server> servers;
+	servers = parse_server(argv[1]);
+	std::cout << "servers[0].host = " << servers[0].host << std::endl;
+//	std::cout << "servers[0].server_names = " << servers[0].server_names[0] << std::endl;
+	return 0;
 }

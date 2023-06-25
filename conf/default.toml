@@ -1,6 +1,6 @@
 [[server]]
     port = 8000
-    host =     "127.0.0.1"
+    host = "127.0.0.1"
 # this is a comment skip it
     server_name = "webserv.com"
     root = "INCLUDES"
