@@ -1,34 +1,17 @@
 [[server]]
-    port = 8000
-    host = "127.0.0.1"
-# this is a comment skip it
-    server_name = "webserv.com"
-    root = "INCLUDES"
-    autoindex = "ON"
     upload_path =  "www"
 
     [[server.error_page]]
         401 = " /errors/4xx.html"
-        403 = "/errors/4xx.html"
-        501 = "/errors/5xx.html"
-        500 = "/errors/5xx.html"
-        502 = "/errors/5xx.html"
-        503 = "/errors/5xx.html"
-        504 = "/errors/5xx.html"
 
     [[server.location]]
         uri = "%.go$"
-        allow_methods = ["GET", "POST"]
-        cgi_path = "./www/cgi-bin"
 
-    index = ["index.html", "index.htm", "index.php"]
-    # 10B 10K 10M 10G 
-    client_max_body_size = "2G"
+    [[server.error_page]]
+        401 = " /errors/4xx.html"
 
     [[server.location]]
         uri = "%.py$"
-        allow_methods = ["GET", "POST"]
-        cgi_path = "www/cgi-bin"
 
     [[server.location]]
         uri = "/"
@@ -54,12 +37,6 @@
     [[server.location]]
         uri = "/redirection"
         return = "301 /test.html"
-
-[[server]]
-    port = 8081
-    root = "INCLUDES"
-    host = "127.0.0.1"
-    server_name = "example_1.com"
 
 [[server]]
     port = 9090
