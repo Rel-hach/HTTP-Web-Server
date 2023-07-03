@@ -95,10 +95,13 @@ std::vector<server> parse_server(std::string config_file){
 	try {
 		file.open(config_file);
 		while (std::getline(file, line)){
-			ss.str("");
-			ss.clear();
-			ss << line;
-			ss >> key;
+			if (key != "[[server.location]]" && key != "[[server.error_page]]")
+			{
+				ss.str("");
+				ss.clear();
+				ss << line;
+				ss >> key;
+			}
 			if (line[0] == '#' || line.empty())
 				continue;
 			else if (key == "[[server]]"){
@@ -148,8 +151,10 @@ std::vector<server> parse_server(std::string config_file){
 									fill_location(servers.back().locations.back(), line);
 								}
 							}
+						if (key == "[[server.location]]" || key == "[[server.error_page]]")
+							continue;
 						}
-
+//TODO: you need to read the line twice
 					std::cout << "line = " << line << std::endl;
 					fill_server(servers.back(), line);
 				}
