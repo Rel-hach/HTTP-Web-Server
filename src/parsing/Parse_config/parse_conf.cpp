@@ -108,13 +108,16 @@ std::vector<server> parse_server(std::string config_file){
 				std::cout << "\033[4;33mfound server\033[0m" << std::endl;
 				servers.push_back(server());
 				while (std::getline(file, line)){
-					ss.str("");
-					ss.clear();
-					ss << line;
+					if (key != "[[server.location]]" && key != "[[server.error_page]]")
+					{
+						ss.str("");
+						ss.clear();
+						ss << line;
+						ss >> key;
+					}
 //					std::cout << "hnaaaaaaaaa line = " << line << std::endl;
-					ss >> key;
 //					std::cout << "hnaaaaaaaaa key = " << key << std::endl;
-					std::cout << "key = " << key << std::endl;
+					std::cout << "key in try = " << key << std::endl;
 					if (line[0] == '#' || line.empty())
 						continue;
 					else{
