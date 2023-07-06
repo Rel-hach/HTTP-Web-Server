@@ -1,5 +1,5 @@
-#ifndef SERVER
-#define SERVER
+#ifndef SERVER_HPP
+#define SERVER_HPP
 #include <sys/socket.h> 
 #include <iostream>
 #include <fstream>
@@ -13,18 +13,10 @@
 #include <poll.h>
 #include "client.hpp"
 #include "location.hpp"
+#include <cstring>
+#include <algorithm>
 
 
-class server
-{
-public:
-	;
- 
-	
-protected:
-private:
-
-};
 class server
 {
     private:
@@ -65,7 +57,7 @@ class server
 	std::string client_max_body_size;
 	std::vector<location> locations;
 	std::map<int, std::string> error_pages;
-	std::vector<location> *location;
+	std::vector<location> *locationss;
 
 };
 
