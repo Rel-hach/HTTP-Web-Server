@@ -26,11 +26,11 @@ class server
         socklen_t client_address_size;
 
     public:
- 
-        server(server&);
-        server(const server &);
-        server&operator=(const server&);
-        void set_keys();
+        server() {}
+        // server(server&);
+        // server(const server &);
+       //  server&operator=(const server&);
+        // void set_keys();
         server(int port);
         ~server();
         int  startServer();
@@ -45,20 +45,6 @@ class server
         sockaddr_in  &getClientAdtess() const ;
         socklen_t  &getClientAdtessSize() const ;
         std::string host;
-	int port;
-	std::vector<std::string> server_names;
-	std::string root;
-	std::string index;
-	std::string autoindex;
-	std::string upload_path;
-	std::string error_page;
-	std::vector<std::string> methods;
-	std::vector<std::string> cgi_extensions;
-	std::string client_max_body_size;
-	std::vector<location> locations;
-	std::map<int, std::string> error_pages;
-	std::vector<location> *locationss;
-
 };
 
 #endif
