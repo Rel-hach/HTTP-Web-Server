@@ -131,7 +131,7 @@ class request
 
       // processing :
 
-      int   processing_request( client client,  Server& serv );
+      int   processing_request( client& client,  Server& serv );
       int   checking_startLine( std::string sline );
       int   checking_method(std::string& sline);
       int   checking_version(std::vector<std::string> headers );
