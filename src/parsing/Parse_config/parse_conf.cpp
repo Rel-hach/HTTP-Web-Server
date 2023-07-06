@@ -102,157 +102,70 @@ void fill_error_page(std::map<int , std::string> error_page, std::string line){
 	error_page[key] = value;
 }
 
-std::string handle_key(std::ifstream& file, std::string old_key, server &server){
+enum e_key{
+	SERVER,
+	LOCATION,
+	ERROR_PAGE,
+	UNKNOWN
+};
 
-	std::string line;
-	std::string key;
-	std::stringstream ss;
-	while (std::getline(file, line)){
-		ss.str("");
-		ss.clear();
-		ss << line;
-		ss >> key;
-		std::cout << "key in handle = " << key << std::endl;
-		if (line[0] == '#' || line.empty())
-			continue;
-		else if (key == "[[server.error_page]]" || key == "[[server]]" || key == "[[server.location]]")
-			return key;
-		//	break;
-		if (old_key == "[[server.error_page]]")
-			fill_error_page(server.error_pages, line);
-		else if (old_key == "[[server.location]]")
-			fill_location(server.locations.back(), line);
-		else
-			return key;
-//			fill_server(server, line);
-	}
-	return key;
+void trim(std::string &line)
+{
+	if (line.empty())
+		return;
+	size_t start = line.find_first_not_of(" \t");
+	size_t end = line.find_last_not_of(" \t");
+	line = line.substr(start, end - start + 1);
 }
 
-std::vector<server> parse_server(std::string config_file){
-	std::ifstream file;//(config_file);
+std::vector<server> parse_server(std::string config_file)
+{
+	std::ifstream file;
 	std::string line;
-	std::string key;
-	std::string value;
+	std::pair<std::string, std::string> key_value;
 	std::vector<server> servers;
-	std::stringstream ss;
+	e_key flag = UNKNOWN;
 
-	try {
-		file.open(config_file);
-		while (std::getline(file, line)){
-			if (key != "[[server]]" && key != "[[server.location]]" && key != "[[server.error_page]]")
-			{
-				ss.str("");
-				ss.clear();
-				ss << line;
-				ss >> key;
-			}
-			if (line[0] == '#' || line.empty())
-				continue;
-			else if (key == "[[server]]"){
-				std::cout << "\033[4;33mfound server\033[0m" << std::endl;
-				servers.push_back(server());
-				while (std::getline(file, line)){
-					if (key != "[[server.location]]" && key != "[[server.error_page]]")
-					{
-						ss.str("");
-						ss.clear();
-						ss << line;
-						ss >> key;
-					}
-					std::cout << "key in try = " << key << std::endl;
-					if (line[0] == '#' || line.empty())
-						continue;
-					else{
-
-						if (key == "[[server.error_page]]"){
-							std::cout << "\033[4;35mfound error_page\033[0m" << std::endl;
-							key = handle_key(file, key, servers.back());
-							//	while (std::getline(file, line)){
-							//		ss.str("");
-							//		ss.clear();
-							//		ss << line;
-							//		ss >> key;
-							//		if (line[0] == '#' || line.empty())
-							//			continue;
-							//		else if (key == "[[server.error_page]]" || key == "[[server]]" || key == "[[server.location]]")
-							//			break;
-							//		fill_error_page(servers.back().error_pages, line);
-							//	}
-							}
-
-						if (key == "[[server.location]]"){
-								std::cout << "\033[4;35mfound location\033[0m" << std::endl;
-								key = handle_key(file, key, servers.back());
-							//	servers.back().locations.push_back(location());
-							//	while (std::getline(file, line)){
-							//		ss.str("");
-							//		ss.clear();
-							//		ss << line;
-							//		ss >> key;
-							//		if (line[0] == '#' || line.empty())
-							//			continue;
-							//		else if (key == "[[server.location]]" || key == "[[server]]" || key == "[[server.error_page]]")
-							//			break;
-							//		fill_location(servers.back().locations.back(), line);
-							//	}
-							}
-						if (key == "[[server.location]]" || key == "[[server.error_page]]")
-							continue;
-						if (key == "[[server]]")
-							break;
-						}
-					std::cout << "line = " << line << std::endl;
-					fill_server(servers.back(), line);
-				}
-			}
+	file.open(config_file);
+	if (!file.is_open())
+		throw std::invalid_argument("Error: cannot open config file");
+	while (std::getline(file, line))
+	{
+		trim(line);
+		if (line[0] == '#' || line.empty())
+			continue;
+		else if (line == "[[server]]")
+		{
+			std::cout << "\033[4;33mfound server\033[0m" << std::endl;
+			servers.push_back(server());
+			flag = SERVER;
 		}
-		file.close();
-	}
-
-	catch (const std::exception&) {
-		std::cout << "Error: could not open/read file" << std::endl;
-	//	exit(1);
+		else if (line == "[[server.location]]")
+		{
+			std::cout << "\033[4;35mfound location\033[0m" << std::endl;
+			servers.back().locations.push_back(location());
+			flag = LOCATION;
+		}
+		else if (line == "[[server.error_page]]")
+		{
+			std::cout << "\033[4;35mfound error_page\033[0m" << std::endl;
+			flag = ERROR_PAGE;
+		}
+		else if (flag == UNKNOWN)
+			throw std::invalid_argument("Error: invalid key");
+		else 
+		{
+			if (flag == SERVER)
+				fill_server(servers.back(), line);
+			else if (flag == LOCATION && line != "[[server.location]]")
+				fill_location(servers.back().locations.back(), line);
+			else if (flag == ERROR_PAGE && line != "[[server.error_page]]")
+				fill_error_page(servers.back().error_pages, line);
+		}
 	}
 	return servers;
 }
-//	try {
-//		file.open(config_file);
-//		while (std::getline(file, line)){
-//			if (line[0] == '#' || line.empty())
-//				continue;
-//			else if (line == "[[server]]"){
-//				std::cout << "found server" << std::endl;
-//				servers.push_back(server());
-//				while (std::getline(file, line)){
-//					if (line[0] == '#' || line.empty())
-//						continue;
-//					else if (line == "[[server]]")
-//						break;
-//
-//
-//
-//					else if (line == "[[location]]"){
-//						std::cout << "found location" << std::endl;
-//						servers.back().locations.push_back(location());
-//						while (std::getline(file, line)){
-//							if (line[0] == '#')
-//								continue;
-//							else if (line == "[[location]]")
-//								break;
-//							fill_location(servers.back().locations.back(), line);
-//						}
-//					}
-//
-//
-//
-//					std::cout << "line = " << line << std::endl;
-//					fill_server(servers.back(), line);
-//						
-//				}
-//			}
-//		}
-//	}
+
 
 int main (int argc, char *argv[])
 {
