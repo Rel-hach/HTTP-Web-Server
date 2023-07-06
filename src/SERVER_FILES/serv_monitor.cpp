@@ -1,5 +1,3 @@
-// made by : rel-hach
-
 #include "../../inc/serv_monitor.hpp"
 
 // utils 
