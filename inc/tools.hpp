@@ -10,7 +10,7 @@
 class tools
 {
     public:
-        void    trimming_string(std::string& str)
+        static void    trimming_string(std::string& str)
         {
             str.erase(0, str.find_first_not_of(" \t"));
         
@@ -20,7 +20,7 @@ class tools
             str.erase(str.find_last_not_of(" /t") + 1);
         }
 
-        int splitting_string(const std::string& str, const std::string& delim, std::vector<std::string>& tokens) 
+        static int splitting_string(const std::string& str, const std::string& delim, std::vector<std::string>& tokens) 
         {
             size_t pos = 0;
             while ((pos = str.find(delim)) != std::string::npos)
@@ -33,7 +33,7 @@ class tools
             return (tokens.size());
         }
 
-        int    allowed_chars(char c)
+        static int    allowed_chars(char c)
         {
             std::string allowd_ch = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!$&'()*+,/:;=?@[]-._~";
 
@@ -50,7 +50,7 @@ class tools
 
         // this function convert a string that has a hexadecimal value to decimal.
 
-        int    Converting_hexaToDecimal ( std::string str )
+        static int    Converting_hexaToDecimal ( std::string str )
         {
             int lenght = str.length();
             
@@ -84,7 +84,7 @@ class tools
         // replace it with it's real ascci value. 
         // for examle if we have %20 this will be replaced with a space ' '
 
-        int            Decoding_url (std::string& uri)
+        static int            Decoding_url (std::string& uri)
         {
             int i = -1;
             int decimal;
@@ -115,7 +115,7 @@ class tools
         // this function is about removing multiple slashes from the uri.
         // this will normalize the uri and make it valid to use.
 
-        int normalizing_uri(std::string& uri)
+        static int normalizing_uri(std::string& uri)
         {
             size_t position = uri.find("//");
 
@@ -134,7 +134,7 @@ class tools
         // [if] the number is negativ then it returns bad request.
         // [else] it returns the number of directories.
 
-        int     counting_Directories (std::string& uri)
+        static int     counting_Directories (std::string& uri)
         {
             normalizing_uri(uri);
             std::vector<std::string> paths;
