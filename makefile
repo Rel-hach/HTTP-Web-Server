@@ -1,25 +1,19 @@
 Name = Webserv
 
-CC = c++
+CXX = c++
 
-CFLAGS			= -Wall -Wextra -Werror -std=c++98
-INCLUDES 		= -I./inc/
-SRCDIR 			= src
-OBJDIR 			= build
-SRC 		= $(shell find $(SRCDIR) -name "*.cpp")
-OBJ 		= $(SRC:%.cpp=$(OBJDIR)/%.o)
+CXXFLAGS = -Wall -Wextra -Werror
+
+SRC = src/SERVER_FILES/main.cpp src/SERVER_FILES/server.cpp src/SERVER_FILES/client.cpp #src/REQUEST/request.cpp
+
+SRC_HEADERS = inc/server.hpp inc/client.hpp #inc/request.hpp
+
+OBJ = $(SRC:.cpp=.o)
 
 all : $(Name)
 
-$(Name) : $(OBJ) #$(SRC_HEADERS)
-	echo "Compiling..."
-	$(CC) $^ -o $@
-
-$(OBJDIR)/%.o : %.cpp
-	echo "Creating object directory..."
-	@mkdir -p $(@D)
-	echo "building $@..."
-	$(CC) $(CFLAGS) $(INCLUDES) -c $^ -o $@
+$(Name) : $(OBJ) $(SRC_HEADERS)
+	$(CXX) $(CXXFLAGS) $(OBJ) -o $@
 
 clean :
 	rm -f $(OBJ)
