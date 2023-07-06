@@ -1,7 +1,7 @@
 #ifndef LISTENINGSOCKET_HPP
 #define LISTENINGSOCKET_HPP
 
-#include "../INCLUDES/parse_config.hpp"
+#include "./parse_config.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <vector>
