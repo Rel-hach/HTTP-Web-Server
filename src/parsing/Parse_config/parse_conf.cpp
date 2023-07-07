@@ -5,6 +5,15 @@
 #include <vector>
 #include <sstream>
 
+void trim(std::string &line)
+{
+	if (line.empty())
+		return;
+	size_t start = line.find_first_not_of(" \t");
+	size_t end = line.find_last_not_of(" \t");
+	line = line.substr(start, end - start + 1);
+}
+
 void fill_server(server &server, std::string &line){
 	std::string key;
 	std::string value;
@@ -51,6 +60,7 @@ void fill_location(location &location, std::string &line){
 	ss >> key;
 	ss >> eq;
 	std::getline(ss, value);
+	trim(value);
 	std::cout << "key = " << key << std::endl;
 	std::cout << "value = " << value << std::endl;
 	if (key == "uri")
@@ -83,6 +93,8 @@ void fill_location(location &location, std::string &line){
 }
 
 void fill_error_page(std::map<int , std::string> &error_page, std::string &line){
+	std::string k;
+	k = line.substr(0, line.find_first_of(" "));
 	int key;
 	std::string value;
 	char eq;
@@ -90,23 +102,14 @@ void fill_error_page(std::map<int , std::string> &error_page, std::string &line)
 	ss >> key;
 	ss >> eq;
 	std::getline(ss, value);
-//TODO: check if key is int
-//TODO: check if value is string
-//TODO: read until end of line for value
+	trim(value);
 	std::cout << "key = " << key << std::endl;
 	std::cout << "value = " << value << std::endl;
-	if (key < 400 || key > 599)
+	if (key < 400 || key > 599 || k.find_first_not_of("0123456789") != std::string::npos || k.empty())
 		throw std::invalid_argument("Error: invalid error_page key");
+	else if (value.empty() || value[0] != '"' || value[value.size() - 1] != '"')
+		throw std::invalid_argument("Error: invalid error_page value");
 	error_page[key] = value;
-}
-
-void trim(std::string &line)
-{
-	if (line.empty())
-		return;
-	size_t start = line.find_first_not_of(" \t");
-	size_t end = line.find_last_not_of(" \t");
-	line = line.substr(start, end - start + 1);
 }
 
 void parse_server(std::string config_file, std::vector<server> &servers)
@@ -164,7 +167,7 @@ int main (int argc, char *argv[])
 {
 	std::vector<server> servers;
 	parse_server(argv[1], servers);
-	std::cout << "servers[0].upload_path = " << servers[0].upload_path << std::endl;
+	std::cout << "servers[1].upload_path = " << servers[0].port << std::endl;
 //	std::cout << "servers[0].server_names = " << servers[0].server_names[0] << std::endl;
 	return 0;
 }
