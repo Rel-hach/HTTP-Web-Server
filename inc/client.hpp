@@ -12,6 +12,10 @@
 
 class client
 {
+    public:
+        std::string _response;
+        bool        _response_isReady;
+        int         _serverIndex;
     private:
         std::string req;
         int fd;
