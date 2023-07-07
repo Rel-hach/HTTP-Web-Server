@@ -109,12 +109,11 @@ void trim(std::string &line)
 	line = line.substr(start, end - start + 1);
 }
 
-std::vector<server> parse_server(std::string config_file)
+void parse_server(std::string config_file, std::vector<server> &servers)
 {
 	std::ifstream file;
 	std::string line;
 	std::pair<std::string, std::string> key_value;
-	std::vector<server> servers;
 	e_key flag = UNKNOWN;
 
 	file.open(config_file);
@@ -158,15 +157,14 @@ std::vector<server> parse_server(std::string config_file)
 	}
 	servers[0].server_names.push_back("localhost");
 	std::cout << "parse_server : servers[0].server_names = " << servers[0].server_names.back() << std::endl;
-	return servers;
 }
 
 
 int main (int argc, char *argv[])
 {
 	std::vector<server> servers;
-	servers = parse_server(argv[1]);
-	std::cout << "servers[0].upload_path = " << servers[0].host << std::endl;
+	parse_server(argv[1], servers);
+	std::cout << "servers[0].upload_path = " << servers[0].upload_path << std::endl;
 //	std::cout << "servers[0].server_names = " << servers[0].server_names[0] << std::endl;
 	return 0;
 }
