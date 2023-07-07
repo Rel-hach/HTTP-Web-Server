@@ -195,7 +195,42 @@ class tools
                 return (Badreq);
             }
         }
-};
+
+        static std::string generateHtmlPage() {
+            std::string html = R"(
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <title>Webserv - A Web Server</title>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    </head>
+                    <body>
+                        <h1>Webserv - A Web Server</h1>
+                        <p>Welcome to Webser, a simple and lightweight web server.</p>
+                        <h2>Features</h2>
+                        <ul>
+                            <li>Supports HTTP/1.0 and HTTP/1.1 protocols</li>
+                            <li>Handles GET, POST and DELETE requests</li>
+                            <li>Can serve static files (HTML, CSS, JS, images, etc.)</li>
+                            <li>Supports dynamic content generation with CGI scripts</li>
+                        </ul>
+                        <h2>Support</h2>
+                        <p>If you have any issues or suggestions, please visit the official GitHub repository and create an issue.</p>
+                        <p>Thank you for using Webserv!</p>
+                    </body>
+                </html>
+            )";
+
+            std::string headers = "HTTP/1.1 200 OK\r\n";
+            headers += "Content-Type: text/html\r\n";
+            headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
+            headers += "Connection: Closed\r\n\r\n";
+
+            return headers + html;
+        }
+
+        };
 
 
 
