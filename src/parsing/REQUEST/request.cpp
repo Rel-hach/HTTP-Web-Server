@@ -1,13 +1,39 @@
-#include "../inc/request.hpp"
-#include "../inc/tools.hpp"
+#include"../../../inc/request.hpp"
+#include"../../../inc/tools.hpp"
 
 
-int   request::processing_request( client& client,  Server& serv )
-{
-     std::string request = client.getreq();
+// -------------------------------------------------------------------------
+
+    request::request ()
+    {
+        this->_method = "";
+        this->_path = "";
+        this->_version = "";
+        this->_querry = "";
+        this->_maxBodySize = -1;
+        this->_host = "";
+        this->_hostname = "";
+        this->_cookie = "";
+        this->_port = 80;
+        this->_status = GO_NEXT;
+
+        this->_isChunked = false;
+        this->_hasContentLenght = false;
+        this->_isMultipart = false;
+        this->_isRedirect = false;
+        this->_isCgi = false;
+    }
+
+    int   request::processing_request( client& clientt, server& serv )
+    {
+        (void)serv;
+        std::string request = clientt.getreq();
         // if the request is empty or has spaces at its start, return a bad request.
         if (request.empty() || isspace(request[0]))
-          return (Bad_Request);
+        {
+            clientt._response = tools::getting_errorPage(Bad_Request);
+            clientt._response_isReady = true;   return _status;
+        }
 
         std::vector<std::string> tokens;
 
@@ -20,21 +46,53 @@ int   request::processing_request( client& client,  Server& serv )
           _body.assign(tokens[1]);
 
         // split the headers with "\r\n" to get a vector of string headers.
+        // in HTTP/1.1 the minimum number of headers is 2 [start_line] [host]
         if (tools::splitting_string(tokens[0], "\r\n", _headers) > 1)
         {
             // here check if the start line is valid.
             if ((_status = checking_startLine(_headers[0])) != GO_NEXT)
-                return (_status);
+            {
+                clientt._response = tools::getting_errorPage(_status);
+                clientt._response_isReady = true;   return _status;
+            }
             
             // here check if the headers are valid.
             if ((_status = checking_headers(_headers)) != GO_NEXT)
-                return (_status);
-            
+            {
+                clientt._response = tools::getting_errorPage(_status);
+                clientt._response_isReady = true;   return _status;
+            }   
         }
         else
-            return (Bad_Request);
+        {
+                clientt._response = tools::getting_errorPage(Bad_Request);
+                clientt._response_isReady = true;   return _status;
+        }
 
-}
+        if (_method == POST)
+        {
+            // if (_contentLength > serv.clienMaxBody)
+            //     return (Reqeust_Entity_Too_Large);
+            if ((_body.length() != _contentLength )|| _body.empty())
+                return (Bad_Request);
+            
+            f_data file;
+
+            if (_isMultipart)
+            {
+                if (_body.find(_boundry) == std::string::npos)
+                    return (Bad_Request);
+                tools::splitting_string(_body, _boundry, file.contents);
+                // creating_contentsFiles ( file.contents );
+            }
+            else if (_isCgi)
+            {
+                // handle_cgi(_body);
+            }
+        }
+
+        return (GO_NEXT);
+    }
 
 
     int   request::checking_startLine( std::string sline )
@@ -71,7 +129,7 @@ int   request::processing_request( client& client,  Server& serv )
             return (URI_Too_Long);
 
         // check if there is a ? if yes : then split the url into [querry] & [path].
-        int position = _path.find('?');
+        size_t position = _path.find('?');
         if (position != std::string::npos)
         {
             _querry = _path.substr(position + 1);
@@ -90,7 +148,7 @@ int   request::processing_request( client& client,  Server& serv )
     {
         std::vector<std::string>::iterator it;
         int   statuuus = GO_NEXT;
-        for (it = this->_headers.begin(); it != this->_headers.end(); ++it)
+        for (it = headers.begin() + 1; it != headers.end(); ++it)
         {
             std::pair<std::string, std::string> couple;
             size_t position = it->find(":");
@@ -108,27 +166,27 @@ int   request::processing_request( client& client,  Server& serv )
                 return (Bad_Request);
         }
 
-        // if (_hasHostHeader == false)
-        //   return (Bad_Request);
+        if (_hasHostHeader == false)
+          return (Bad_Request);
 
-        // if (_method == "POST")
-        // {
-        //   if (_isChunked == false && _hasContentLenght == false)
-        //       return (Lengh_Required);
+        if (_method == "POST")
+        {
+          if (_isChunked == false && _hasContentLenght == false)
+              return (Lengh_Required);
 
-        //   if (_isChunked != false && _hasContentLenght != false)
-        //       return (Bad_Request);
-        // }
-        // return (GO_NEXT);
+          if (_isChunked != false && _hasContentLenght != false)
+              return (Bad_Request);
+        }
+        return (GO_NEXT);
     }
 
 
-        int    request::checking_headerByHeader(std::string& key, std::string& value)
+    int    request::checking_headerByHeader(std::string& key, std::string& value)
     {
         // the host contains the hostname and the port of the server, the client want to connect to
         if (key == "" || value == "")
             return Bad_Request;
-
+        
         if ((key.find_first_of(" \t") != std::string::npos))
             return Bad_Request;
         
@@ -136,7 +194,7 @@ int   request::processing_request( client& client,  Server& serv )
         // if ((value.find_first_of(" \t") != std::string::npos))
         //     return Bad_Request;
 
-        if (key == "Host")
+        if (key == "Hos")
         {
             int position = value.find(':');
             if (position != -1 && !_hasHostHeader)
@@ -158,28 +216,27 @@ int   request::processing_request( client& client,  Server& serv )
                 return (Bad_Request);
         }
 
-        
         // connection type - close or keep-alive
         if (key == "Connection")
             _connection = value;
 
         // transfer-encoding and chunked then ischunked else NOT_IMPLEMENTED
-        if (key == "Transfer-Encoding" && value == "chunked")
+        if (key == "Transfer-Encoding")
         {
-            if (_isChunked == false)
+            if (_isChunked == false && value == "chunked")
+            {
+                handling_chunked();
                 _isChunked = true;
+            }
             else
-                return (Bad_Request);
+                return (Not_Implemented);
         }
-        else
-            return (Not_Implemented);
-
 
         if (key == "Content-Length")
         {
             if (_hasContentLenght || (value.empty() || value.find_first_not_of("0123456789") != std::string::npos))
                 return (Bad_Request);
-            _contentLength = atoll(value.c_str());
+            _contentLength = std::stoul(value);
             _hasContentLenght = true;
         }
 
@@ -193,12 +250,13 @@ int   request::processing_request( client& client,  Server& serv )
             int app = value.find("application/x-www-form-urlencoded");
 
             if (multilpart == -1 && app == -1)
-                return (Not_Implemented);
+                _contentType = value;
             
             if (_isMultipart || _isCgi)
                 return (Bad_Request);
 
             int position = value.find(';');
+
             if (position != -1)
             {
                 _contentType = value.substr(0, position);
@@ -210,10 +268,31 @@ int   request::processing_request( client& client,  Server& serv )
 
                 else if (_contentType == "application/x-www-form-urlencoded")
                     _isCgi = true;
-                
                 else
                     _isMultipart = true;
             }
         }
         return (GO_NEXT);
     }
+
+    void    request::handling_chunked()
+    {
+        std::string temp;
+        temp.assign(_body, sizeof(_body) - 1);
+        _body.clear();
+        size_t start = 0, end = 0;
+        while (temp.length())
+        {
+            if (end != std::string::npos)
+            {
+                std::string size = temp.substr(start, end - start - 1);
+                int sizeInDecimal = tools::Converting_hexaToDecimal(size);
+                if (sizeInDecimal == 0)
+                    break ;
+                _body += temp.substr(end + 1, sizeInDecimal);
+                start = end + sizeInDecimal + 3;
+            }
+        }
+    }
+
+
