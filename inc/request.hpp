@@ -127,7 +127,7 @@ class request
       // int   checking_method(std::string& sline);
       // int   checking_version(std::vector<std::string> headers );
       // int   checking_uri();
-      void  handling_chunked();
+      bool  handling_chunked();
       int   checking_headers( std::vector<std::string> headers );
       int   checking_headerByHeader(std::string& key, std::string& value);
       // void  checking_connectionType( std::string& connectionType );
