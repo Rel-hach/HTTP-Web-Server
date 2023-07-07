@@ -127,8 +127,6 @@
             return (Bad_Request);
 
         // check if the url has a slash at the beginning. and see if there is a '..'
-        if (_path[0] != '/' || _path.find("..") != std::string::npos)
-            return (Bad_Request);
         
         // the size of the request shouldn't be more than 2048 chars long. 
         if (_path.size() > 2048)
@@ -141,6 +139,9 @@
             _querry = _path.substr(position + 1);
             _path   = _path.substr(0, position);
         }
+
+        if (_path[0] != '/')
+            return (Bad_Request);
         // compare the version of HTTP ! it should be HTTP/1.1
         if (_version.compare(SUPPORTED_HTTP_VER) != 0)
             return (HTTP_Version_Not_Supported);
@@ -231,8 +232,10 @@
         {
             if (_isChunked == false && value == "chunked")
             {
-                handling_chunked();
-                _isChunked = true;
+                if (handling_chunked())
+                    _isChunked = true;
+                else
+                   return (Bad_Request);
             }
             else
                 return (Not_Implemented);
@@ -281,24 +284,24 @@
         return (GO_NEXT);
     }
 
-    void    request::handling_chunked()
+    bool request::handling_chunked()
     {
-        std::string temp;
-        temp.assign(_body, _body.length());
+        std::string temp(_body);
         _body.clear();
-        size_t start = 0, end = 0;
-        while (temp.length() != 0)
-        {
-            end = temp.find("\n", start);
-            if (end != std::string::npos)
-            {
-                std::string size = temp.substr(start, end - start - 1);
-                int sizeInDecimal = tools::Converting_hexaToDecimal(size);
-                if (sizeInDecimal == 0)
-                    break ;
-                _body += temp.substr(end + 1, sizeInDecimal);
-                start = end + sizeInDecimal + 3;
-            }
-        }
-    }
+        std::vector<std::string> parts;
 
+        tools::splitting_string(temp, "\r\n", parts);
+        temp.clear();
+        int size = -1;
+        for (size_t i = 0; i < parts.size(); i+=2)
+        {
+            size = tools::Converting_hexaToDecimal(parts[i]);
+            if (static_cast<size_t>(size) == parts[i + 1].size())
+                _body += parts[i + 1];
+            else
+                return (false);
+        }
+        if (size != 0)
+            return (false);
+        return (true);
+    }

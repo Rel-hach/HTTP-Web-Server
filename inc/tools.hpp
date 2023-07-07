@@ -140,7 +140,6 @@ class tools
             std::vector<std::string> paths;
             splitting_string(uri, "/", paths);
             int count = 0;
-
             for (size_t i = 0; i < paths.size(); i++)
             {
                 if (paths[i] == "..")
@@ -150,7 +149,7 @@ class tools
             }
             if (count < 0)
                 return (Bad_Request);
-            return (count);
+            return (GO_NEXT);
         }
 
 
