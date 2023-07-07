@@ -43,7 +43,7 @@
         // split the request with "/r/n/r/n" to get headers and body.
         // if there is a body the split function will return 2 the number of tokens [headers] - [request].
         if (tools::splitting_string(request, "\r\n\r\n", tokens) == 2)
-          _body.assign(tokens[1]);
+          _body.assign(tokens[1], sizeof(tokens[1]) - 1);
 
         // split the headers with "\r\n" to get a vector of string headers.
         // in HTTP/1.1 the minimum number of headers is 2 [start_line] [host]
@@ -55,6 +55,7 @@
                 clientt._response = tools::getting_errorPage(_status);
                 clientt._response_isReady = true;   return _status;
             }
+            
             
             // here check if the headers are valid.
             if ((_status = checking_headers(_headers)) != GO_NEXT)
@@ -69,26 +70,31 @@
                 clientt._response_isReady = true;   return _status;
         }
 
-        if (_method == POST)
-        {
-            // if (_contentLength > serv.clienMaxBody)
-            //     return (Reqeust_Entity_Too_Large);
-            if ((_body.length() != _contentLength )|| _body.empty())
-                return (Bad_Request);
+        // if (_method == POST)
+        // {
+        //     // if (_contentLength > serv.clienMaxBody)
+        //     //     return (Reqeust_Entity_Too_Large);
+        //     if ((_body.length() != _contentLength )|| _body.empty())
+        //         return (Bad_Request);
             
-            f_data file;
+        //     f_data file;
 
-            if (_isMultipart)
-            {
-                if (_body.find(_boundry) == std::string::npos)
-                    return (Bad_Request);
-                tools::splitting_string(_body, _boundry, file.contents);
-                // creating_contentsFiles ( file.contents );
-            }
-            else if (_isCgi)
-            {
-                // handle_cgi(_body);
-            }
+        //     if (_isMultipart)
+        //     {
+        //         if (_body.find(_boundry) == std::string::npos)
+        //             return (Bad_Request);
+        //         tools::splitting_string(_body, _boundry, file.contents);
+        //         // creating_contentsFiles ( file.contents );
+        //     }
+        //     else if (_isCgi)
+        //     {
+        //         // handle_cgi(_body);
+        //     }
+        // }
+        if (_method == GET)
+        {
+            clientt._response = tools::generateHtmlPage();
+            clientt._response_isReady = true;   return (GO_NEXT);
         }
 
         return (GO_NEXT);
@@ -159,7 +165,7 @@
                 tools::trimming_string(couple.first);
                 tools::trimming_string(couple.second);
                 if ((statuuus = checking_headerByHeader(couple.first,couple.second)) != GO_NEXT)
-                  return (statuuus);
+                    return (statuuus);
                 this->_mapOfHeaders.insert(couple);
             }
             else
@@ -194,7 +200,7 @@
         // if ((value.find_first_of(" \t") != std::string::npos))
         //     return Bad_Request;
 
-        if (key == "Hos")
+        if (key == "Host")
         {
             int position = value.find(':');
             if (position != -1 && !_hasHostHeader)
