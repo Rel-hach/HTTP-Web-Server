@@ -213,7 +213,7 @@ class tools
             headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
             headers += "Connection: Closed\r\n\r\n";
 
-            return headers + html;
+            return headers + html;  
         }
 
         };
