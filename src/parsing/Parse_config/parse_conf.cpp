@@ -5,18 +5,18 @@
 #include <vector>
 #include <sstream>
 
-void fill_server(server &server, std::string line){
+void fill_server(server &server, std::string &line){
 	std::string key;
 	std::string value;
 	char eq;
 	std::stringstream ss(line);
 	ss >> key;
 	ss >> eq;
-	ss >> value;
+	std::getline(ss, value);
+
 	std::cout << "keyuuu = " << key << std::endl;
 	std::cout << "valueuuu = " << value << std::endl;
-//	key = line.substr(0, line.find('='));
-//	value = line.substr(line.find('=') + 1, line.length());
+
 	if (key == "host")
 		server.host = value;
 	else if (key == "port")
@@ -43,18 +43,16 @@ void fill_server(server &server, std::string line){
 		throw std::invalid_argument("Error: invalid server key");
 }
 
-void fill_location(location &location, std::string line){
+void fill_location(location &location, std::string &line){
 	std::string key;
 	std::string value;
 	char eq;
 	std::stringstream ss(line);
 	ss >> key;
 	ss >> eq;
-	ss >> value;
+	std::getline(ss, value);
 	std::cout << "key = " << key << std::endl;
 	std::cout << "value = " << value << std::endl;
-//	key = line.substr(0, line.find('='));
-//	value = line.substr(line.find('=') + 1, line.length());
 	if (key == "uri")
 	{
 		location.uri = value;
@@ -84,14 +82,14 @@ void fill_location(location &location, std::string line){
 		throw std::invalid_argument("Error: invalid location key");
 }
 
-void fill_error_page(std::map<int , std::string> error_page, std::string line){
+void fill_error_page(std::map<int , std::string> &error_page, std::string &line){
 	int key;
 	std::string value;
 	char eq;
 	std::stringstream ss(line);
 	ss >> key;
 	ss >> eq;
-	ss >> value;
+	std::getline(ss, value);
 //TODO: check if key is int
 //TODO: check if value is string
 //TODO: read until end of line for value
@@ -101,13 +99,6 @@ void fill_error_page(std::map<int , std::string> error_page, std::string line){
 		throw std::invalid_argument("Error: invalid error_page key");
 	error_page[key] = value;
 }
-
-enum e_key{
-	SERVER,
-	LOCATION,
-	ERROR_PAGE,
-	UNKNOWN
-};
 
 void trim(std::string &line)
 {
@@ -161,8 +152,12 @@ std::vector<server> parse_server(std::string config_file)
 				fill_location(servers.back().locations.back(), line);
 			else if (flag == ERROR_PAGE && line != "[[server.error_page]]")
 				fill_error_page(servers.back().error_pages, line);
+			servers.back().print();
+			std::cout << "uplooooood" << servers.back().upload_path << std::endl;
 		}
 	}
+	servers[0].server_names.push_back("localhost");
+	std::cout << "parse_server : servers[0].server_names = " << servers[0].server_names.back() << std::endl;
 	return servers;
 }
 
@@ -171,7 +166,7 @@ int main (int argc, char *argv[])
 {
 	std::vector<server> servers;
 	servers = parse_server(argv[1]);
-	std::cout << "servers[0].host = " << servers[0].host << std::endl;
+	std::cout << "servers[0].upload_path = " << servers[0].host << std::endl;
 //	std::cout << "servers[0].server_names = " << servers[0].server_names[0] << std::endl;
 	return 0;
 }

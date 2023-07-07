@@ -6,6 +6,13 @@
 #include <map>
 #include "location.hpp"
 
+enum e_key{
+	SERVER,
+	LOCATION,
+	ERROR_PAGE,
+	UNKNOWN
+};
+
 class server
 {
 public:
@@ -14,6 +21,7 @@ public:
 	server(const server &);
 	server&operator=(const server&);
 	void set_keys();
+	void print();
 	~server();
  
 	std::string host;
