@@ -107,7 +107,10 @@ int main()
                                 request req;
                                 req.processing_request(all_client[j],  all_server[all_client[j]._serverIndex]);
                                 if (all_client[j]._response_isReady == true)
+                                {
+                                    std::cout<<all_client[j]._response<<std::endl;
                                     write(all_df[i].fd,all_client[j]._response.c_str(),all_client[j]._response.length());
+                                }
                                 all_client[j]._response = "";
                                 all_client[j]._response_isReady = false;
                                 close(all_df[i].fd);
