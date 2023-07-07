@@ -14,8 +14,9 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-#include "parse_config.hpp"
+// #include "parse_config.hpp"
 #include "status_codes.hpp"
+#include "client.hpp"
 #include <iostream>
 #include <string>
 #include <map>
@@ -51,20 +52,7 @@ typedef struct  data
 } f_data;
 
 
-
-// to be deleted after 
-class client
-{
-    private:
-        std::string _request;
-    std::string     _response;
-    public:
-    bool            _responseIsReady;
-        std::string     getreq() const
-        {
-            return (_request);
-        }
-};
+class server;
 
 class request
 {
@@ -92,7 +80,7 @@ class request
 
     // CONTENT_TYPE IS REQUIRED IN POST
     std::string _transferEncoding;
-    long long   _contentLength;
+    size_t      _contentLength;
     std::string _contentType;
     std::string _boundry; // multipart/form-data
 
@@ -125,20 +113,24 @@ class request
     // constructors : 
 
 
-      request () {}
-      request(Server& conf);
+      request ();
+      // request(server& conf)
+      // {
+
+      // }
 
 
       // processing :
 
-      int   processing_request( client& client,  Server& serv );
+      int   processing_request( client& client, server& serv );
       int   checking_startLine( std::string sline );
-      int   checking_method(std::string& sline);
-      int   checking_version(std::vector<std::string> headers );
-      int   checking_uri();
+      // int   checking_method(std::string& sline);
+      // int   checking_version(std::vector<std::string> headers );
+      // int   checking_uri();
+      void  handling_chunked();
       int   checking_headers( std::vector<std::string> headers );
       int   checking_headerByHeader(std::string& key, std::string& value);
-      void  checking_connectionType( std::string& connectionType );
+      // void  checking_connectionType( std::string& connectionType );
 
 
 
