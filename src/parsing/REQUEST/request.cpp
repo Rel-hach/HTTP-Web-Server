@@ -43,7 +43,7 @@
         // split the request with "/r/n/r/n" to get headers and body.
         // if there is a body the split function will return 2 the number of tokens [headers] - [request].
         if (tools::splitting_string(request, "\r\n\r\n", tokens) == 2)
-          _body.assign(tokens[1], sizeof(tokens[1]) - 1);
+          _body.assign(tokens[1], tokens[1].length());
 
         // split the headers with "\r\n" to get a vector of string headers.
         // in HTTP/1.1 the minimum number of headers is 2 [start_line] [host]
@@ -284,11 +284,12 @@
     void    request::handling_chunked()
     {
         std::string temp;
-        temp.assign(_body, sizeof(_body) - 1);
+        temp.assign(_body, _body.length());
         _body.clear();
         size_t start = 0, end = 0;
-        while (temp.length())
+        while (temp.length() != 0)
         {
+            end = temp.find("\n", start);
             if (end != std::string::npos)
             {
                 std::string size = temp.substr(start, end - start - 1);
@@ -300,5 +301,4 @@
             }
         }
     }
-
 
