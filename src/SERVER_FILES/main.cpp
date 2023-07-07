@@ -108,7 +108,8 @@ int main()
                                 req.processing_request(all_client[j],  all_server[all_client[j]._serverIndex]);
                                 if (all_client[j]._response_isReady == true)
                                     write(all_df[i].fd,all_client[j]._response.c_str(),all_client[j]._response.length());
-                                all_client[j]._response.clear();
+                                all_client[j]._response = "";
+                                all_client[j]._response_isReady = false;
                                 close(all_df[i].fd);
                                 all_df.erase(all_df.begin() + i);
                                 all_client.erase(all_client.begin() + j);
