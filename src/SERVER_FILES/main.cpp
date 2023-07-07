@@ -1,6 +1,6 @@
 #include "../../inc/server.hpp"
+#include "../../inc/request.hpp"
 #include "../../inc/client.hpp"
-
 
 int main() 
 { 
@@ -39,6 +39,7 @@ int main()
     all_server.push_back(Server2);
     all_server.push_back(Server3);
     all_server.push_back(Server4);
+
 
     //staart server and bind and lesten
     for (size_t i = 0; i < all_server.size(); i++)
@@ -84,8 +85,9 @@ int main()
                     fds.events = POLLIN;
                     all_df.push_back(fds);
                     client newclient = client(fds.fd);
+                    newclient._serverIndex = i;
                     all_client.push_back(newclient);
-                     std::cout<< "server ==> "<<all_df[i].fd<<"   accept connection cleient ==> "<<client_socket<<std::endl;
+                     std::cout<< "server ==> "<< all_df[i].fd << "   accept connection cleient ==> " << client_socket<<std::endl;
                 }
                 else
                 {
@@ -101,14 +103,12 @@ int main()
 
                             if(all_client[j].getcontentlenght() <= all_client[j].getcontentread())
                             {
-                                std::cout << all_client[j].getcontentlenght()<<"    "<<all_client[j].getcontentread()<<std::endl;
-                                std::string response = "HTTP/1.1 200 OK";
-                                response+= "Content-Length:" +  std::to_string(all_client[j].getreq().length()) + "\r\n\r\n";
-                                response += all_client[j].getreq();
-                                std::cout<<response.length()<<std::endl;
-                                write(all_df[i].fd,response.c_str(),response.length());
-                                
-                                response="";
+                                all_client[j]._response_isReady = false;
+                                request req;
+                                req.processing_request(all_client[j],  all_server[all_client[j]._serverIndex]);
+                                if (all_client[j]._response_isReady == true)
+                                    write(all_df[i].fd,all_client[j]._response.c_str(),all_client[j]._response.length());
+                                all_client[j]._response.clear();
                                 close(all_df[i].fd);
                                 all_df.erase(all_df.begin() + i);
                                 all_client.erase(all_client.begin() + j);
@@ -118,8 +118,7 @@ int main()
                     }
                 }
             }
-        } 
+        }
     }
-
     return 0;
 }
