@@ -1,17 +1,39 @@
 #include "../../../inc/server.hpp"
 #include <fstream>
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
 #include <sstream>
 
-void trim(std::string &line)
+void trim(std::string &line, std::string str)
 {
 	if (line.empty())
 		return;
-	size_t start = line.find_first_not_of(" \t");
-	size_t end = line.find_last_not_of(" \t");
+	size_t start = line.find_first_not_of(str);
+	size_t end = line.find_last_not_of(str);
 	line = line.substr(start, end - start + 1);
+}
+
+void fill_vector(std::vector<std::string> &vec, std::string &values){
+	std::string value;
+	int i = 0;
+	trim(values, " \t[]");
+	while (values[i])
+	{
+		if (values[i] == ',' || values[i + 1] == '\0')
+		{
+			if (values[i + 1] == '\0')
+				value += values[i];
+			trim(value, " \t\"");
+			vec.push_back(value);
+			value.clear();
+		}
+		else
+			value += values[i];
+		i++;
+	}
+//	vec.push_back(value);
 }
 
 void fill_server(server &server, std::string &line){
@@ -22,16 +44,18 @@ void fill_server(server &server, std::string &line){
 	ss >> key;
 	ss >> eq;
 	std::getline(ss, value);
-
-	std::cout << "keyuuu = " << key << std::endl;
-	std::cout << "valueuuu = " << value << std::endl;
+	trim(value, " \t\"");	
 
 	if (key == "host")
 		server.host = value;
 	else if (key == "port")
+	{
+		if (std::stoi(value) < 0 || std::stoi(value) > 65535 || value.find_first_not_of("0123456789") != std::string::npos)
+			throw std::invalid_argument("Error: invalid port");
 		server.port = std::stoi(value);
+	}
 	else if (key == "server_name")
-		server.server_names.push_back(value);
+		fill_vector(server.server_names, value);
 	else if (key == "root")
 		server.root = value;
 	else if (key == "index")
@@ -42,10 +66,10 @@ void fill_server(server &server, std::string &line){
 		server.upload_path = value;
 	else if (key == "error_page")
 		server.error_page = value;
-	else if (key == "methods")
-		server.methods.push_back(value);
+	else if (key == "allow_methods")
+		fill_vector(server.allow_methods, value);
 	else if (key == "cgi_extensions")
-		server.cgi_extensions.push_back(value);
+		fill_vector(server.cgi_extensions, value);
 	else if (key == "client_max_body_size")
 		server.client_max_body_size = value;
 	else 
@@ -60,9 +84,9 @@ void fill_location(location &location, std::string &line){
 	ss >> key;
 	ss >> eq;
 	std::getline(ss, value);
-	trim(value);
-	std::cout << "key = " << key << std::endl;
-	std::cout << "value = " << value << std::endl;
+	trim(value, " \t\"");
+	std::cout << "key = " << key;
+	std::cout << " value = " << value << std::endl;
 	if (key == "uri")
 	{
 		location.uri = value;
@@ -102,19 +126,20 @@ void fill_error_page(std::map<int , std::string> &error_page, std::string &line)
 	ss >> key;
 	ss >> eq;
 	std::getline(ss, value);
-	trim(value);
-	std::cout << "key = " << key << std::endl;
-	std::cout << "value = " << value << std::endl;
+	trim(value, " \t\"");
+	std::cout << "key = " << key;
+	std::cout << " value = " << value << std::endl;
 	if (key < 400 || key > 599 || k.find_first_not_of("0123456789") != std::string::npos || k.empty())
 		throw std::invalid_argument("Error: invalid error_page key");
-	else if (value.empty() || value[0] != '"' || value[value.size() - 1] != '"')
+	else if (value.empty() || value[0] != '/' || value.substr(value.find_last_of(".")) != ".html")
 		throw std::invalid_argument("Error: invalid error_page value");
 	error_page[key] = value;
 }
 
-void parse_server(std::string config_file, std::vector<server> &servers)
+std::vector<server> parse_server(std::string config_file)
 {
 	std::ifstream file;
+	std::vector<server> servers;
 	std::string line;
 	std::pair<std::string, std::string> key_value;
 	e_key flag = UNKNOWN;
@@ -124,7 +149,7 @@ void parse_server(std::string config_file, std::vector<server> &servers)
 		throw std::invalid_argument("Error: cannot open config file");
 	while (std::getline(file, line))
 	{
-		trim(line);
+		trim(line, " \t");
 		if (line[0] == '#' || line.empty())
 			continue;
 		else if (line == "[[server]]")
@@ -154,20 +179,29 @@ void parse_server(std::string config_file, std::vector<server> &servers)
 				fill_location(servers.back().locations.back(), line);
 			else if (flag == ERROR_PAGE && line != "[[server.error_page]]")
 				fill_error_page(servers.back().error_pages, line);
-			servers.back().print();
-			std::cout << "uplooooood" << servers.back().upload_path << std::endl;
 		}
 	}
-	servers[0].server_names.push_back("localhost");
-	std::cout << "parse_server : servers[0].server_names = " << servers[0].server_names.back() << std::endl;
+	file.close();
+	servers[0].print();
+	return servers;
 }
 
 
 int main (int argc, char *argv[])
 {
 	std::vector<server> servers;
-	parse_server(argv[1], servers);
-	std::cout << "servers[1].upload_path = " << servers[0].port << std::endl;
-//	std::cout << "servers[0].server_names = " << servers[0].server_names[0] << std::endl;
+	try
+	{
+		if (argc != 2)
+			throw std::invalid_argument("Error: invalid number of arguments");
+		servers = parse_server(argv[1]);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+	std::cout << "====" ;
+	std::cout << "servers[1].upload_path = " << servers[0].upload_path << std::endl;
+	std::cout << "servers[2].upload_path = " << servers[1].upload_path << std::endl;
 	return 0;
 }
