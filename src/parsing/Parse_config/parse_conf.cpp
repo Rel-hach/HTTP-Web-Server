@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <cwctype>
 
 void trim(std::string &line, std::string str)
 {
@@ -33,7 +34,64 @@ void fill_vector(std::vector<std::string> &vec, std::string &values){
 			value += values[i];
 		i++;
 	}
-//	vec.push_back(value);
+}
+
+int has_bad_char(std::string &key){
+	int i = 0;
+	while (key[i])
+	{
+		if (!iswalnum(key[i]) && key[i] != '_')
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
+int check_if_closed(std::string value){
+	int i = 0;
+	int count_quote = 0;
+	int count_bracket = 0;
+	while (value[i])
+	{
+		if (value[i] == '\"')
+			count_quote++;
+		if (value[i] == '[' || value[i] == ']')
+			count_bracket++;
+		i++;
+	}
+	if ( count_quote == 0 || count_quote % 2 != 0 || count_bracket % 2 != 0)
+		return (0);
+	return (1);
+}
+
+void check_value_key(std::string &value, std::string &key){
+	trim(value, " \t");
+	if (value.empty())
+		throw std::invalid_argument("Error: empty value");
+	if (!check_if_closed(value) && key != "port")
+	{
+		std::cout << value << std::endl;
+		std::cout << key << std::endl;
+		throw std::invalid_argument("Error: invalid value");
+	}
+	
+	if (key.empty())
+		throw std::invalid_argument("Error: empty key");
+	if (has_bad_char(key)) 
+		throw std::invalid_argument("Error: invalid key");
+}
+
+std::pair<std::string, std::string> fill_pair(std::string &line){
+	std::string key;
+	std::string value;
+	char eq;
+	std::stringstream ss(line);
+	ss >> key;
+	ss >> eq;
+	std::getline(ss, value);
+	check_value_key(value, key);
+	trim(value, " \t\"");	
+	return (std::make_pair(key, value));
 }
 
 void fill_server(server &server, std::string &line){
@@ -44,6 +102,7 @@ void fill_server(server &server, std::string &line){
 	ss >> key;
 	ss >> eq;
 	std::getline(ss, value);
+	check_value_key(value, key);
 	trim(value, " \t\"");	
 
 	if (key == "host")
