@@ -9,7 +9,7 @@ public:
 	location();
 	location(location&);
 	location(const location &);
-	location&operator=(const location&);
+	location&operator=(location const&);
 	~location();
  
 	std::string uri;
