@@ -6,6 +6,7 @@
 #include <vector>
 #include <sstream>
 #include <cwctype>
+#include <stdlib.h>
 
 void trim(std::string &line, std::string str)
 {
@@ -109,9 +110,9 @@ void fill_server(server &server, std::string &line){
 		server.host = value;
 	else if (key == "port")
 	{
-		if (std::stoi(value) < 0 || std::stoi(value) > 65535 || value.find_first_not_of("0123456789") != std::string::npos)
+		if (atoi(value.c_str()) < 0 || atoi(value.c_str()) > 65535 || value.find_first_not_of("0123456789") != std::string::npos)
 			throw std::invalid_argument("Error: invalid port");
-		server.port = std::stoi(value);
+		server.port = atoi(value.c_str());
 	}
 	else if (key == "server_name")
 		fill_vector(server.server_names, value);
@@ -147,30 +148,15 @@ void fill_location(location &location, std::string &line){
 	std::cout << "key = " << key;
 	std::cout << " value = " << value << std::endl;
 	if (key == "uri")
-	{
 		location.uri = value;
-		return;
-	}
 	else if (key == "allow_methods")
-	{
-		location.allow_methods.push_back(value);
-		return;
-	}
+		fill_vector(location.allow_methods, value);
 	else if (key == "cgi_path")
-	{
 		location.cgi_path = value;
-		return;
-	}
 	else if (key == "autoindex")
-	{
 		location.autoindex = value;
-		return;
-	}
-	else if (key == "return_code")
-	{
+	else if (key == "returno")
 		location.return_code = value;
-		return;
-	}
 	else
 		throw std::invalid_argument("Error: invalid location key");
 }
@@ -203,12 +189,13 @@ std::vector<server> parse_server(std::string config_file)
 	std::pair<std::string, std::string> key_value;
 	e_key flag = UNKNOWN;
 
-	file.open(config_file);
+	file.open(config_file.c_str());
 	if (!file.is_open())
 		throw std::invalid_argument("Error: cannot open config file");
 	while (std::getline(file, line))
 	{
 		trim(line, " \t");
+		std::cout << "line = " << line << std::endl;
 		if (line[0] == '#' || line.empty())
 			continue;
 		else if (line == "[[server]]")
