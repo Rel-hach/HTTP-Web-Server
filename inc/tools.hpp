@@ -6,7 +6,9 @@
 #include <vector>
 #include <map>
 #define GO_NEXT 1
-
+#include <iostream>
+#include <fstream>
+#include <string>
 class tools
 {
     public:
@@ -195,26 +197,7 @@ class tools
             }
         }
 
-        static std::string generateHtmlPage() {
-            std::ifstream file("../www/html/home.html");
-            std::string html;
-            std::string line;  
-            std::cout<<"ddd"<<std::endl;
-            if (file.is_open()) 
-            {
-                while (std::getline(file, line)) {
-                    html.append(line);
-            }
-            file.close();
-            }
-            std::string headers = "HTTP/1.1 200 OK\r\n";
-            headers += "Content-Type: text/html\r\n";
-            headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
-            headers += "Connection: Closed\r\n\r\n";
-
-            return headers + html;  
-        }
-
+        static std::string generateHtmlPage();
         };
 
 
