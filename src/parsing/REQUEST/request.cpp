@@ -3,7 +3,27 @@
 
 
 // -------------------------------------------------------------------------
+    std::string tools::generateHtmlPage() {
+            std::ifstream file("root/index.html");
+            std::string html;
+            std::string line; 
+            if (!file.is_open()) {
+                std::cerr << "Failed to open the file." << std::endl;
+            } 
+            if (file.is_open()) 
+            {
+                while (std::getline(file, line))
+                    html+= line;
+                file.close();
+            }
+            
+            std::string headers = "HTTP/1.1 200 OK\r\n";
+            headers += "Content-Type: text/html\r\n";
+            headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
+            headers += "Connection: Closed\r\n\r\n";
 
+            return headers + html;  
+    }
     request::request ()
     {
         this->_method = "";
@@ -306,27 +326,3 @@
             return (false);
         return (true);
     }
-    std::string tools::generateHtmlPage() {
-            std::ifstream file("text.txt");
-            std::string html;
-            std::string line; 
-            if (!file.is_open()) {
-                std::cerr << "Failed to open the file." << std::endl;
-            } 
-            if (!file.is_open()) 
-            {
-                while (std::getline(file, line)) {
-                    html+= line;
-                    std::cout<<html<<std::endl;
-            }
-            file.close();
-            }
-            
-
-            std::string headers = "HTTP/1.1 200 OK\r\n";
-            headers += "Content-Type: text/html\r\n";
-            headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
-            headers += "Connection: Closed\r\n\r\n";
-
-            return headers + html;  
-        }
