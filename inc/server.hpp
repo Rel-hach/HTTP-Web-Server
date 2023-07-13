@@ -15,17 +15,20 @@
 #include "client.hpp"
 #include <cstring>
 #include <algorithm>
+#include "server_data.hpp"
 
-class server_data
+class server
 {
     private:
         int m_socket;
         sockaddr_in server_address;
         sockaddr_in client_address;
         socklen_t client_address_size;
+//		server_data data;
+		std::vector<server_data> data;
 
     public:
-        server_data(int port);
+        server(int port);
         sockaddr_in  &getClientAdtess() const ;
         socklen_t  &getClientAdtessSize() const ;
         int getSockert() const ;
@@ -35,7 +38,7 @@ class server_data
         int bindServer();
         int listenSrver();
         int acceptServer();
-        ~server_data();
+        ~server();
 };
 
 #endif

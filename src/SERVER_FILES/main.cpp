@@ -1,4 +1,5 @@
 #include "../../inc/server.hpp"
+#include "../../inc/server_data.hpp"
 #include "../../inc/request.hpp"
 #include "../../inc/client.hpp"
 

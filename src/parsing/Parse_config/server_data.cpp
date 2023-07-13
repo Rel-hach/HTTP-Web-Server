@@ -1,4 +1,5 @@
 #include "../../../inc/server_data.hpp"
+#include <cstddef>
 
 server_data::server_data()
 {
@@ -32,7 +33,7 @@ void server_data::print(){
 	std::cout << "port = " << port << std::endl;
 	std::cout << "root = " << root << std::endl;
 	std::cout << "index = " << index << std::endl;
-	int i = 0;
+	size_t i = 0;
 	while (i < server_names.size())
 	{
 		std::cout << "server_name[" << i << "] = " << server_names[i] << std::endl;
