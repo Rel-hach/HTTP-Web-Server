@@ -1,10 +1,10 @@
-Name = Webserv
+Name = webserv
 
 CXX = c++
 
 CXXFLAGS = -Wall -Wextra -Werror
 
-SRC = src/SERVER_FILES/main.cpp src/SERVER_FILES/server.cpp src/SERVER_FILES/client.cpp src/parsing/REQUEST/request.cpp
+SRC = src/SERVER_FILES/main.cpp src/SERVER_FILES/server.cpp src/SERVER_FILES/client.cpp src/parsing/REQUEST/request.cpp 
 
 SRC_HEADERS = inc/server.hpp inc/client.hpp inc/request.hpp
 

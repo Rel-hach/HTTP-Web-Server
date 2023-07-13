@@ -1,17 +1,34 @@
 [[server]]
+    port = 8000
+    host =     "79.29.28.10"
+# this is a comment skip it
+    server_name = "webserv.com"
+    root = "    img "
+    autoindex = "ON"
     upload_path =  "www"
+    index = ["index.html", "index.htm", "index.php"]
+    # 10B 10K 10M 10G 
+    client_max_body_size = "2G"
+
 
     [[server.error_page]]
         401 = " /errors/4xx.html"
+        403 = "/errors/4xx.html"
+        501 = "/errors/5xx.html"
+        500 = "/errors/5xx.html"
+        502 = "/errors/5xx.html"
+        503 = "/errors/5xx.html"
+        504 = "/errors/5xx.html"
 
     [[server.location]]
         uri = "%.go$"
-
-    [[server.error_page]]
-        401 = " /errors/4xx.html"
+        allow_methods = ["GET", "POST"]
+        cgi_path = "./www/cgi-bin"
 
     [[server.location]]
         uri = "%.py$"
+        allow_methods = ["GET", "POST"]
+        cgi_path = "www/cgi-bin"
 
     [[server.location]]
         uri = "/"
@@ -39,13 +56,19 @@
         return = "301 /test.html"
 
 [[server]]
-    port = 9090
+    port = 8081
+    root = "srcs"
     host = "127.0.0.1"
+    server_name = "example_1.com"
+
+[[server]]
+    port = 9090
+    host = "192.168.10.11"
     server_name = "example_2.com"
-    root = "INCLUDES"
+    root = "./srcs"
 
     [[server.location]]
-        uri = "/1337"
+        uri = "/l3erbi"
         allow_methods = ["GET"]
         autoindex = "ON"
 
@@ -54,11 +77,11 @@
 
 [[server]]
     port = 9000
-    host =     "127.0.0.1"
+    host =     "10.12.18.19"
     server_name = "wordpress.com"
-    root = "INCLUDES"
+    root = "srcs"
     autoindex = "OFF"
-    upload_path  = "INCLUDES"
+    upload_path  = "img"
 
     [[server.error_page]]
         401 = "/errors/4xx.html"

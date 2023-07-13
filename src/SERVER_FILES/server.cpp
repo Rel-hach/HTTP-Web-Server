@@ -8,10 +8,12 @@ server::server(int port)
     this->client_address_size =  sizeof(this->client_address);
 }
 
+
 server::~server()
 {
 
 }
+
 
 int server::startServer()
 {
@@ -78,4 +80,5 @@ int server::listenSrver()
     }
     return 0;
 }
+
 

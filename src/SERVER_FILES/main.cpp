@@ -2,28 +2,11 @@
 #include "../../inc/request.hpp"
 #include "../../inc/client.hpp"
 
-int main() 
+int main(int argc,char **argv) 
 { 
-    // std::ifstream file("conf/default.toml");
+    (void) argv;
+    (void) argc;
 
-    // if (!file.is_open())
-    // {
-    //     std::cerr << "Failed to open the file." << std::endl;
-    //     return 1;
-    // }
-
-    // std::string line;
-    // std::ostringstream bufferStream;
-    // while (std::getline(file, line))
-    //     bufferStream << line << '\n';
-
-    // std::string buffer = bufferStream.str();
-
-    // std::vector<Server> servers;
-    // splitByServer(buffer, servers);
-    // parseDirectives(servers);
-    
-//vectore for all  file descriptore  file server file server 
     std::vector<pollfd> all_df;
     std::vector<server> all_server;
     std::vector<client> all_client;
@@ -57,7 +40,6 @@ int main()
         if(all_server[i].listenSrver())
             return 1;
     }
-
 
     // pooling and accept connection and parsing requist
     signal(SIGPIPE, SIG_IGN);
@@ -107,7 +89,9 @@ int main()
                                 request req;
                                 req.processing_request(all_client[j],  all_server[all_client[j]._serverIndex]);
                                 if (all_client[j]._response_isReady == true)
+                                {
                                     write(all_df[i].fd,all_client[j]._response.c_str(),all_client[j]._response.length());
+                                }
                                 all_client[j]._response = "";
                                 all_client[j]._response_isReady = false;
                                 close(all_df[i].fd);

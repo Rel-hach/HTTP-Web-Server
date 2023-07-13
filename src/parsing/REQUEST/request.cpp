@@ -3,7 +3,27 @@
 
 
 // -------------------------------------------------------------------------
+    std::string tools::generateHtmlPage() {
+            std::ifstream file("root/index.html");
+            std::string html;
+            std::string line; 
+            if (!file.is_open()) {
+                std::cerr << "Failed to open the file." << std::endl;
+            } 
+            if (file.is_open()) 
+            {
+                while (std::getline(file, line))
+                    html+= line;
+                file.close();
+            }
+            
+            std::string headers = "HTTP/1.1 200 OK\r\n";
+            headers += "Content-Type: text/html\r\n";
+            headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
+            headers += "Connection: Closed\r\n\r\n";
 
+            return headers + html;  
+    }
     request::request ()
     {
         this->_method = "";
@@ -27,6 +47,7 @@
     int   request::processing_request( client& clientt, server& serv )
     {
         (void)serv;
+        // std::cout<<clientt.getreq()<<std::endl;
         std::string request = clientt.getreq();
         // if the request is empty or has spaces at its start, return a bad request.
         if (request.empty() || isspace(request[0]))
@@ -56,10 +77,12 @@
                 clientt._response_isReady = true;   return _status;
             }
             
+        
             
             // here check if the headers are valid.
             if ((_status = checking_headers(_headers)) != GO_NEXT)
             {
+
                 clientt._response = tools::getting_errorPage(_status);
                 clientt._response_isReady = true;   return _status;
             }   
@@ -156,15 +179,16 @@
         std::vector<std::string>::iterator it;
         int   statuuus = GO_NEXT;
         for (it = headers.begin() + 1; it != headers.end(); ++it)
-        {
+        {             
             std::pair<std::string, std::string> couple;
             size_t position = it->find(":");
             if (position != std::string::npos)
             {
                 couple.first = it->substr(0, position);
                 couple.second = it->substr(position + 2);
-                tools::trimming_string(couple.first);
+                // tools::trimming_string(couple.first);
                 tools::trimming_string(couple.second);
+                // std::cout<<couple.first << "--------------------------"<<couple.second<<std::endl;
                 if ((statuuus = checking_headerByHeader(couple.first,couple.second)) != GO_NEXT)
                     return (statuuus);
                 this->_mapOfHeaders.insert(couple);
@@ -172,7 +196,6 @@
             else
                 return (Bad_Request);
         }
-
         if (_hasHostHeader == false)
           return (Bad_Request);
 
@@ -216,11 +239,9 @@
                     _port = atoi(port.c_str());
                 else
                     return (Bad_Request);
-                
+               
                 _hasHostHeader = true;
             }
-            else
-                return (Bad_Request);
         }
 
         // connection type - close or keep-alive
