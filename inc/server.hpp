@@ -16,12 +16,8 @@
 #include <cstring>
 #include <algorithm>
 
-
-
-class server
+class server_data
 {
-
-    
     private:
         int m_socket;
         sockaddr_in server_address;
@@ -29,7 +25,7 @@ class server
         socklen_t client_address_size;
 
     public:
-        server(int port);
+        server_data(int port);
         sockaddr_in  &getClientAdtess() const ;
         socklen_t  &getClientAdtessSize() const ;
         int getSockert() const ;
@@ -39,7 +35,7 @@ class server
         int bindServer();
         int listenSrver();
         int acceptServer();
-        ~server();
+        ~server_data();
 };
 
 #endif
