@@ -1,4 +1,4 @@
-#include "../../../inc/server_data.hpp"
+#include "../../../inc/server.hpp"
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -95,7 +95,7 @@ std::pair<std::string, std::string> fill_pair(std::string &line){
 	return (std::make_pair(key, value));
 }
 
-void fill_server(server_data &server, std::string &line){
+void fill_server(server &server, std::string &line){
 	std::string key;
 	std::string value;
 	char eq;
@@ -181,10 +181,10 @@ void fill_error_page(std::map<int , std::string> &error_page, std::string &line)
 	error_page[key] = value;
 }
 
-std::vector<server_data> parse_server(std::string config_file)
+std::vector<server> parse_server(std::string config_file)
 {
 	std::ifstream file;
-	std::vector<server_data> servers;
+	std::vector<server> servers;
 	std::string line;
 	std::pair<std::string, std::string> key_value;
 	e_key flag = UNKNOWN;
@@ -201,7 +201,7 @@ std::vector<server_data> parse_server(std::string config_file)
 		else if (line == "[[server]]")
 		{
 			std::cout << "\033[4;33mfound server\033[0m" << std::endl;
-			servers.push_back(server_data());
+			servers.push_back(server());
 			flag = SERVER;
 		}
 		else if (line == "[[server.location]]")
@@ -232,10 +232,10 @@ std::vector<server_data> parse_server(std::string config_file)
 	return servers;
 }
 
-/*
+
 int main (int argc, char *argv[])
 {
-	std::vector<server_data> servers;
+	std::vector<server> servers;
 	try
 	{
 		if (argc != 2)
@@ -249,5 +249,5 @@ int main (int argc, char *argv[])
 	std::cout << "====" ;
 	std::cout << "servers[1].upload_path = " << servers[0].upload_path << std::endl;
 	std::cout << "servers[2].upload_path = " << servers[1].upload_path << std::endl;
-	return 0; 
-}*/
+	return 0;
+}

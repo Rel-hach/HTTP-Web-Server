@@ -1,5 +1,5 @@
-#ifndef SERVER_DATA_HPP
-# define SERVER_DATA_HPP
+#ifndef SERVER_HPP
+# define SERVER_HPP
 #include <iostream>
 #include <string>
 #include <vector>
@@ -13,16 +13,16 @@ enum e_key{
 	UNKNOWN
 };
 
-class server_data
+class server
 {
 public:
-	server_data();
-	server_data(server_data&);
-	server_data(const server_data &);
-	server_data&operator=(const server_data&);
+	server();
+	server(server&);
+	server(const server &);
+	server&operator=(const server&);
 	void set_keys();
 	void print();
-	~server_data();
+	~server();
  
 	std::string host;
 	int port;

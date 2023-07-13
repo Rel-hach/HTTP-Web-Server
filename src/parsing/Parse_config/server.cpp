@@ -1,15 +1,15 @@
-#include "../../../inc/server_data.hpp"
+#include "../../../inc/server.hpp"
 
-server_data::server_data()
+server::server()
 {
 }
 
-server_data::server_data(const server_data &server)
+server::server(const server &server)
 {
 	*this = server;
 }
 
-server_data &server_data::operator=(const server_data &server)
+server &server::operator=(const server &server)
 {
 	this->host = server.host;
 	this->port = server.port;
@@ -27,7 +27,7 @@ server_data &server_data::operator=(const server_data &server)
 	return *this;
 }
 
-void server_data::print(){
+void server::print(){
 	std::cout << "host = " << host << std::endl;
 	std::cout << "port = " << port << std::endl;
 	std::cout << "root = " << root << std::endl;
@@ -55,6 +55,6 @@ void server_data::print(){
 	std::cout << "error_page = " << error_page << std::endl;
 }
 
-server_data::~server_data()
+server::~server()
 {
 }
