@@ -1,45 +1,44 @@
 #ifndef SERVER_HPP
-# define SERVER_HPP
+#define SERVER_HPP
+#include "request.hpp"
+#include <sys/socket.h> 
 #include <iostream>
-#include <string>
+#include <fstream>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <vector>
 #include <map>
-#include "location.hpp"
-
-enum e_key{
-	SERVER,
-	LOCATION,
-	ERROR_PAGE,
-	UNKNOWN
-};
+#include <signal.h>
+#include <fcntl.h>
+#include <poll.h>
+#include "client.hpp"
+#include <cstring>
+#include <algorithm>
+#include "server_data.hpp"
 
 class server
 {
-public:
-	server();
-	server(server&);
-	server(const server &);
-	server&operator=(const server&);
-	void set_keys();
-	void print();
-	~server();
- 
-	std::string host;
-	int port;
-	std::vector<std::string> server_names;
-	std::string root;
-	std::string index;
-	std::string autoindex;
-	std::string upload_path;
-	std::string error_page;
-	std::vector<std::string> allow_methods;
-	std::vector<std::string> cgi_extensions;
-	std::string client_max_body_size;
-	std::vector<location> locations;
-	std::map<int, std::string> error_pages;
-	// vector location *location;
-protected:
-private:
+    private:
+        int m_socket;
+        sockaddr_in server_address;
+        sockaddr_in client_address;
+        socklen_t client_address_size;
+//		server_data data;
+		std::vector<server_data> data;
 
+    public:
+        server(int port);
+        sockaddr_in  &getClientAdtess() const ;
+        socklen_t  &getClientAdtessSize() const ;
+        int getSockert() const ;
+        void setSockert( const int socket);
+        int  startServer();
+        void closeServer();
+        int bindServer();
+        int listenSrver();
+        int acceptServer();
+        ~server();
 };
+
 #endif
