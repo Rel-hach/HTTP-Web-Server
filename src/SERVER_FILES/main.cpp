@@ -5,8 +5,22 @@
 
 int main(int argc,char **argv) 
 { 
-    (void) argv;
-    (void) argc;
+    std::vector<server_data> servers;
+	try
+	{
+		if (argc != 2)
+			throw std::invalid_argument("Error: invalid number of arguments");
+		servers = parse_server(argv[1]);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+	// std::cout << "====" ;
+	// std::cout << "servers[1].upload_path = " << servers[0].upload_path << std::endl;
+	// std::cout << "servers[2].upload_path = " << servers[1].upload_path << std::endl;
+
+
 
     std::vector<pollfd> all_df;
     std::vector<server> all_server;
@@ -56,7 +70,7 @@ int main(int argc,char **argv)
             if (all_df[i].revents & POLLIN) {
                 std::vector<int>::iterator it = std::find(fd_server.begin(), fd_server.end(), all_df[i].fd); 
                 if (it != fd_server.end()) {
-                    int client_socket = accept(all_df[i].fd, (sockaddr*) &all_server[std::distance(fd_server.begin(), it)].getClientAdtess(), &all_server[std::distance(fd_server.begin(), it)].getClientAdtessSize());
+                   int client_socket = accept(all_df[i].fd, (sockaddr*) &all_server[std::distance(fd_server.begin(), it)].getClientAdtess(), &all_server[std::distance(fd_server.begin(), it)].getClientAdtessSize()); 
                     if (client_socket == -1)
                     {
                         std::cerr << "Error: client connection failed\n";
@@ -84,8 +98,15 @@ int main(int argc,char **argv)
                             all_client[j].appendreq(buff,content);
                             all_client[j].addTocontentread(content);
 
+
                             if(all_client[j].getcontentlenght() <= all_client[j].getcontentread())
                             {
+                                // std::ofstream file("output.txt");
+                                // if (file.is_open()) {
+                                //     file<<all_client[j].getreq();
+                                // } else {
+                                //     std::cout << "Unable to open the file." << std::endl;
+                                // }
                                 all_client[j]._response_isReady = false;
                                 request req;
                                 req.processing_request(all_client[j],  all_server[all_client[j]._serverIndex]);
@@ -95,6 +116,7 @@ int main(int argc,char **argv)
                                 }
                                 all_client[j]._response = "";
                                 all_client[j]._response_isReady = false;
+
                                 close(all_df[i].fd);
                                 all_df.erase(all_df.begin() + i);
                                 all_client.erase(all_client.begin() + j);
