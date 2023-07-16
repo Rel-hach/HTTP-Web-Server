@@ -16,12 +16,6 @@ int main(int argc,char **argv)
 	{
 		std::cerr << e.what() << '\n';
 	}
-	// std::cout << "====" ;
-	// std::cout << "servers[1].upload_path = " << servers[0].upload_path << std::endl;
-	// std::cout << "servers[2].upload_path = " << servers[1].upload_path << std::endl;
-
-
-
     std::vector<pollfd> all_df;
     std::vector<server> all_server;
     std::vector<client> all_client;
@@ -101,12 +95,12 @@ int main(int argc,char **argv)
 
                             if(all_client[j].getcontentlenght() <= all_client[j].getcontentread())
                             {
-                                // std::ofstream file("output.txt");
-                                // if (file.is_open()) {
-                                //     file<<all_client[j].getreq();
-                                // } else {
-                                //     std::cout << "Unable to open the file." << std::endl;
-                                // }
+                                std::ofstream file("output.txt");
+                                if (file.is_open()) {
+                                    file<<all_client[j].getreq();
+                                } else {
+                                    std::cout << "Unable to open the file." << std::endl;
+                                }
                                 all_client[j]._response_isReady = false;
                                 request req;
                                 req.processing_request(all_client[j],  all_server[all_client[j]._serverIndex]);

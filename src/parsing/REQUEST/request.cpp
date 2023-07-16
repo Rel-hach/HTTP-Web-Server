@@ -19,6 +19,9 @@
             
             std::string headers = "HTTP/1.1 200 OK\r\n";
             headers += "Content-Type: text/html\r\n";
+            // headers += "Set-Cookie: session_id=adhasgdfashgasdjgasvdhf; Expires=Sat, 16 Jul 2023 23:59:59 GMT; Path=/\r\n";
+            headers += "Set-Cookie: sessionID=abc123; Path=/; Secure; HttpOnly\r\n";
+
             headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
             headers += "Connection: Closed\r\n\r\n";
 
