@@ -12,8 +12,8 @@
 //     }
 //     if(pid == 0)
 //     {
-//         char* argv[]={(char*)"php",(char*)"file.php",nullptr};
-//         execve("/usr/bin/php",argv,nullptr);
+//         char* argv[]={(char*)"python3",(char*)"test1.py",nullptr};
+//         execve("/usr/bin/python3",argv,nullptr);
 //         std::cerr<<"execve failed"<<std::endl;
 //         exit(0);
 //     }

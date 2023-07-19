@@ -16,7 +16,6 @@ client::client(int fd)
     this->contentlenght=0;
     this->contentread = 0;
     this->firstbuff = false;
-
 }
 
 int client::getfd() const
@@ -37,17 +36,24 @@ std::string client::getreq() const
 
 void client::appendreq(char const *req, int count)
 {
-    
     if(!this->firstbuff)
     {
         std::string input(req);
         this->firstbuff = true;
-        int firstposition = input.find("Content-Length:");
-        int lastposition = input.find("\n",firstposition);
-        this->contentread = (-1 * lastposition) ;
-        std::string lent = input.substr(firstposition + 15,lastposition - firstposition);
-        if(lent.length())
-            this->contentlenght= std::stoi(lent);
+        int firstposition = input.find("Content-Length:"); 
+        if(firstposition !=  (int)std::string::npos)
+        {
+            int lastposition = input.find("\n",firstposition);
+            this->contentread = (-1 * lastposition) ;
+            std::string lent = input.substr(firstposition + 15,lastposition - firstposition);
+            if(lent.length())
+                this->contentlenght= std::stoi(lent);
+            this->ischunked= false;
+        }
+        else if (input.find("Transfer-Encoding: chunked") !=  std::string::npos)
+        {
+            this->ischunked= true;
+        }
     }
     this->req.append(req,count);
 }
@@ -79,5 +85,9 @@ void client::addTocontentread(long long const contentread)
 long long client::getcontentread() const
 {
     return this->contentread;
+}
+void client::setreq(std::string  const req)
+{
+    this->req = req;
 }
 

@@ -198,6 +198,7 @@ class tools
         }
 
         static std::string generateHtmlPage();
+        
         };
 
 

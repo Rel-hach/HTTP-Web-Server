@@ -2,6 +2,7 @@
 #include "../../inc/server_data.hpp"
 #include "../../inc/request.hpp"
 #include "../../inc/client.hpp"
+#include "../../inc/tools.hpp"
 
 int main(int argc,char **argv) 
 { 
@@ -16,6 +17,12 @@ int main(int argc,char **argv)
 	{
 		std::cerr << e.what() << '\n';
 	}
+    // for (size_t i = 0; i < servers.size(); i++)
+    // {
+    //    servers[i].print();
+    // }
+    
+
     std::vector<pollfd> all_df;
     std::vector<server> all_server;
     std::vector<client> all_client;
@@ -51,6 +58,7 @@ int main(int argc,char **argv)
     }
 
     // pooling and accept connection and parsing requist
+    // POOL
     signal(SIGPIPE, SIG_IGN);
     while (true)
     {
@@ -61,10 +69,10 @@ int main(int argc,char **argv)
         }
         for (size_t i = 0; i < all_df.size(); i++)
         {
-            if (all_df[i].revents & POLLIN) {
+            if (all_df[i].revents & POLLIN ) {
                 std::vector<int>::iterator it = std::find(fd_server.begin(), fd_server.end(), all_df[i].fd); 
                 if (it != fd_server.end()) {
-                   int client_socket = accept(all_df[i].fd, (sockaddr*) &all_server[std::distance(fd_server.begin(), it)].getClientAdtess(), &all_server[std::distance(fd_server.begin(), it)].getClientAdtessSize()); 
+                    int client_socket = accept(all_df[i].fd, (sockaddr*) &all_server[std::distance(fd_server.begin(), it)].getClientAdtess(), &all_server[std::distance(fd_server.begin(), it)].getClientAdtessSize()); 
                     if (client_socket == -1)
                     {
                         std::cerr << "Error: client connection failed\n";
@@ -78,7 +86,7 @@ int main(int argc,char **argv)
                     client newclient = client(fds.fd);
                     newclient._serverIndex = i;
                     all_client.push_back(newclient);
-                     std::cout<< "server ==> "<< all_df[i].fd << "   accept connection cleient ==> " << client_socket<<std::endl;
+                    std::cout<< "server ==> "<< all_df[i].fd << "   accept connection cleient ==> " << client_socket<<std::endl;
                 }
                 else
                 {
@@ -92,8 +100,8 @@ int main(int argc,char **argv)
                             all_client[j].appendreq(buff,content);
                             all_client[j].addTocontentread(content);
 
-
-                            if(all_client[j].getcontentlenght() <= all_client[j].getcontentread())
+                            if((all_client[j].ischunked && all_client[j].getreq().find("\r\n0\r\n\r\n") != std::string::npos)
+                                || (!all_client[j].ischunked && all_client[j].getcontentlenght() <= all_client[j].getcontentread()))
                             {
                                 std::ofstream file("output.txt");
                                 if (file.is_open()) {
@@ -110,10 +118,17 @@ int main(int argc,char **argv)
                                 }
                                 all_client[j]._response = "";
                                 all_client[j]._response_isReady = false;
-
-                                close(all_df[i].fd);
-                                all_df.erase(all_df.begin() + i);
-                                all_client.erase(all_client.begin() + j);
+                                if(all_client[j].getreq().find("keep-alive") ==  std::string::npos)
+                                {
+                                    close(all_df[i].fd);
+                                    all_df.erase(all_df.begin() + i);
+                                    all_client.erase(all_client.begin() + j); 
+                                }
+                                else
+                                {
+                                    all_df[i].revents = POLLOUT;
+                                    all_client[j].setreq("");
+                                }             
                                 break;
                             }
                         }

@@ -315,7 +315,6 @@
         std::vector<std::string> parts;
 
         tools::splitting_string(temp, "\r\n", parts);
-        temp.clear();
         int size = -1;
         for (size_t i = 0; i < parts.size(); i+=2)
         {
@@ -329,3 +328,8 @@
             return (false);
         return (true);
     }
+
+
+/*
+
+*/
