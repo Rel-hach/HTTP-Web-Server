@@ -101,7 +101,7 @@ int main(int argc,char **argv)
                             all_client[j].addTocontentread(content);
 
                             if((all_client[j].ischunked && all_client[j].getreq().find("\r\n0\r\n\r\n") != std::string::npos)
-                                || (!all_client[j].ischunked && all_client[j].getcontentlenght() <= all_client[j].getcontentread()))
+                                || (all_client[j].getreq().length() && !all_client[j].ischunked && all_client[j].getcontentlenght() <= all_client[j].getcontentread()))
                             {
                                 std::ofstream file("output.txt");
                                 if (file.is_open()) {
@@ -116,20 +116,20 @@ int main(int argc,char **argv)
                                 {
                                     write(all_df[i].fd,all_client[j]._response.c_str(),all_client[j]._response.length());
                                 }
-                                all_client[j]._response = "";
-                                all_client[j]._response_isReady = false;
+                                
                                 if(all_client[j].getreq().find("keep-alive") ==  std::string::npos)
                                 {
                                     close(all_df[i].fd);
                                     all_df.erase(all_df.begin() + i);
                                     all_client.erase(all_client.begin() + j); 
+                                     break;
                                 }
                                 else
-                                {
-                                    all_df[i].revents = POLLOUT;
+                                {  
                                     all_client[j].setreq("");
+                                    std::cout<<"ok"<<std::endl;
+                                    break;
                                 }             
-                                break;
                             }
                         }
                     }
