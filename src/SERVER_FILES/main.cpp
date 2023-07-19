@@ -56,9 +56,7 @@ int main(int argc,char **argv)
         if(all_server[i].listenSrver())
             return 1;
     }
-
     // pooling and accept connection and parsing requist
-    // POOL
     signal(SIGPIPE, SIG_IGN);
     while (true)
     {
@@ -121,15 +119,14 @@ int main(int argc,char **argv)
                                 {
                                     close(all_df[i].fd);
                                     all_df.erase(all_df.begin() + i);
-                                    all_client.erase(all_client.begin() + j); 
-                                     break;
+                                    all_client.erase(all_client.begin() + j);         
                                 }
                                 else
                                 {  
                                     all_client[j].setreq("");
-                                    std::cout<<"ok"<<std::endl;
-                                    break;
-                                }             
+                                    all_df[i].revents=POLLOUT;
+                                }
+                                break;      
                             }
                         }
                     }
