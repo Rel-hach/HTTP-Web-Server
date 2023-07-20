@@ -12,7 +12,7 @@ public:
 	location&operator=(location const&);
 	~location();
  
-	std::string uri;
+//	std::string uri;
 	std::vector<std::string> allow_methods;
 	std::string cgi_path;
 	std::string autoindex;

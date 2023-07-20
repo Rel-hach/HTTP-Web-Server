@@ -35,7 +35,8 @@ public:
 	std::vector<std::string> allow_methods;
 	std::vector<std::string> cgi_extensions;
 	std::string client_max_body_size;
-	std::vector<location> locations;
+	std::map<std::string, location> locations;
+//	std::vector<location> locations;
 	std::map<int, std::string> error_pages;
 	// vector location *location;
 protected:

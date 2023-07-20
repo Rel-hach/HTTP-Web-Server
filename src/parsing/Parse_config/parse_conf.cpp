@@ -147,18 +147,21 @@ void fill_location(location &location, std::string &line){
 	trim(value, " \t\"");
 	std::cout << "key = " << key;
 	std::cout << " value = " << value << std::endl;
-	if (key == "uri")
-		location.uri = value;
-	else if (key == "allow_methods")
+//	if (key == "uri")
+//		location.uri = value;
+	if (key == "allow_methods")
 		fill_vector(location.allow_methods, value);
 	else if (key == "cgi_path")
 		location.cgi_path = value;
 	else if (key == "autoindex")
 		location.autoindex = value;
-	else if (key == "returno")
+	else if (key == "return")
 		location.return_code = value;
 	else
+	{
+		std::cout << "key exception = " << key;
 		throw std::invalid_argument("Error: invalid location key");
+	}
 }
 
 void fill_error_page(std::map<int , std::string> &error_page, std::string &line){
@@ -187,7 +190,10 @@ std::vector<server_data> parse_server(std::string config_file)
 	std::vector<server_data> servers;
 	std::string line;
 	std::pair<std::string, std::string> key_value;
+//	std::map<std::string, location>::iterator it;
+	std::string uri;
 	e_key flag = UNKNOWN;
+	int pseudo_flag = 0;
 
 	file.open(config_file.c_str());
 	if (!file.is_open())
@@ -200,6 +206,7 @@ std::vector<server_data> parse_server(std::string config_file)
 			continue;
 		else if (line == "[[server]]")
 		{
+//			it = servers.back().locations.begin();
 			std::cout << "\033[4;33mfound server\033[0m" << std::endl;
 			servers.push_back(server_data());
 			flag = SERVER;
@@ -207,8 +214,8 @@ std::vector<server_data> parse_server(std::string config_file)
 		else if (line == "[[server.location]]")
 		{
 			std::cout << "\033[4;35mfound location\033[0m" << std::endl;
-			servers.back().locations.push_back(location());
 			flag = LOCATION;
+			pseudo_flag = 1;
 		}
 		else if (line == "[[server.error_page]]")
 		{
@@ -222,7 +229,15 @@ std::vector<server_data> parse_server(std::string config_file)
 			if (flag == SERVER)
 				fill_server(servers.back(), line);
 			else if (flag == LOCATION && line != "[[server.location]]")
-				fill_location(servers.back().locations.back(), line);
+			{
+				if (pseudo_flag){
+					uri = fill_pair(line).second;
+					servers.back().locations.insert({uri, location()});
+					pseudo_flag = 0;
+				}
+				else
+					fill_location(servers.back().locations.at(uri), line);
+			}
 			else if (flag == ERROR_PAGE && line != "[[server.error_page]]")
 				fill_error_page(servers.back().error_pages, line);
 		}
@@ -233,7 +248,7 @@ std::vector<server_data> parse_server(std::string config_file)
 }
 
 
-/* int main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
 	std::vector<server_data> servers;
 	try
@@ -250,4 +265,4 @@ std::vector<server_data> parse_server(std::string config_file)
 	std::cout << "servers[1].upload_path = " << servers[0].upload_path << std::endl;
 	std::cout << "servers[2].upload_path = " << servers[1].upload_path << std::endl;
 	return 0;
-} */
+}
