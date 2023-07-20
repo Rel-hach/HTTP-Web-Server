@@ -10,7 +10,7 @@ cgi::~cgi()
 
 cgi::cgi(std::string body, std::string respense, std::string flag){
     this->body=body;
-    this->respense=respense;
+    this->respense=respense; // amine=raqube
     this->flag=flag;
 }
 std::string cgi::getbody() const{
