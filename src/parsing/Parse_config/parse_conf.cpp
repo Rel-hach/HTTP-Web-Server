@@ -7,189 +7,14 @@
 #include <sstream>
 #include <cwctype>
 #include <stdlib.h>
-
-void trim(std::string &line, std::string str)
-{
-	if (line.empty())
-		return;
-	size_t start = line.find_first_not_of(str);
-	size_t end = line.find_last_not_of(str);
-	line = line.substr(start, end - start + 1);
-}
-
-void fill_vector(std::vector<std::string> &vec, std::string &values){
-	std::string value;
-	int i = 0;
-	trim(values, " \t[]");
-	while (values[i])
-	{
-		if (values[i] == ',' || values[i + 1] == '\0')
-		{
-			if (values[i + 1] == '\0')
-				value += values[i];
-			trim(value, " \t\"");
-			vec.push_back(value);
-			value.clear();
-		}
-		else
-			value += values[i];
-		i++;
-	}
-}
-
-int has_bad_char(std::string &key){
-	int i = 0;
-	while (key[i])
-	{
-		if (!iswalnum(key[i]) && key[i] != '_')
-			return (1);
-		i++;
-	}
-	return (0);
-}
-
-int check_if_closed(std::string value){
-	int i = 0;
-	int count_quote = 0;
-	int count_bracket = 0;
-	while (value[i])
-	{
-		if (value[i] == '\"')
-			count_quote++;
-		if (value[i] == '[' || value[i] == ']')
-			count_bracket++;
-		i++;
-	}
-	if ( count_quote == 0 || count_quote % 2 != 0 || count_bracket % 2 != 0)
-		return (0);
-	return (1);
-}
-
-void check_value_key(std::string &value, std::string &key){
-	trim(value, " \t");
-	if (value.empty())
-		throw std::invalid_argument("Error: empty value");
-	if (!check_if_closed(value) && key != "port")
-	{
-		std::cout << value << std::endl;
-		std::cout << key << std::endl;
-		throw std::invalid_argument("Error: invalid value");
-	}
-	
-	if (key.empty())
-		throw std::invalid_argument("Error: empty key");
-	if (has_bad_char(key)) 
-		throw std::invalid_argument("Error: invalid key");
-}
-
-std::pair<std::string, std::string> fill_pair(std::string &line){
-	std::string key;
-	std::string value;
-	char eq;
-	std::stringstream ss(line);
-	ss >> key;
-	ss >> eq;
-	std::getline(ss, value);
-	check_value_key(value, key);
-	trim(value, " \t\"");	
-	return (std::make_pair(key, value));
-}
-
-void fill_server(server_data &server, std::string &line){
-	std::string key;
-	std::string value;
-	char eq;
-	std::stringstream ss(line);
-	ss >> key;
-	ss >> eq;
-	std::getline(ss, value);
-	check_value_key(value, key);
-	trim(value, " \t\"");	
-
-	if (key == "host")
-		server.host = value;
-	else if (key == "port")
-	{
-		if (atoi(value.c_str()) < 0 || atoi(value.c_str()) > 65535 || value.find_first_not_of("0123456789") != std::string::npos)
-			throw std::invalid_argument("Error: invalid port");
-		server.port = atoi(value.c_str());
-	}
-	else if (key == "server_name")
-		fill_vector(server.server_names, value);
-	else if (key == "root")
-		server.root = value;
-	else if (key == "index")
-		server.index = value;
-	else if (key == "autoindex")
-		server.autoindex = value;
-	else if (key == "upload_path")
-		server.upload_path = value;
-	else if (key == "error_page")
-		server.error_page = value;
-	else if (key == "allow_methods")
-		fill_vector(server.allow_methods, value);
-	else if (key == "cgi_extensions")
-		fill_vector(server.cgi_extensions, value);
-	else if (key == "client_max_body_size")
-		server.client_max_body_size = value;
-	else 
-		throw std::invalid_argument("Error: invalid server key");
-}
-
-void fill_location(location &location, std::string &line){
-	std::string key;
-	std::string value;
-	char eq;
-	std::stringstream ss(line);
-	ss >> key;
-	ss >> eq;
-	std::getline(ss, value);
-	trim(value, " \t\"");
-	std::cout << "key = " << key;
-	std::cout << " value = " << value << std::endl;
-//	if (key == "uri")
-//		location.uri = value;
-	if (key == "allow_methods")
-		fill_vector(location.allow_methods, value);
-	else if (key == "cgi_path")
-		location.cgi_path = value;
-	else if (key == "autoindex")
-		location.autoindex = value;
-	else if (key == "return")
-		location.return_code = value;
-	else
-	{
-		std::cout << "key exception = " << key;
-		throw std::invalid_argument("Error: invalid location key");
-	}
-}
-
-void fill_error_page(std::map<int , std::string> &error_page, std::string &line){
-	std::string k;
-	k = line.substr(0, line.find_first_of(" "));
-	int key;
-	std::string value;
-	char eq;
-	std::stringstream ss(line);
-	ss >> key;
-	ss >> eq;
-	std::getline(ss, value);
-	trim(value, " \t\"");
-	std::cout << "key = " << key;
-	std::cout << " value = " << value << std::endl;
-	if (key < 400 || key > 599 || k.find_first_not_of("0123456789") != std::string::npos || k.empty())
-		throw std::invalid_argument("Error: invalid error_page key");
-	else if (value.empty() || value[0] != '/' || value.substr(value.find_last_of(".")) != ".html")
-		throw std::invalid_argument("Error: invalid error_page value");
-	error_page[key] = value;
-}
+#include "../../../inc/tools.hpp"
 
 std::vector<server_data> parse_server(std::string config_file)
 {
 	std::ifstream file;
 	std::vector<server_data> servers;
 	std::string line;
-	std::pair<std::string, std::string> key_value;
+	std::pair<std::string, std::string> uri_p;
 //	std::map<std::string, location>::iterator it;
 	std::string uri;
 	e_key flag = UNKNOWN;
@@ -231,8 +56,10 @@ std::vector<server_data> parse_server(std::string config_file)
 			else if (flag == LOCATION && line != "[[server.location]]")
 			{
 				if (pseudo_flag){
-					uri = fill_pair(line).second;
-					servers.back().locations.insert({uri, location()});
+					uri_p = fill_pair(line);
+					if (uri_p.first != "uri" || uri_p.second.empty())
+						throw std::invalid_argument("Error: invalid location key");
+					servers.back().locations.insert(std::make_pair(uri_p.second, location()));
 					pseudo_flag = 0;
 				}
 				else
@@ -262,7 +89,6 @@ int main (int argc, char *argv[])
 		std::cerr << e.what() << '\n';
 	}
 	std::cout << "====" ;
-	std::cout << "servers[1].upload_path = " << servers[0].upload_path << std::endl;
-	std::cout << "servers[2].upload_path = " << servers[1].upload_path << std::endl;
+	std::cout << "servers[1].upload_path = " << servers[0].client_max_body_size << std::endl;
 	return 0;
 }

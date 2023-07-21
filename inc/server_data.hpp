@@ -27,18 +27,10 @@ public:
 	std::string host;
 	int port;
 	std::vector<std::string> server_names;
-	std::string root;
-	std::string index;
-	std::string autoindex;
-	std::string upload_path;
-	std::string error_page;
-	std::vector<std::string> allow_methods;
-	std::vector<std::string> cgi_extensions;
+	std::string home;
 	std::string client_max_body_size;
 	std::map<std::string, location> locations;
-//	std::vector<location> locations;
 	std::map<int, std::string> error_pages;
-	// vector location *location;
 protected:
 private:
 

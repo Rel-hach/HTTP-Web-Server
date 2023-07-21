@@ -12,11 +12,15 @@ public:
 	location&operator=(location const&);
 	~location();
  
-//	std::string uri;
 	std::vector<std::string> allow_methods;
-	std::string cgi_path;
-	std::string autoindex;
-	std::string return_code;
+	std::vector<std::string> cgi_path;//maybe a vector 
+	std::string autoindex;//should be handled
+	std::string root;//should be handled
+	bool upload;// = false;//should be handled
+	std::vector<std::string> index;
+	std::vector<std::string> cgi_extensions;//should be handled
+	size_t return_code;
+	std::string return_path;
 protected:
 private:
 
