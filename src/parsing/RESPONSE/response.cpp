@@ -100,7 +100,7 @@ void    response::preparing_responseHeaders()
         return ;
     }
 
-    // Content-Length Header
+    // Content-Length HEADER
     _respHeaders += "ContentLength: ";
     _respHeaders += std::to_string(_contentLength);
     _respHeaders += "\r\n";
