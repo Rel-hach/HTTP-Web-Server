@@ -70,11 +70,13 @@ void fill_location(location &location, std::string &line){
 	std::string key;
 	std::string value;
 	char eq;
+	static bool _upload = false;
 	std::stringstream ss(line);
 	ss >> key;
 	ss >> eq;
 	std::getline(ss, value);
 	trim(value, " \t\"");
+	location.upload = _upload;
 	std::cout << "key = " << key;
 	std::cout << " value = " << value << std::endl;
 //	if (key == "uri")
@@ -88,7 +90,10 @@ void fill_location(location &location, std::string &line){
 	else if (key == "root")
 		location.root = value;
 	else if (key == "upload" && value == "ok")
+	{
 		location.upload = true;
+		_upload = true;
+	}
 	else if (key == "index")
 		fill_vector(location.index, value);
 	else if (key == "cgi_extensions")
