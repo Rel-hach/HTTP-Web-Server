@@ -3,27 +3,7 @@
 
 
 // -------------------------------------------------------------------------
-    std::string tools::generateHtmlPage() {
-            std::ifstream file("root/index.html");
-            std::string html;
-            std::string line; 
-            if (!file.is_open()) {
-                std::cerr << "Failed to open the file." << std::endl;
-            } 
-            if (file.is_open()) 
-            {
-                while (std::getline(file, line))
-                    html+= line;
-                file.close();
-            }
-            
-            std::string headers = "HTTP/1.1 200 OK\r\n";
-            headers += "Content-Type: text/html\r\n";
-            headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
-            headers += "Connection: Closed\r\n\r\n";
 
-            return headers + html;  
-    }
     request::request ()
     {
         this->_method = "";
@@ -36,6 +16,7 @@
         this->_cookie = "";
         this->_port = 80;
         this->_status = GO_NEXT;
+        this->_referer = "";
 
         this->_isChunked = false;
         this->_hasContentLenght = false;
@@ -47,25 +28,31 @@
     int   request::processing_request( client& clientt, server& serv )
     {
         (void)serv;
-        // std::cout<<clientt.getreq()<<std::endl;
         std::string request = clientt.getreq();
+
+
         // if the request is empty or has spaces at its start, return a bad request.
         if (request.empty() || isspace(request[0]))
         {
-            clientt._response = tools::getting_errorPage(Bad_Request);
-            clientt._response_isReady = true;   return _status;
+            clientt._isParsed = true;
+            return (Bad_Request);
+            // clientt._response = tools::getting_errorPage(Bad_Request);
+            // clientt._response_isReady = true;   return _status;
         }
 
         std::vector<std::string> tokens;
 
         _headers.clear();
+        _headersBody.clear();
         _body.clear();
 
-        // split the request with "/r/n/r/n" to get headers and body.
-        // if there is a body the split function will return 2 the number of tokens [headers] - [request].
-        if (tools::splitting_string(request, "\r\n\r\n", tokens) == 2)
-          _body.assign(tokens[1], tokens[1].length());
-
+        int i = 0;
+        if ((i = tools::splitting_string(request, "\r\n\r\n", tokens)) == 3)
+        {
+            _headersBody.assign(tokens[1]);
+            _body.assign(tokens[i - 1]);
+        }
+        
         // split the headers with "\r\n" to get a vector of string headers.
         // in HTTP/1.1 the minimum number of headers is 2 [start_line] [host]
         if (tools::splitting_string(tokens[0], "\r\n", _headers) > 1)
@@ -73,16 +60,17 @@
             // here check if the start line is valid.
             if ((_status = checking_startLine(_headers[0])) != GO_NEXT)
             {
-                clientt._response = tools::getting_errorPage(_status);
-                clientt._response_isReady = true;   return _status;
+                clientt._isParsed = true;
+                return (_status);
+                // clientt._response = tools::getting_errorPage(_status);
+                // clientt._response_isReady = true;   return _status;
             }
-            
-        
             
             // here check if the headers are valid.
             if ((_status = checking_headers(_headers)) != GO_NEXT)
             {
-
+                clientt._isParsed = true;
+                return (_status);
                 clientt._response = tools::getting_errorPage(_status);
                 clientt._response_isReady = true;   return _status;
             }   
@@ -93,32 +81,14 @@
                 clientt._response_isReady = true;   return _status;
         }
 
-        // if (_method == POST)
-        // {
-        //     // if (_contentLength > serv.clienMaxBody)
-        //     //     return (Reqeust_Entity_Too_Large);
-        //     if ((_body.length() != _contentLength )|| _body.empty())
-        //         return (Bad_Request);
-            
-        //     f_data file;
-
-        //     if (_isMultipart)
-        //     {
-        //         if (_body.find(_boundry) == std::string::npos)
-        //             return (Bad_Request);
-        //         tools::splitting_string(_body, _boundry, file.contents);
-        //         // creating_contentsFiles ( file.contents );
-        //     }
-        //     else if (_isCgi)
-        //     {
-        //         // handle_cgi(_body);
-        //     }
-        // }
-        if (_method == GET)
+        if (_method == POST)
         {
-            clientt._response = tools::generateHtmlPage();
-            clientt._response_isReady = true;   return (GO_NEXT);
+            // if (_contentLength > serv.clienMaxBody)
+            //     return (Reqeust_Entity_Too_Large);
+            if ((_body.length() != _contentLength ) || _body.empty())
+                return (Bad_Request);
         }
+
 
         return (GO_NEXT);
     }
@@ -149,7 +119,6 @@
         if (_method != "GET" && _method != "DELETE" && _method != "POST")
             return (Bad_Request);
 
-        // check if the url has a slash at the beginning. and see if there is a '..'
         
         // the size of the request shouldn't be more than 2048 chars long. 
         if (_path.size() > 2048)
@@ -165,6 +134,12 @@
 
         if (_path[0] != '/')
             return (Bad_Request);
+        
+        if (_path.find("..") != std::string::npos)
+            return (Bad_Request);
+        
+        //
+
         // compare the version of HTTP ! it should be HTTP/1.1
         if (_version.compare(SUPPORTED_HTTP_VER) != 0)
             return (HTTP_Version_Not_Supported);
@@ -179,23 +154,24 @@
         std::vector<std::string>::iterator it;
         int   statuuus = GO_NEXT;
         for (it = headers.begin() + 1; it != headers.end(); ++it)
-        {             
+        {
             std::pair<std::string, std::string> couple;
             size_t position = it->find(":");
             if (position != std::string::npos)
             {
                 couple.first = it->substr(0, position);
                 couple.second = it->substr(position + 2);
-                // tools::trimming_string(couple.first);
                 tools::trimming_string(couple.second);
-                // std::cout<<couple.first << "--------------------------"<<couple.second<<std::endl;
                 if ((statuuus = checking_headerByHeader(couple.first,couple.second)) != GO_NEXT)
+                {
                     return (statuuus);
+                }
                 this->_mapOfHeaders.insert(couple);
             }
             else
                 return (Bad_Request);
         }
+
         if (_hasHostHeader == false)
           return (Bad_Request);
 
@@ -239,7 +215,7 @@
                     _port = atoi(port.c_str());
                 else
                     return (Bad_Request);
-               
+                
                 _hasHostHeader = true;
             }
         }
@@ -273,31 +249,39 @@
         if (key == "Cookie")
             _cookie = value;
 
+        if (key == "Referer")
+        {
+            value = value.substr(value.find_first_of("0123456789"));
+            if (!value.empty() && value.find('/') != std::string::npos)
+            {
+                value = value.substr(value.find('/'));
+                _referer.assign(value);
+            }
+        }
+     
+
         // content type => multipart/form-data or application/x-www-form-urlencoded else not supported.
         if (key == "Content-Type")
         {
             int multilpart = value.find("multipart/form-data");
-            int app = value.find("application/x-www-form-urlencoded");
-
-            if (multilpart == -1 && app == -1)
+           
+            if (multilpart == -1)
+            {
                 _contentType = value;
+                return (GO_NEXT);
+            }
             
-            if (_isMultipart || _isCgi)
-                return (Bad_Request);
-
             int position = value.find(';');
 
             if (position != -1)
             {
-                _contentType = value.substr(0, position);
-                if ((position = value.find("boundry=")) != -1)
-                    _boundry = value.substr(position + 9);
-
+                _contentType = value.substr(multilpart, position);
+                int boundpos;
+                if ((boundpos = value.find("boundary="), position) != -1)
+                    _boundry = value.substr(boundpos + 9);
+                
                 if (_boundry == "" && _contentType == "multipart/form-data")
                     return (Bad_Request);
-
-                else if (_contentType == "application/x-www-form-urlencoded")
-                    _isCgi = true;
                 else
                     _isMultipart = true;
             }
@@ -308,11 +292,9 @@
     bool request::handling_chunked()
     {
         std::string temp(_body);
-        _body.clear();
         std::vector<std::string> parts;
 
         tools::splitting_string(temp, "\r\n", parts);
-        temp.clear();
         int size = -1;
         for (size_t i = 0; i < parts.size(); i+=2)
         {
@@ -325,4 +307,19 @@
         if (size != 0)
             return (false);
         return (true);
+    }
+
+
+    std::string    request::getErrorPage()
+    {
+        std::string errorPage;
+        if (_errorPages.find(_status) != _errorPages.end())
+            errorPage = readPage(errorPage);
+        else
+        {
+            errorPage = tools::getting_errorPage(_status);
+        }
+
+        _contentLength = errorPage.size();
+        return (errorPage);
     }

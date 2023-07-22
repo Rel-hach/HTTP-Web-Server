@@ -6,7 +6,7 @@
 /*   By: rel-hach <rel-hach@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 17:10:47 by rel-hach          #+#    #+#             */
-/*   Updated: 2023/05/30 00:01:45 by rel-hach         ###   ########.fr       */
+/*   Updated: 2023/07/21 21:47:57 by rel-hach         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ typedef struct  data
 
 
 class server;
-
+class response;
 class request
 {
   public:
@@ -75,6 +75,8 @@ class request
     std::string _host;
     std::string _hostname;
     std::string _cookie;
+    std::string _referer;
+    std::string _image;
     int         _port;
     int         _status;
 
@@ -83,6 +85,8 @@ class request
     size_t      _contentLength;
     std::string _contentType;
     std::string _boundry; // multipart/form-data
+    std::string _response;
+    std::string _headersBody;
 
     // ACCEPT : type client are waiting for.
     std::string _accept;
@@ -130,6 +134,7 @@ class request
       bool  handling_chunked();
       int   checking_headers( std::vector<std::string> headers );
       int   checking_headerByHeader(std::string& key, std::string& value);
+      std::string   getErrorPage();
       // void  checking_connectionType( std::string& connectionType );
 
 

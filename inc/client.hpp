@@ -16,6 +16,7 @@ class client
         std::string _response;
         bool        _response_isReady;
         int         _serverIndex;
+        bool        _isParsed;
     private:
         std::string req;
         int fd;
