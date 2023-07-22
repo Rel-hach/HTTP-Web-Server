@@ -31,7 +31,7 @@
 #define Bad_Request 400
 #define Unauthorized 401
 #define Payment_Required_Not_used_really 402
-#define Forbidden_Server_refuses_to_give_you_a_file_authentication_won_t_help 403
+#define Forbidden 403
 #define Not_Found 404
 #define Method_Not_Allowed 405
 #define Not_Acceptable 406
