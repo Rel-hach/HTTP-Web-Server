@@ -60,7 +60,7 @@ int main(int argc,char **argv)
     signal(SIGPIPE, SIG_IGN);
     while (true)
     {
-        int rev =  poll(&all_df[0], all_df.size(), -1);
+        int rev =  poll(&all_df[0], all_df.size(), 1);
         if (rev == -1) {
             std::cerr << "Error: Polling failed\n";
             return 1;
@@ -101,37 +101,67 @@ int main(int argc,char **argv)
                             if((all_client[j].ischunked && all_client[j].getreq().find("\r\n0\r\n\r\n") != std::string::npos)
                                 || (all_client[j].getreq().length() && !all_client[j].ischunked && all_client[j].getcontentlenght() <= all_client[j].getcontentread()))
                             {
-                                std::ofstream file("output.txt");
-                                if (file.is_open()) {
-                                    file<<all_client[j].getreq();
-                                } else {
-                                    std::cout << "Unable to open the file." << std::endl;
-                                }
-                                all_client[j]._response_isReady = false;
-                                request req;
-                                req.processing_request(all_client[j],  all_server[all_client[j]._serverIndex]);
-                                if (all_client[j]._response_isReady == true)
-                                {
-                                    write(all_df[i].fd,all_client[j]._response.c_str(),all_client[j]._response.length());
-                                }
+                                all_df[i].events = POLLOUT;
                                 
-                                if(all_client[j].getreq().find("keep-alive") ==  std::string::npos)
-                                {
-                                    close(all_df[i].fd);
-                                    all_df.erase(all_df.begin() + i);
-                                    all_client.erase(all_client.begin() + j);         
-                                }
-                                else
-                                {  
-                                    all_client[j].setreq("");
-                                    all_df[i].revents=POLLOUT;
-                                }
-                                break;      
                             }
                         }
                     }
                 }
             }
+            else if(all_df[i].revents & POLLOUT)
+            {
+                for (size_t j = 0; j < all_client.size(); j++)
+                {
+                    if(all_client[j].getfd() == all_df[i].fd)
+                    {
+                        // std::ofstream file("output.txt");
+                        // if (file.is_open()) {
+                        //     file<<all_client[j].getreq();
+                        // } else {
+                        //     std::cout << "Unable to open the file." << std::endl;
+                        // }
+                            std::ifstream file("root/index.html");
+                            std::string html;
+                            std::string line; 
+                            if (!file.is_open()) {
+                                std::cerr << "Failed to open the file." << std::endl;
+                            } 
+                            if (file.is_open()) 
+                            {
+                                while (std::getline(file, line))
+                                    html+= line;
+                                file.close();
+                            }
+                            
+                            std::string headers = "HTTP/1.1 200 OK\r\n";
+                            headers += "Content-Type: text/html\r\n";
+                            headers += "Set-Cookie: Darkmode=true\r\n";
+                            headers += "Set-Cookie: sessionID=abc123; Path=/; Secure; HttpOnly\r\n";
+
+                            headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
+                            headers += "Connection: Closed\r\n\r\n";
+
+                            headers +=  headers + html;  
+                        write(all_df[i].fd,headers.c_str(),headers.length());
+                        close(all_df[i].fd);
+                        all_df.erase(all_df.begin() + i);
+                        all_client.erase(all_client.begin() + j);         
+                        break;      
+                    }
+                }        
+            }
+            else if (all_df[i].revents  & POLLHUP) {
+                close(all_df[i].fd);
+                all_df.erase(all_df.begin() + i);
+            } else if (all_df[i].revents  & POLLERR) {
+                std::cerr << "Error on socket " << all_df[i].fd << std::endl;
+                close(all_df[i].fd);
+                all_df.erase(all_df.begin() + i);
+            } else if (all_df[i].revents  & POLLNVAL) {
+                close(all_df[i].fd);
+                all_df.erase(all_df.begin() + i);
+            }
+
         }
     }
     return 0;
