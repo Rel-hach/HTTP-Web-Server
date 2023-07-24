@@ -119,7 +119,7 @@
             _path   = _path.substr(0, position);
         }
 
-        if (_path[0] != '/')
+        if (_path.empty() || _path[0] != '/')
             return (Bad_Request);
         
         if (_path.find("..") != std::string::npos)
@@ -161,13 +161,11 @@
 
         if (_method == "POST")
         {
-            std::cout << "S\n\n";
           if (_isChunked == false && _hasContentLenght == false)
               return (Lengh_Required);
 
           if (_isChunked != false && _hasContentLenght != false)
               return (Bad_Request);
-            std::cout << "E\n\n";
         }
         return (GO_NEXT);
     }
