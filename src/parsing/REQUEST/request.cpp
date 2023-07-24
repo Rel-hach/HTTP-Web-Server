@@ -47,7 +47,10 @@
         int i = 0;
         if ((i = tools::splitting_string(request, "\r\n\r\n", tokens)) > 1)
         {
+            std::cout << "_request LENGHT : " << request.length() << std::endl;
             _body = request.substr(request.find("\r\n\r\n") + 4);
+            std::cout << "_body LENGHT : " << _body.length() << std::endl;
+
         }
         
         if (tools::splitting_string(tokens[0], "\r\n", _headers) > 1)
@@ -75,7 +78,6 @@
             // if ((_body.length() != _contentLength ) || _body.empty())
             //     return (clientt._requestIsParsed = true, Bad_Request);
         }
-        std::cout << "RESPONSE NOW \n\n";
         std::cout << _status << std::endl;
         return (clientt._requestIsParsed = true, GO_NEXT);
     }
@@ -227,6 +229,7 @@
             if (_hasContentLenght || (value.empty() || value.find_first_not_of("0123456789") != std::string::npos))
                 return (Bad_Request);
             _contentLength = std::stoul(value);
+            std::cout << "CONTENT-LENGTH : " << _contentLength << std::endl;
             _hasContentLenght = true;
         }
 
@@ -273,7 +276,7 @@
     }
 
 
-    bool    check_hexadecimalLine(std::string& line)
+    bool    request::check_hexadecimalLine(std::string& line)
     {
         int found = line.find_first_not_of("0123456789ABCDEFabcdef");
         if (found != -1)
@@ -281,11 +284,13 @@
         return (true);
     }
 
-    bool    check_chunkEnd(std::string end)
+
+    bool    request::chunk_ending_correctly( std::string end )
     {
-        if (end.compare("\r\n") == 0)
+        if (end == "\r\n")
             return (true);
-        return false;
+        else
+            return (false);
     }
 
     bool    request::handling_chunked()
@@ -296,6 +301,7 @@
         size_t start = 0;
         int n = _body.find("\r\n", start);
         std::string temp;
+        std::string end;
         while (n != -1)
         {
             std::string hexa = _body.substr(start, n - start);
@@ -305,13 +311,12 @@
             if (size == 0)
                 break ;
             temp = _body.substr(n + 2, size);
-            if (temp.size() == size)
+            end = _body.substr(n + 2 + size, 2);
+            if (temp.size() == size && chunk_ending_correctly(end) == true)
             {
                 _unchunked_body += temp;
                 start += hexa.size() + temp.size() + 4;
             }
-            else if (temp.size() < size)
-                start += 2;
             else
                 return (false);
             n = _body.find("\r\n", start);
