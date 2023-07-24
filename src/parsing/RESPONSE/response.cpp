@@ -327,14 +327,12 @@ int     response::stroring_requestBody()
         return (storing_multipleParts());
     else
     {
-        std::cout << "file_name **** : " << _fileName << std::endl;
         std::string fileName = _fileName;
         if (fileName.empty())
             return (Bad_Request);
         std::ofstream ofs( _root + "/" + fileName );
         if (ofs.is_open())
         {
-            std::cout << "COOL\n";
             ofs << _body;
             ofs.close();
         }
@@ -400,7 +398,6 @@ int     response::storing_multipleParts()
 
 bool    response::permissionForReading()
 {
-    std::cout << _realPath << std::endl;
     if (access(_realPath.c_str(), F_OK) == -1)
     {
         _status = Not_Found;
@@ -487,6 +484,9 @@ std::string  response::readPage(std::string page)
 
 void    response::get_pathAndLocationInfos (std::map<std::string, Location> locations, std::string uri)
 {
+    if (uri.empty())
+        return ;
+
     if (!_referer.empty() && _referer.find('.') == std::string::npos)
     {
         if (uri.find(_referer) == std::string::npos)
