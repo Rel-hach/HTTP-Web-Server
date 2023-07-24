@@ -35,4 +35,5 @@ protected:
 private:
 
 };
+std::vector<server_data> parse_server(std::string config_file);
 #endif

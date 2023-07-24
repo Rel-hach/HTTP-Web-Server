@@ -3,7 +3,7 @@
     host =  "79.29.28.10"
 # this is a comment skip it
     server_name = "webserv.com"
-    # 10B 10K 10M 10G 
+    root = "    img "
     client_max_body_size = "2G"
 
 
@@ -39,23 +39,16 @@
 
     [[server.location]]
         uri = "/upload"
-        allow_methods = ["GET", "POST", "DELETE"]
-        autoindex = "ON"
 
     [[server.location]]
         uri = "/assets"
-        allow_methods = ["GET"]
-        autoindex = "ON"
+
 
     [[server.location]]
         uri = "/yo"
-        allow_methods = ["GET", "POST", "DELETE"]
-        autoindex = "ON"
-        return = "301 https://www.youtube.com/watch?v=eLaIVnI-N6Q"
 
     [[server.location]]
         uri = "/redirection"
-        return = "301 /test.html"
 
 [[server]]
     port = 8081
@@ -71,8 +64,9 @@
 
     [[server.location]]
         uri = "/l3erbi"
-        allow_methods = ["GET"]
-        autoindex = "ON"
+	    index = ["index.html", "index.htm", "index.php"]
+    	root = "    img "
+    	autoindex = "ON"
 
     [[server.error_page]]
         401 = "/errors/4xx.html"
