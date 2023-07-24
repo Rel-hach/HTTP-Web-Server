@@ -4,6 +4,7 @@
 #include <vector>
 #include "request.hpp"
 
+#define BUILD_ANSWER    10000
 
 class Location
 {
@@ -23,7 +24,7 @@ class Location
         std::string                 locationName;
         std::string                 homePage;
         std::vector<std::string>    index;
-        std::vector<std::string>    methods;             
+        std::vector<std::string>    methods;
         std::string                 root;
         std::string                 redirectionPath;
         bool                        isUpload;
@@ -41,6 +42,7 @@ class response
         std::vector<std::string>    _index;
         std::vector<std::string>    _methods;             
         std::string                 _root;
+        std::string                 _unchunked_body;             
         std::string                 _autoIndex;
         bool                        _redirection;
         size_t                      _clientMaxBodySize;
@@ -91,7 +93,7 @@ class response
         void    determine_contentType();
         void    preparing_responseHeaders();
         void    getting_responsCode();
-        std::string    generating_response(request& request);
+        std::string    generating_response(request& request, int returnStatus);
         void    get_pathAndLocationInfos(std::map<std::string, Location> locations, std::string uri);
         std::string getErrorPage();
         std::string readPage(std::string page);

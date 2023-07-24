@@ -74,7 +74,6 @@ std::vector<server_data> parse_server(std::string config_file)
 	return servers;
 }
 
-
 int main (int argc, char *argv[])
 {
 	std::vector<server_data> servers;

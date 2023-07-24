@@ -6,7 +6,7 @@
 /*   By: rel-hach <rel-hach@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 17:10:47 by rel-hach          #+#    #+#             */
-/*   Updated: 2023/07/21 21:47:57 by rel-hach         ###   ########.fr       */
+/*   Updated: 2023/07/24 15:52:48 by rel-hach         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
+
 
 
 #define CRLFX2              "\r\n\r\n"
@@ -60,6 +61,7 @@ class request
     // request
     std::string _request;
     std::string _body;
+    std::string _unchunked_body;
     std::vector<std::string> _headers;
     std::map<std::string, std::string>    _mapOfHeaders; 
   
@@ -128,6 +130,8 @@ class request
 
       int   processing_request( client& client, server& serv );
       int   checking_startLine( std::string sline );
+      bool    dechunkBody();
+
       // int   checking_method(std::string& sline);
       // int   checking_version(std::vector<std::string> headers );
       // int   checking_uri();

@@ -14,15 +14,18 @@ class client
 {
     public:
         std::string _response;
+        std::string _unchunked_body;
         bool        _response_isReady;
         int         _serverIndex;
-        bool        _isParsed;
+        bool        _requestIsParsed;
+        bool ischunked;
     private:
         std::string req;
         int fd;
         long long contentlenght;
         long long contentread;
         bool firstbuff;
+        
     public:
         client();
         client(int fd);
@@ -36,6 +39,7 @@ class client
         bool getfirstbuff() const;
         void addTocontentread(long long const contentread);
         long long getcontentread() const;
+        void setreq(std::string  const req);
         ~client();
 };
 
