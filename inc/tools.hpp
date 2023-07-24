@@ -22,7 +22,7 @@ class tools
             str.erase(str.find_last_not_of(" /t") + 1);
         }
 
-        static int splitting_string(std::string& str, const std::string& delim, std::vector<std::string>& tokens) 
+        static int splitting_string(std::string str, const std::string& delim, std::vector<std::string>& tokens) 
         {
             size_t pos = 0;
             while ((pos = str.find(delim)) != std::string::npos)
