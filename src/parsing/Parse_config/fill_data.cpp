@@ -63,7 +63,7 @@ void fill_server(server_data &server, std::string &line){
 	else if (key == "client_max_body_size")
 		server.client_max_body_size = value;
 	else 
-		throw std::invalid_argument("Error: invalid server key");
+		throw std::invalid_argument("Error: invalid server key at `" + line + "`");
 }
 
 void fill_location(location &location, std::string &line){
@@ -79,8 +79,6 @@ void fill_location(location &location, std::string &line){
 	location.upload = _upload;
 	std::cout << "key = " << key;
 	std::cout << " value = " << value << std::endl;
-//	if (key == "uri")
-//		location.uri = value;
 	if (key == "allow_methods")
 		fill_vector(location.allow_methods, value);
 	else if (key == "cgi_path")
@@ -100,9 +98,10 @@ void fill_location(location &location, std::string &line){
 		fill_vector(location.cgi_extensions, value);
 	else if (key == "return")
 	{
-		std::pair<std::string, std::string> p = fill_pair(value);
-		location.return_code = atoi(p.first.c_str());
-		location.return_path = p.second;
+		std::vector<std::string> tokens;
+		tools::splitting_string(value, " ", tokens);
+		location.return_code = atoi(tokens[0].c_str());
+		location.return_path = tokens[1];
 	}
 	else
 	{
