@@ -9,13 +9,14 @@ client::~client()
 
 }
 
-client::client(int fd)
+client::client(int fd,int index_server)
 {
     this->req = "";
     this->fd =fd;
     this->contentlenght=0;
     this->contentread = 0;
     this->firstbuff = false;
+    this.index_server = index_server;
 }
 
 int client::getfd() const

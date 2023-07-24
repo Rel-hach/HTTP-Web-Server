@@ -1,10 +1,11 @@
 #include "../../inc/server.hpp"
+#include "../../inc/server_data.hpp"
 
-server::server(int port)
+server::server(server_data &data)
 {
     this->server_address.sin_family = AF_INET;
     this->server_address.sin_addr.s_addr = INADDR_ANY;
-    this->server_address.sin_port = htons(port);
+    this->server_address.sin_port = htons(data.port);
     this->client_address_size =  sizeof(this->client_address);
 }
 
@@ -15,13 +16,14 @@ server::~server()
 }
 
 
-int server::startServer()
+int server::startServer(server_data &data)
 {
     this->m_socket = socket(AF_INET, SOCK_STREAM, 0);
     if ( this->m_socket == -1) {
         std::cerr << "Error creating socket" << std::endl;
         return 1;
     }
+    data.fd = this->m_socket ;
     fcntl(this->m_socket, F_SETFL, O_NONBLOCK);
     return 0;
 }

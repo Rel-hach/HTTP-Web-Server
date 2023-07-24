@@ -26,6 +26,7 @@ public:
  
 	std::string host;
 	int port;
+	int fd_server;
 	std::vector<std::string> server_names;
 	std::string root;
 	std::string index;
@@ -37,10 +38,6 @@ public:
 	std::string client_max_body_size;
 	std::vector<location> locations;
 	std::map<int, std::string> error_pages;
-	// vector location *location;
-protected:
-private:
-
 };
 std::vector<server_data> parse_server(std::string config_file);
 #endif

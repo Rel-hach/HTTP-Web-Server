@@ -17,16 +17,18 @@ class client
         bool        _response_isReady;
         int         _serverIndex;
         bool ischunked;
+        int fd_server;
     private:
         std::string req;
         int fd;
+        int index_server
         long long contentlenght;
         long long contentread;
         bool firstbuff;
         
     public:
         client();
-        client(int fd);
+        client(int fd, int index);
         int getfd() const ;
         void setfd(int const fd);
         std::string getreq() const;

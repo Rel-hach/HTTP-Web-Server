@@ -24,16 +24,14 @@ class server
         sockaddr_in server_address;
         sockaddr_in client_address;
         socklen_t client_address_size;
-//		server_data data;
-		std::vector<server_data> data;
 
     public:
-        server(int port);
+        server(server_data &data);
         sockaddr_in  &getClientAdtess() const ;
         socklen_t  &getClientAdtessSize() const ;
         int getSockert() const ;
         void setSockert( const int socket);
-        int  startServer();
+        int  startServer(server_data &data);
         void closeServer();
         int bindServer();
         int listenSrver();
