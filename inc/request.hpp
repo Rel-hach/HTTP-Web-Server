@@ -6,7 +6,7 @@
 /*   By: rel-hach <rel-hach@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 17:10:47 by rel-hach          #+#    #+#             */
-/*   Updated: 2023/07/24 15:52:48 by rel-hach         ###   ########.fr       */
+/*   Updated: 2023/07/25 00:15:15 by rel-hach         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,16 +128,19 @@ class request
 
       // processing :
 
-      int   processing_request( client& client, server& serv );
-      int   checking_startLine( std::string sline );
+      int     processing_request( client& client, server& serv );
+      int     checking_startLine( std::string sline );
       bool    dechunkBody();
 
       // int   checking_method(std::string& sline);
       // int   checking_version(std::vector<std::string> headers );
       // int   checking_uri();
-      bool  handling_chunked();
-      int   checking_headers( std::vector<std::string> headers );
-      int   checking_headerByHeader(std::string& key, std::string& value);
+      bool    handling_chunked();
+      int     checking_headers( std::vector<std::string> headers );
+      int     checking_headerByHeader(std::string& key, std::string& value);
+      bool    chunk_ending_correctly( std::string end );
+      bool    check_hexadecimalLine(std::string& line);
+
       std::string   getErrorPage();
       // void  checking_connectionType( std::string& connectionType );
 
