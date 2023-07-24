@@ -63,7 +63,7 @@ std::vector<server_data> parse_server(std::string config_file)
 					pseudo_flag = 0;
 				}
 				else
-					fill_location(servers.back().locations.at(uri), line);
+					fill_location(servers.back().locations.at(uri_p.second), line);
 			}
 			else if (flag == ERROR_PAGE && line != "[[server.error_page]]")
 				fill_error_page(servers.back().error_pages, line);
@@ -74,21 +74,21 @@ std::vector<server_data> parse_server(std::string config_file)
 	return servers;
 }
 
-
-// int main (int argc, char *argv[])
-// {
-// 	std::vector<server_data> servers;
-// 	try
-// 	{
-// 		if (argc != 2)
-// 			throw std::invalid_argument("Error: invalid number of arguments");
-// 		servers = parse_server(argv[1]);
-// 	}
-// 	catch(const std::exception& e)
-// 	{
-// 		std::cerr << e.what() << '\n';
-// 	}
-// 	std::cout << "====" ;
-// 	std::cout << "servers[1].upload_path = " << servers[0].client_max_body_size << std::endl;
-// 	return 0;
-// }
+int main (int argc, char *argv[])
+{
+	std::vector<server_data> servers;
+	try
+	{
+		if (argc != 2)
+			throw std::invalid_argument("Error: invalid number of arguments");
+		servers = parse_server(argv[1]);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+		return 1;
+	}
+	std::cout << "====" ;
+	std::cout << "servers[1].upload_path = " << servers[0].client_max_body_size << std::endl;
+	return 0;
+}
