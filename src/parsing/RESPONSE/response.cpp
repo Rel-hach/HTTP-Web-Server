@@ -96,7 +96,6 @@ void    response::preparing_responseHeaders()
     {
         _respHeaders += "Location: ";
         _respHeaders += _redirectionPath;
-        _respHeaders += "\r\n";
         return ;
     }
 
@@ -108,8 +107,6 @@ void    response::preparing_responseHeaders()
     // Content-Type Header
     _respHeaders += "Content-Type: ";
     _respHeaders += _contentType;
-    _respHeaders += "\r\n";
-
 }
 
 
@@ -148,18 +145,21 @@ void    response::store_requestInfos(request& req)
     _path = req._path;
     _contentLength = req._contentLength;
     _referer = req._referer;
-    _body = req._body;
+
     _bheaders = req._headersBody;
     _ischunked = req._isChunked;
     _isMultipart = req._isMultipart;
     if (_isMultipart)
         _boundry = req._boundry;
     _redirection = req._isRedirect;
-
+    if (_ischunked)
+        _body = req._unchunked_body;
+    else
+        _body = req._body;
 }
 
 
-std::string    response::generating_response(request& request)
+std::string    response::generating_response(request& request, int returnStatus)
 {
     int status;
     std::vector<std::string> Index;
@@ -170,7 +170,7 @@ std::string    response::generating_response(request& request)
     Methods.push_back("POST");
 
     Location    location1("/Test_one",Index, "/www/html/index.html", "www/html/GET_PAGE", Methods, true);
-    Location    location2("/Test_two",Index, "/www/html/index.html", "www/html/nop", Methods, false);
+    Location    location2("/Test_two",Index, "/www/html/index.html", "www/html/GET_PAGE", Methods, false);
     Location    location3("/Test_tree",Index, "/www/html/index.html", "www/html/GET_PAGE", Methods, false);
 
     std::map<std::string, Location> locations;
@@ -186,8 +186,9 @@ std::string    response::generating_response(request& request)
 
     get_pathAndLocationInfos (locations, _path);
 
-    if (request._status != GO_NEXT)
-        _status = request._status;
+
+    if (returnStatus != GO_NEXT)
+        _status = returnStatus;
 
     else if (_realPath.empty())
         _status = Not_Found;
@@ -199,7 +200,9 @@ std::string    response::generating_response(request& request)
         _status = 301;
 
     else if ((status = executing_method()) != GO_NEXT)
+    {
         _status = status;
+    }
 
 
 
@@ -220,11 +223,7 @@ std::string    response::generating_response(request& request)
         preparing_responseHeaders();
     }
 
-    if (_contentType == "text/html")
-        return (_respHeaders + "\r\n\r\n" + _fileContent);
-    else if (_status == 301)
-        return (_respHeaders);
-    return (_fileContent);
+    return (_respHeaders + "\r\n\r\n" + _fileContent);
 }
 
 
@@ -249,6 +248,11 @@ int    response::executing_method()
                 return (200);
             else
                 return (_status);
+        }
+
+        else if (_method == "POST")
+        {
+            stroring_requestBody();
         }
 
         else if (_method == "DELETE")
@@ -323,12 +327,14 @@ int     response::stroring_requestBody()
         return (storing_multipleParts());
     else
     {
-        std::string fileName = _fileName.substr(1);
+        std::cout << "file_name **** : " << _fileName << std::endl;
+        std::string fileName = _fileName;
         if (fileName.empty())
-            std::cout << "getFileName()";
+            return (Bad_Request);
         std::ofstream ofs( _root + "/" + fileName );
         if (ofs.is_open())
         {
+            std::cout << "COOL\n";
             ofs << _body;
             ofs.close();
         }
@@ -356,33 +362,32 @@ int     response::storing_multipleParts()
     {
         std::string filename = "";
         std::string filecontent = "";
-        start = _bheaders.find("filename=");
-        end = _bheaders.find("\"", start + 10);
+        start = parts[i].find("filename=");
+        end = parts[i].find("\"", start + 10);
 
         if(start != -1 && end != -1)
         {
             start += 10;
-            filename = _bheaders.substr(start, end);
+            filename = parts[i].substr(start, end);
             int found = 0;
             if ((found = filename.find("\"")) != -1)
                 filename.erase(found);
         }
         else
             return (Bad_Request);
-        // int startbody = parts[i].find(CRLFX2, end);
-        // if (startbody != -1)
-        //     filecontent = parts[i].substr(start + 4);
-        // else
-        //     return (Bad_Request);
+        int startbody = parts[i].find(CRLFX2, end);
+        if (startbody != -1)
+            filecontent = parts[i].substr(startbody + 4);
+        else
+            return (Bad_Request);
         
         std::string path = _root + "/" + filename;
-        std::cout << "path : " << path << std::endl;
         std::ofstream ofs (path.c_str());
 
         if (!ofs.is_open())
             return (Internal_Server);
 
-        ofs << _body;
+        ofs << filecontent;
         ofs.close();
     }
     return (201);
@@ -395,6 +400,7 @@ int     response::storing_multipleParts()
 
 bool    response::permissionForReading()
 {
+    std::cout << _realPath << std::endl;
     if (access(_realPath.c_str(), F_OK) == -1)
     {
         _status = Not_Found;
@@ -498,7 +504,7 @@ void    response::get_pathAndLocationInfos (std::map<std::string, Location> loca
         {
             if (uri > it->first && uri[it->first.size()] == '/')
             {
-                _fileName = uri.substr(it->first.size());
+                _fileName = uri.substr(it->first.size() + 1);
                 break ;
             }
             else if (uri == it->first)
@@ -506,8 +512,6 @@ void    response::get_pathAndLocationInfos (std::map<std::string, Location> loca
         }
         temp = temp.substr(0, i);
     }
-
-    std::cout << "_fileName : " << std::endl;
      
     if (it != locations.end())
     {
@@ -532,7 +536,7 @@ void    response::get_pathAndLocationInfos (std::map<std::string, Location> loca
 
     else if (uri == "/" && _method == "GET")
     {
-        _realPath = "www/index.html"; // get the homePage
+        _realPath = "www/index.html";
     }
 }
 
