@@ -9,7 +9,7 @@ int main(int argc,char **argv)
 {
     (void) argc;
     (void)argv;
-    // int size = 0;÷
+    // int size = 0;
     // std::vector<server_data> servers;
 	// try
 	// {
@@ -32,12 +32,12 @@ int main(int argc,char **argv)
     // create number of server
     server Server = server(8000);
     server Server2 = server(8001);
-    server Server3 = server(8002);
-    server Server4 = server(8003);
+    // server Server3 = server(8002);
+    // server Server4 = server(8003);
     all_server.push_back(Server);
     all_server.push_back(Server2);
-    all_server.push_back(Server3);
-    all_server.push_back(Server4);
+    // all_server.push_back(Server3);
+    // all_server.push_back(Server4);
 
 
     //staart server and bind and lesten
@@ -77,6 +77,7 @@ int main(int argc,char **argv)
                         close(all_df[i].fd);
                         return 1;
                     }
+                    fcntl(client_socket, F_SETFL, O_NONBLOCK);
                     struct pollfd fds;
                     fds.fd=  client_socket;
                     fds.events = POLLIN;
@@ -91,6 +92,8 @@ int main(int argc,char **argv)
                     char buff[1024];
                     std::memset(buff, '\0', sizeof(buff));
                     int content = read(all_df[i].fd,buff,1024);
+                    if (content <= 0)
+                        continue;
                     for (size_t j = 0; j < all_client.size(); j++)
                     {
                         if(all_client[j].getfd() == all_df[i].fd)
@@ -144,3 +147,15 @@ int main(int argc,char **argv)
     }
     return 0;
 }
+
+/*
+
+    std::vector<server> servers;
+
+    for (int i = 0; i servers.size(); i++)
+    {
+        
+    }
+
+
+*/
