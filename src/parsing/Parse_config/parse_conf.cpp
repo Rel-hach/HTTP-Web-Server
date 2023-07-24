@@ -75,20 +75,20 @@ std::vector<server_data> parse_server(std::string config_file)
 }
 
 
-int main (int argc, char *argv[])
-{
-	std::vector<server_data> servers;
-	try
-	{
-		if (argc != 2)
-			throw std::invalid_argument("Error: invalid number of arguments");
-		servers = parse_server(argv[1]);
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-	}
-	std::cout << "====" ;
-	std::cout << "servers[1].upload_path = " << servers[0].client_max_body_size << std::endl;
-	return 0;
-}
+// int main (int argc, char *argv[])
+// {
+// 	std::vector<server_data> servers;
+// 	try
+// 	{
+// 		if (argc != 2)
+// 			throw std::invalid_argument("Error: invalid number of arguments");
+// 		servers = parse_server(argv[1]);
+// 	}
+// 	catch(const std::exception& e)
+// 	{
+// 		std::cerr << e.what() << '\n';
+// 	}
+// 	std::cout << "====" ;
+// 	std::cout << "servers[1].upload_path = " << servers[0].client_max_body_size << std::endl;
+// 	return 0;
+// }
