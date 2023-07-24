@@ -28,16 +28,14 @@
     int   request::processing_request( client& clientt, server& serv )
     {
         (void)serv;
+
         std::string request = clientt.getreq();
 
 
         // if the request is empty or has spaces at its start, return a bad request.
         if (request.empty() || isspace(request[0]))
         {
-            clientt._isParsed = true;
-            return (Bad_Request);
-            // clientt._response = tools::getting_errorPage(Bad_Request);
-            // clientt._response_isReady = true;   return _status;
+             return (clientt._requestIsParsed = true, Bad_Request);
         }
 
         std::vector<std::string> tokens;
@@ -47,50 +45,39 @@
         _body.clear();
 
         int i = 0;
-        if ((i = tools::splitting_string(request, "\r\n\r\n", tokens)) == 3)
+        if ((i = tools::splitting_string(request, "\r\n\r\n", tokens)) > 1)
         {
-            _headersBody.assign(tokens[1]);
-            _body.assign(tokens[i - 1]);
+            _body = request.substr(request.find("\r\n\r\n") + 4);
         }
         
-        // split the headers with "\r\n" to get a vector of string headers.
-        // in HTTP/1.1 the minimum number of headers is 2 [start_line] [host]
         if (tools::splitting_string(tokens[0], "\r\n", _headers) > 1)
         {
             // here check if the start line is valid.
             if ((_status = checking_startLine(_headers[0])) != GO_NEXT)
             {
-                clientt._isParsed = true;
-                return (_status);
-                // clientt._response = tools::getting_errorPage(_status);
-                // clientt._response_isReady = true;   return _status;
+                return (clientt._requestIsParsed = true, _status);
             }
             
-            // here check if the headers are valid.
             if ((_status = checking_headers(_headers)) != GO_NEXT)
             {
-                clientt._isParsed = true;
-                return (_status);
-                clientt._response = tools::getting_errorPage(_status);
-                clientt._response_isReady = true;   return _status;
+                return (clientt._requestIsParsed = true, _status);
             }   
         }
         else
         {
-                clientt._response = tools::getting_errorPage(Bad_Request);
-                clientt._response_isReady = true;   return _status;
+            return (clientt._requestIsParsed = true, _status);
         }
 
         if (_method == POST)
         {
             // if (_contentLength > serv.clienMaxBody)
             //     return (Reqeust_Entity_Too_Large);
-            if ((_body.length() != _contentLength ) || _body.empty())
-                return (Bad_Request);
+            // if ((_body.length() != _contentLength ) || _body.empty())
+            //     return (clientt._requestIsParsed = true, Bad_Request);
         }
-
-
-        return (GO_NEXT);
+        std::cout << "RESPONSE NOW \n\n";
+        std::cout << _status << std::endl;
+        return (clientt._requestIsParsed = true, GO_NEXT);
     }
 
 
@@ -137,8 +124,6 @@
         
         if (_path.find("..") != std::string::npos)
             return (Bad_Request);
-        
-        //
 
         // compare the version of HTTP ! it should be HTTP/1.1
         if (_version.compare(SUPPORTED_HTTP_VER) != 0)
@@ -146,7 +131,6 @@
 
         return (GO_NEXT);
     }
-
 
 
     int   request::checking_headers( std::vector<std::string> headers )
@@ -177,11 +161,13 @@
 
         if (_method == "POST")
         {
+            std::cout << "S\n\n";
           if (_isChunked == false && _hasContentLenght == false)
               return (Lengh_Required);
 
           if (_isChunked != false && _hasContentLenght != false)
               return (Bad_Request);
+            std::cout << "E\n\n";
         }
         return (GO_NEXT);
     }
@@ -259,7 +245,6 @@
             }
         }
      
-
         // content type => multipart/form-data or application/x-www-form-urlencoded else not supported.
         if (key == "Content-Type")
         {
@@ -289,37 +274,49 @@
         return (GO_NEXT);
     }
 
-    bool request::handling_chunked()
-    {
-        std::string temp(_body);
-        std::vector<std::string> parts;
 
-        tools::splitting_string(temp, "\r\n", parts);
-        int size = -1;
-        for (size_t i = 0; i < parts.size(); i+=2)
-        {
-            size = tools::Converting_hexaToDecimal(parts[i]);
-            if (static_cast<size_t>(size) == parts[i + 1].size())
-                _body += parts[i + 1];
-            else
-                return (false);
-        }
-        if (size != 0)
-            return (false);
+    bool    check_hexadecimalLine(std::string& line)
+    {
+        int found = line.find_first_not_of("0123456789ABCDEFabcdef");
+        if (found != -1)
+            return false;
         return (true);
     }
 
-
-    std::string    request::getErrorPage()
+    bool    check_chunkEnd(std::string end)
     {
-        std::string errorPage;
-        if (_errorPages.find(_status) != _errorPages.end())
-            errorPage = readPage(errorPage);
-        else
-        {
-            errorPage = tools::getting_errorPage(_status);
-        }
+        if (end.compare("\r\n") == 0)
+            return (true);
+        return false;
+    }
 
-        _contentLength = errorPage.size();
-        return (errorPage);
+    bool    request::handling_chunked()
+    {
+
+        std::vector<std::string> tokens;
+        _unchunked_body = "";
+        size_t start = 0;
+        int n = _body.find("\r\n", start);
+        std::string temp;
+        while (n != -1)
+        {
+            std::string hexa = _body.substr(start, n - start);
+            if (check_hexadecimalLine(hexa) == false)
+                return false;
+            size_t size = std::strtol(hexa.c_str(), NULL, 16);
+            if (size == 0)
+                break ;
+            temp = _body.substr(n + 2, size);
+            if (temp.size() == size)
+            {
+                _unchunked_body += temp;
+                start += hexa.size() + temp.size() + 4;
+            }
+            else if (temp.size() < size)
+                start += 2;
+            else
+                return (false);
+            n = _body.find("\r\n", start);
+        }
+        return true;
     }
