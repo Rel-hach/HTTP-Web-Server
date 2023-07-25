@@ -2,7 +2,7 @@ Name = Webserv
 
 CC = c++
 
-CFLAGS			= -Wall -Wextra -Werror #-std=c++98
+CFLAGS			= -g -Wall -Wextra -Werror #-std=c++98
 INCLUDES 		= -I./inc/
 SRCDIR 			= src
 OBJDIR 			= build

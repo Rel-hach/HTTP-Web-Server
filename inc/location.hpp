@@ -10,6 +10,7 @@ public:
 	location(location&);
 	location(const location &);
 	location&operator=(location const&);
+	void print_location();
 	~location();
  
 	std::vector<std::string> allow_methods;
