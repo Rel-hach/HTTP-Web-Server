@@ -75,7 +75,8 @@ void fill_location(location &location, std::string &line){
 	ss >> key;
 	ss >> eq;
 	std::getline(ss, value);
-	trim(value, " \t\"");
+	check_value_key(value, key);
+//	trim(value, " \t\"");
 	location.upload = _upload;
 	std::cout << "key = " << key;
 	std::cout << " value = " << value << std::endl;
