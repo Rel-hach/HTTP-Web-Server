@@ -4,6 +4,59 @@
 #include "../../inc/client.hpp"
 #include "../../inc/tools.hpp"
 #include "../../inc/response.hpp"
+std::string  find_server_name(client client)
+{
+    std::string clean_name;
+    int index = client.server_name.find(":");
+    if(index !=(int) std::string::npos)
+        clean_name=client.server_name.substr(0,index);
+    else
+       clean_name=  client.server_name;
+    return clean_name;
+}
+
+server_data find_server(std::vector<server_data>& servers,std::vector<server_data>& deplicate, client client)
+{
+    server_data server_exicte;
+    std::string server_name =find_server_name(client);
+    for (size_t i = 0; i < servers.size(); i++)
+    {
+        std::cout<<servers[i].server_names[0]<<std::endl;
+        if(servers[i].server_names[0] == server_name)
+        {
+            server_exicte=servers[i];
+            break;
+        }
+    }
+    for (size_t i = 0; i < deplicate.size(); i++)
+    {
+        if(deplicate[i].server_names[0] == server_name)
+        {
+            server_exicte=deplicate[i];
+            break;
+        }
+    }
+    return server_exicte;
+}
+
+std::vector<server_data> felter_server(std::vector<server_data>& servers) {
+    std::vector<server_data> deplicate;
+    for (size_t i = 0; i < servers.size(); i++) {
+        bool is_duplicate = false;
+        for (size_t j = 0; j < servers.size(); j++) {
+            if (i != j && servers[i].port == servers[j].port && servers[i].host == servers[j].host) {
+                is_duplicate = true;
+                break;
+            }
+        }
+        if (is_duplicate) {
+            deplicate.push_back(servers[i]);
+            servers.erase(servers.begin() + i);
+            i--; 
+        }
+    }
+    return deplicate;
+}
 
 int main(int argc,char **argv) 
 {
@@ -13,7 +66,14 @@ int main(int argc,char **argv)
 	{
 		if (argc != 2)
 			throw std::invalid_argument("Error: invalid number of arguments");
+        std::cout<<"hi"<<std::endl;
 		servers = parse_server(argv[1]);
+        std::cout<<"hi"<<std::endl;
+        std::vector<server_data> deplicate = felter_server(servers); 
+        // for (size_t i = 0; i < deplicate.size(); i++)
+        // {
+        //     std::cout<< deplicate[i].host <<"------"<< deplicate[i].port << "--------"<< deplicate[i].server_names[0]<<std::endl;
+        // }
         std::vector<pollfd> all_df;
         std::vector<server> all_server;
         std::vector<client> all_client;
@@ -60,7 +120,6 @@ int main(int argc,char **argv)
                             return 1;
                         }
                         fcntl(client_socket, F_SETFL, O_NONBLOCK);
-                        // client = 
                         struct pollfd fds;
                         fds.fd=  client_socket;
                         fds.events = POLLIN;
@@ -81,9 +140,9 @@ int main(int argc,char **argv)
                         {
                             if(all_client[j].getfd() == all_df[i].fd)
                             {
+                                all_client[j].setservr_name(buff);
                                 all_client[j].appendreq(buff,content);
                                 all_client[j].addTocontentread(content);
-
                                 if(( all_client[j].ischunked && all_client[j].getreq().find("\r\n0\r\n\r\n") != std::string::npos)
                                     || (all_client[j].getreq().length() && !all_client[j].ischunked && all_client[j].getcontentlenght() <= all_client[j].getcontentread()))
                                 {
@@ -94,20 +153,27 @@ int main(int argc,char **argv)
                     }
                 }
                 else if(all_df[i].revents & POLLOUT)
-                {
+                { 
                     for (size_t j = 0; j < all_client.size(); j++)
                     {
                         if(all_client[j].getfd() == all_df[i].fd)
                         {
-                            request req;
-                            int ret_status = req.processing_request(all_client[j],  all_server[all_client[j]._serverIndex]);
-                            
-                            if (all_client[j]._requestIsParsed == true)
-                            {
-                                response resp;
-                                all_client[j]._response = resp.generating_response(req, ret_status);
-                                write(all_df[i].fd,all_client[j]._response.c_str(), all_client[j]._response.length());
+                            std::ofstream file("output.txt");
+                            if (file.is_open()) {
+                                file<<all_client[j].getreq();
+                            } else {
+                                std::cout << "Unable to open the file." << std::endl;
                             }
+                            std::cout<<find_server(servers, deplicate, all_client[j]).server_names[0]<<std::endl;
+                            // request req;
+                            // int ret_status = req.processing_request(all_client[j],  all_server[all_client[j]._serverIndex]);
+                            
+                            // if (all_client[j]._requestIsParsed == true)
+                            // {
+                            //     response resp;
+                            //     all_client[j]._response = resp.generating_response(req, ret_status);
+                            //     write(all_df[i].fd,all_client[j]._response.c_str(), all_client[j]._response.length());
+                            // }
                             close(all_df[i].fd);
                             all_df.erase(all_df.begin() + i);
                             all_client.erase(all_client.begin() + j);         
@@ -138,14 +204,3 @@ int main(int argc,char **argv)
     return 0;
 }
 
-/*
-
-    std::vector<server> servers;
-
-    for (int i = 0; i servers.size(); i++)
-    {
-        
-    }
-
-
-*/

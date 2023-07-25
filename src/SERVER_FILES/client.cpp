@@ -16,6 +16,7 @@ client::client(int fd)
     this->contentlenght=0;
     this->contentread = 0;
     this->firstbuff = false;
+    this->server_name="";
 
 }
 
@@ -88,3 +89,16 @@ long long client::getcontentread() const
     return this->contentread;
 }
 
+void client::setservr_name(char const *first_req)
+{
+    if(!firstbuff)
+    {
+        std::string buff(first_req);
+        int index1 = buff.find("Host:") + 6;
+        int index2 = buff.find("\r\n", index1);
+        if(index1 != (int)std::string::npos && index2 != (int)std::string::npos )
+        {
+            this->server_name = buff.substr(index1 , index2 - index1);
+        }
+    }
+}

@@ -19,6 +19,7 @@ class client
         int         _serverIndex;
         bool        _requestIsParsed;
         bool ischunked;
+        std::string server_name;
     private:
         std::string req;
         int fd;
@@ -40,6 +41,7 @@ class client
         void addTocontentread(long long const contentread);
         long long getcontentread() const;
         void setreq(std::string  const req);
+        void setservr_name(char const *first_req);
         ~client();
 };
 
