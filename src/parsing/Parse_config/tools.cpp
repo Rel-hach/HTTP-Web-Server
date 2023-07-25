@@ -9,7 +9,10 @@ void trim(std::string &line, std::string str)
 		return;
 	size_t start = line.find_first_not_of(str);
 	size_t end = line.find_last_not_of(str);
-	line = line.substr(start, end - start + 1);
+	if (start == std::string::npos || end == std::string::npos)
+		line.clear();
+	else
+		line = line.substr(start, end - start + 1);
 }
 
 int has_bad_char(std::string &key){
@@ -35,25 +38,23 @@ int check_if_closed(std::string value){
 			count_bracket++;
 		i++;
 	}
-	if ( count_quote == 0 || count_quote % 2 != 0 || count_bracket % 2 != 0)
+	if ((count_quote != 0 && count_quote % 2 != 0) || (count_bracket != 0 && count_bracket != 2))
 		return (0);
 	return (1);
 }
 
 void check_value_key(std::string &value, std::string &key){
-	trim(value, " \t");
-	if (value.empty())
-		throw std::invalid_argument("Error: empty value");
-	if (!check_if_closed(value) && key != "port")
-	{
-		std::cout << value << std::endl;
-		std::cout << key << std::endl;
-		throw std::invalid_argument("Error: invalid value");
-	}
-	
 	if (key.empty())
 		throw std::invalid_argument("Error: empty key");
 	if (has_bad_char(key)) 
 		throw std::invalid_argument("Error: invalid key");
+	trim(value, " \t\"[]");
+	if (value.empty())
+		throw std::invalid_argument("Error: empty value");
+	if (!check_if_closed(value) && key != "port")
+	{
+		std::cout << key << std::endl;
+		std::cout << value << std::endl;
+		throw std::invalid_argument("Error: invalid value");
+	}
 }
-
