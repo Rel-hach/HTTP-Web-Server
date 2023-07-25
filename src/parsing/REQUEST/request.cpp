@@ -31,8 +31,6 @@
 
         std::string request = clientt.getreq();
 
-
-        // if the request is empty or has spaces at its start, return a bad request.
         if (request.empty() || isspace(request[0]))
         {
              return (clientt._requestIsParsed = true, Bad_Request);
@@ -55,7 +53,6 @@
         
         if (tools::splitting_string(tokens[0], "\r\n", _headers) > 1)
         {
-            // here check if the start line is valid.
             if ((_status = checking_startLine(_headers[0])) != GO_NEXT)
             {
                 return (clientt._requestIsParsed = true, _status);
@@ -78,7 +75,6 @@
             // if ((_body.length() != _contentLength ) || _body.empty())
             //     return (clientt._requestIsParsed = true, Bad_Request);
         }
-        std::cout << _status << std::endl;
         return (clientt._requestIsParsed = true, GO_NEXT);
     }
 
@@ -99,9 +95,8 @@
         _path       = tokens[1];
         _version    = tokens[2];
 
-
         // those methods have not been implemented.
-        if (_method == "HEAD" || _method == "PATCH" || _method == "PUT" || _method == "OPTIONS")
+        if (_method == "HEAD" || _method == "PATCH" || _method == "PUT" || _method == "OPTIONS" || _method == "MKCOL" || _method == "COPY" || _method == "MOVE")
             return (Not_Implemented);
 
         // something else means not a method, return bad request.
