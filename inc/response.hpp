@@ -6,6 +6,11 @@
 
 #define BUILD_ANSWER    10000
 
+#define UPLOAD_FILE "www/cases/success_upload.html"
+#define DELETE_FILE "www/cases/success_deletion.html"
+
+#define REDIRECTION 301
+
 class Location
 {
     public:
@@ -97,6 +102,9 @@ class response
         void    get_pathAndLocationInfos(std::map<std::string, Location> locations, std::string uri);
         std::string getErrorPage();
         std::string readPage(std::string page);
+        bool        successAnswer(int status);
+        bool        redirectionAnswer(int status);
+        bool        errorAnswer(int status);     
 };
 
 
