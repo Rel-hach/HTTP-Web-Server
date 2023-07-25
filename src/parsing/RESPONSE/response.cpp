@@ -12,7 +12,7 @@ Location::Location()
 
 response::response()
 {
-        // homePage;
+        _homePage = "www/index.html";
         // _index;
         // _methods;             
         _root = "";
@@ -39,7 +39,7 @@ response::response()
 }
 
 
-void    response::determine_contentType()
+void response::determine_contentType()
 {
     std::vector<std::string> tokens;
 
@@ -55,6 +55,10 @@ void    response::determine_contentType()
                 _contentType = "text/css";
             else if (_extension == ".js")
                 _contentType = "application/javascript";
+            else if (_extension == ".json")
+                _contentType = "application/json";
+            else if (_extension == ".xml")
+                _contentType = "application/xml";
             else if (_extension == ".gif")
                 _contentType = "image/gif";
             else if (_extension == ".jpg")
@@ -63,18 +67,38 @@ void    response::determine_contentType()
                 _contentType = "image/jpeg";
             else if (_extension == ".png")
                 _contentType = "image/png";
+            else if (_extension == ".bmp")
+                _contentType = "image/bmp";
+            else if (_extension == ".ico")
+                _contentType = "image/x-icon";
+            else if (_extension == ".svg")
+                _contentType = "image/svg+xml";
+            else if (_extension == ".webp")
+                _contentType = "image/webp";
             else if (_extension == ".txt")
                 _contentType = "text/plain";
             else if (_extension == ".pdf")
                 _contentType = "application/pdf";
             else if (_extension == ".mp4")
                 _contentType = "video/mp4";
+            else if (_extension == ".mpeg")
+                _contentType = "video/mpeg";
+            else if (_extension == ".webm")
+                _contentType = "video/webm";
+            else if (_extension == ".mov")
+                _contentType = "video/quicktime";
+            else if (_extension == ".avi")
+                _contentType = "video/x-msvideo";
             else if (_extension == ".mp3")
                 _contentType = "audio/mp3";
-            else if (_extension == "ogg")
+            else if (_extension == ".wav")
+                _contentType = "audio/wav";
+            else if (_extension == ".ogg")
                 _contentType = "audio/ogg";
+            else if (_extension == ".flac")
+                _contentType = "audio/flac";
             else
-                _contentType = "application/octet-stream";
+                _contentType = "application/octet-stream"; // Un fichier de type inconnu doit être associé à ce type MIME
         }
         else
             _contentType = "text/html"; 
@@ -90,9 +114,10 @@ void    response::preparing_responseHeaders()
     // start line Header.
     _respHeaders += "HTTP/1.1 ";
     _respHeaders += _responseCode;
+    _respHeaders += "\r\n";
 
     // Location Header
-    if (_status == 301)
+    if (_status == REDIRECTION)
     {
         _respHeaders += "Location: ";
         _respHeaders += _redirectionPath;
@@ -111,20 +136,34 @@ void    response::preparing_responseHeaders()
 
 
 
-void    response::getting_responsCode()
+void response::getting_responsCode()
 {
     if (_status == 200)
-        _responseCode = "200 OK\r\n";
+        _responseCode = "200 OK";
     else if (_status == 201)
-        _responseCode = "201 Created\r\n";
+        _responseCode = "201 Created";
+    else if (_status == 204)
+        _responseCode = "204 No Content";
     else if (_status == 301)
-        _responseCode = "301 Moved Permanently\r\n";
+        _responseCode = "301 Moved Permanently";
+    else if (_status == 400)
+        _responseCode = "400 Bad Request";
+    else if (_status == 401)
+        _responseCode = "401 Unauthorized";
     else if (_status == 403)
-        _responseCode = "403 Not Found\r\n";
+        _responseCode = "403 Forbidden";
     else if (_status == 404)
-        _responseCode = "404 Not Found\r\n";
+        _responseCode = "404 Not Found";
     else if (_status == 405)
-        _responseCode = "405 Method Not Allowed\r\n";
+        _responseCode = "405 Method Not Allowed";
+    else if (_status == 500)
+        _responseCode = "500 Internal Server Error";
+    else if (_status == 501)
+        _responseCode = "501 Not Implemented";
+    else if (_status == 503)
+        _responseCode = "503 Service Unavailable";
+    else
+        _responseCode = "200 OK";
 }
 
 
@@ -186,7 +225,6 @@ std::string    response::generating_response(request& request, int returnStatus)
 
     get_pathAndLocationInfos (locations, _path);
 
-
     if (returnStatus != GO_NEXT)
         _status = returnStatus;
 
@@ -197,28 +235,26 @@ std::string    response::generating_response(request& request, int returnStatus)
         _status = Method_Not_Allowed;
 
     else if (_redirection == true)
-        _status = 301;
+        _status = REDIRECTION;
 
     else if ((status = executing_method()) != GO_NEXT)
     {
         _status = status;
     }
 
-
-
-    if (_status > 301)
+    if (errorAnswer(_status))
     {
         _fileContent = getErrorPage();
         determine_contentType();
         preparing_responseHeaders();
     }
 
-    else if (_status == 301)
+    else if (redirectionAnswer(_status))
     {
         preparing_responseHeaders();
     }
 
-    else if (_status < 300 && _status > 199) // 
+    else if (successAnswer(_status))
     {
         preparing_responseHeaders();
     }
@@ -234,13 +270,13 @@ int    response::executing_method()
     {
         determine_contentType();
 
-        // if (_extension == _cgiExtention && _method == GET)
-        // {
-        //     if (permissionForExecuting() == true)
-        //         std::cout << "return ( Execute_cgi() )";
-        //     else
-        //         return (_status);
-        // }
+        if (_extension == _cgiExtention && _method == GET)
+        {
+            if (permissionForExecuting() == true)
+                std::cout << "return ( Execute_cgi() )";
+            else
+                return (_status);
+        }
 
         if (_method == "GET")
         {
@@ -262,7 +298,10 @@ int    response::executing_method()
                 if (unlink(_realPath.c_str()) == -1)
                     return (Internal_Server);
                 else
+                {
+                    _fileContent = readPage(DELETE_FILE);
                     return (No_Content);
+                }
             }
             return (_status);
         }
@@ -314,6 +353,8 @@ int    response::executing_method()
 }
 
 
+
+
 int     response::stroring_requestBody()
 {
     // if (_root.empty() || _isupload == false)
@@ -335,6 +376,7 @@ int     response::stroring_requestBody()
         {
             ofs << _body;
             ofs.close();
+            _fileContent = readPage(UPLOAD_FILE);
         }
         else
             return (Internal_Server);
@@ -343,6 +385,8 @@ int     response::stroring_requestBody()
 
     return (201);
 }
+
+
 
 
 int     response::storing_multipleParts()
@@ -387,7 +431,9 @@ int     response::storing_multipleParts()
 
         ofs << filecontent;
         ofs.close();
+
     }
+    _fileContent = readPage(UPLOAD_FILE);
     return (201);
 }
 
@@ -457,6 +503,8 @@ bool    response::permissionForDeleting()
 // reading File Content 
 
 
+
+
 int    response::reading_fileContent()
 {
     std::ifstream ifs(_realPath.c_str());
@@ -480,7 +528,13 @@ std::string  response::readPage(std::string page)
 }
 
 
+
+
 // GET PATH AND LOCATION INFOS
+
+
+
+
 
 void    response::get_pathAndLocationInfos (std::map<std::string, Location> locations, std::string uri)
 {
@@ -527,7 +581,7 @@ void    response::get_pathAndLocationInfos (std::map<std::string, Location> loca
         if ( uri.size() > it->first.size() )
         {
             if (uri[temp.size()] == '/')
-                _realPath = _root + uri.substr(temp.size()); // + _fileName;
+                _realPath = _root + uri.substr(temp.size());
         }
 
         else if (it->first.size() == uri.size())
@@ -541,7 +595,12 @@ void    response::get_pathAndLocationInfos (std::map<std::string, Location> loca
 }
 
 
+
+
+
 // ERROR PAGE
+
+
 
 
 
@@ -560,7 +619,13 @@ std::string    response::getErrorPage()
 }
 
 
+
+
+
 // AUTO-INDEX
+
+
+
 
 int     response::listing_requestDirectory()
 {
@@ -590,4 +655,29 @@ int     response::listing_requestDirectory()
     _fileContent = autoindex_page;
     closedir(D);
     return (200);
+}
+
+
+
+
+
+bool        response::successAnswer(int status)
+{
+    if (status >= 200 && status <= 204)
+        return (true);
+    return (false);
+}
+
+bool        response::redirectionAnswer(int status)
+{
+    if (status == 301)
+        return (true);
+    return (false);
+}
+
+bool        response::errorAnswer(int status)
+{
+    if (status >= 400 && status <= 503)
+        return (true);
+    return (false);
 }
