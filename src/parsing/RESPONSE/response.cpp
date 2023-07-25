@@ -270,10 +270,10 @@ int    response::executing_method()
     {
         determine_contentType();
 
-        if (_extension == _cgiExtention && _method == GET)
+        if (_extension == _cgiExtention)
         {
             if (permissionForExecuting() == true)
-                std::cout << "return ( Execute_cgi() )";
+                std::cout << "return ( Execute_cgi(*this) )";
             else
                 return (_status);
         }
@@ -293,6 +293,7 @@ int    response::executing_method()
 
         else if (_method == "DELETE")
         {
+            // must return 405 method not allowed. sbin ();
             if (permissionForDeleting())
             {
                 if (unlink(_realPath.c_str()) == -1)
@@ -314,12 +315,12 @@ int    response::executing_method()
             _realPath += _index[i];
             determine_contentType();
 
-            if ( _extension == _cgiExtention)
+            if ( _extension == _cgiExtention) // this part must be removed.
             {
                 if (permissionForExecuting())
                     std::cout << "return (execute_cgi())";
                 else
-                    return _status;
+                    return (_status);
             }
 
             else
@@ -342,12 +343,15 @@ int    response::executing_method()
     }
 
     else if (_method == "DELETE")
-        return (403);
+        return (Forbidden);
     
-    else if (_method == "POST")
+    else if (_method == "POST" && _isMultipart)
     {
         return (stroring_requestBody());
     }
+
+    else
+        return (Bad_Request);
     
     return (GO_NEXT);
 }
@@ -546,6 +550,8 @@ void    response::get_pathAndLocationInfos (std::map<std::string, Location> loca
         if (uri.find(_referer) == std::string::npos)
             uri = _referer + uri;
     }
+
+    std::cout << "uri : " << uri << std::endl;
     
     std::string temp = uri;
 
