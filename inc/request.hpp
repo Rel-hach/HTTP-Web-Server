@@ -23,7 +23,7 @@
 #include <vector>
 #include <sstream>
 
-
+#include "./server_data.hpp"
 
 #define CRLFX2              "\r\n\r\n"
 #define VEC_OF_STRS         std::vector<std::string>
@@ -128,7 +128,7 @@ class request
 
       // processing :
 
-      int     processing_request( client& client, server& serv );
+      int     processing_request( client& client, server_data& serv );
       int     checking_startLine( std::string sline );
       bool    dechunkBody();
 

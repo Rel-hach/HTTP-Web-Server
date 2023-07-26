@@ -21,7 +21,6 @@ server_data find_server(std::vector<server_data>& servers,std::vector<server_dat
     std::string server_name =find_server_name(client);
     for (size_t i = 0; i < servers.size(); i++)
     {
-        std::cout<<servers[i].server_names[0]<<std::endl;
         if(servers[i].server_names[0] == server_name)
         {
             server_exicte=servers[i];
@@ -164,16 +163,17 @@ int main(int argc,char **argv)
                             } else {
                                 std::cout << "Unable to open the file." << std::endl;
                             }
-                            std::cout<<find_server(servers, deplicate, all_client[j]).server_names[0]<<std::endl;
-                            // request req;
-                            // int ret_status = req.processing_request(all_client[j],  all_server[all_client[j]._serverIndex]);
+                            request req;
+                            server_data ser=find_server(servers, deplicate, all_client[j]);
+                            std::cout<<ser.server_names[0]<<std::endl;
+                            int ret_status = req.processing_request(all_client[j], ser );
                             
-                            // if (all_client[j]._requestIsParsed == true)
-                            // {
-                            //     response resp;
-                            //     all_client[j]._response = resp.generating_response(req, ret_status);
-                            //     write(all_df[i].fd,all_client[j]._response.c_str(), all_client[j]._response.length());
-                            // }
+                            if (all_client[j]._requestIsParsed == true)
+                            {
+                                response resp;
+                                all_client[j]._response = resp.generating_response(req, ret_status);
+                                write(all_df[i].fd,all_client[j]._response.c_str(), all_client[j]._response.length());
+                            }
                             close(all_df[i].fd);
                             all_df.erase(all_df.begin() + i);
                             all_client.erase(all_client.begin() + j);         

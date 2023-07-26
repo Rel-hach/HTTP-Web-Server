@@ -25,7 +25,7 @@
         this->_isCgi = false;
     }
 
-    int   request::processing_request( client& clientt, server& serv )
+    int   request::processing_request( client& clientt, server_data & serv )
     {
         (void)serv;
 
