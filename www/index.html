@@ -2,51 +2,88 @@
 <html>
   <head>
     <link rel="shortcut icon" href="WWW/favicon.ico" type="image/x-icon">
-    <title>Webserver Example</title>
+    <title>WEBSERV/1.1</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet"> 
     <style>
-    
-      /* CSS with a melange of three colors */
+      /* Set global styles */
+      * {
+        box-sizing: border-box;
+        font-family: 'Open Sans', sans-serif;
+      }
+      
+      /* Set background color */
       body {
+        background-color: #F5F7FA;
+      }
+      
+      /* Center content */
+      .content {
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background-color: lightblue;
       }
-      .content {
+      
+      /* Set styles for headings */
+      h1, h2 {
+        margin: 0;
+        color: #1F2937;
         text-align: center;
       }
+      
       h1 {
-        color: green;
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
       }
+      
+      h2 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+      }
+      
+      /* Set styles for paragraphs */
       p {
-        color: black;
+        margin: 0;
+        color: #4B5563;
+        line-height: 1.5rem;
+        text-align: center;
       }
-      /* Style for collaborator pictures */
+      
+      /* Set styles for collaborator pictures */
       .collaborator {
         display: inline-block;
         width: 100px;
         height: 100px;
         border-radius: 50%;
-        margin: 10px;
-        background-color: white;
+        margin: 1rem;
+        background-color: #FFFFFF;
         background-size: cover;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
       }
-
-      .c{
-            color: blueviolet;
+      
+      /* Set styles for collaborator names */
+      .name {
+        color: #1F2937;
+        font-size: 1.2rem;
+        margin-top: 1rem;
+        text-align: center;
       }
     </style>
   </head>
   <body>
     <div class="content">
-      <h1>WEBSERV HTTP 1.1</h1>
-      <h2>A Webserver made with C++98</h2>
-      <p>WEBSERV is a webserver made with C++98 that supports GET, DELETE, and POST methods.</p>
-      <p class="c">Here are three collaborators who helped create WEBSERV HTTP 1.1:</p>
-      <div class="collaborator" style="background-image: url('collaborator1.jpg')"></div>
+      <h1>WELCOME TO WEBSERV FIRST VERSION HOME PAGE<br><br></h1>
+      <h2>WEBSERV 0.0 is a HTTP/1.1 webserver made in c++ 98</h3>
+      <h2>supports GET, DELETE, and POST methods<br><br></h2>
+      <h3>collaborators : <br><br></h3>
+      <div class="collaborator" style="background-image: url('https://cdn.intra.42.fr/users/23f95527e0919a5c24a02a5802fb68f2/rel-hach.jpg')"></div>
+      <div class="name">rel-hach</div>
       <div class="collaborator" style="background-image: url('collaborator2.jpg')"></div>
+      <div class="name">Add yourself :p</div>
       <div class="collaborator" style="background-image: url('collaborator3.jpg')"></div>
+      <div class="name">Add yourself :p</div>
     </div>
   </body>
 </html>
