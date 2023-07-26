@@ -4,35 +4,47 @@
 #include "../../inc/client.hpp"
 #include "../../inc/tools.hpp"
 #include "../../inc/response.hpp"
-std::string  find_server_name(client client)
+std::vector<std::string>  find_server_name(client client)
 {
-    std::string clean_name;
+    std::vector<std::string> clean_name;
     int index = client.server_name.find(":");
     if(index !=(int) std::string::npos)
-        clean_name=client.server_name.substr(0,index);
-    else
-       clean_name=  client.server_name;
+    {
+        tools::splitting_string(client.server_name, ":", clean_name);
+        std::cout<<clean_name[1]<<std::endl;
+        return clean_name;
+    }
+    clean_name.push_back(client.server_name);
+    clean_name.push_back("8000");
     return clean_name;
 }
 
 server_data find_server(std::vector<server_data>& servers,std::vector<server_data>& deplicate, client client)
 {
     server_data server_exicte;
-    std::string server_name =find_server_name(client);
+    std::vector<std::string> server_name =find_server_name(client);
     for (size_t i = 0; i < servers.size(); i++)
     {
-        if(servers[i].server_names[0] == server_name)
+        if(std::to_string(servers[i].port) == server_name[1] && servers[i].server_names[0] == server_name[0])
         {
             server_exicte=servers[i];
-            break;
+            return server_exicte;
         }
     }
     for (size_t i = 0; i < deplicate.size(); i++)
     {
-        if(deplicate[i].server_names[0] == server_name)
+        if(std::to_string(deplicate[i].port) == server_name[1] && deplicate[i].server_names[0] == server_name[0])
         {
             server_exicte=deplicate[i];
-            break;
+            return server_exicte;
+        }
+    } 
+    for (size_t i = 0; i < servers.size(); i++)
+    {
+        if(std::to_string(servers[i].port) == server_name[1])
+        {
+            server_exicte=servers[i];
+            return server_exicte;
         }
     }
     return server_exicte;
@@ -61,6 +73,7 @@ int main(int argc,char **argv)
 {
 
     std::vector<server_data> servers;
+
 	try
 	{
 		if (argc != 2)
@@ -69,10 +82,6 @@ int main(int argc,char **argv)
 		servers = parse_server(argv[1]);
         std::cout<<"hi"<<std::endl;
         std::vector<server_data> deplicate = felter_server(servers); 
-        // for (size_t i = 0; i < deplicate.size(); i++)
-        // {
-        //     std::cout<< deplicate[i].host <<"------"<< deplicate[i].port << "--------"<< deplicate[i].server_names[0]<<std::endl;
-        // }
         std::vector<pollfd> all_df;
         std::vector<server> all_server;
         std::vector<client> all_client;
@@ -118,7 +127,7 @@ int main(int argc,char **argv)
                             close(all_df[i].fd);
                             return 1;
                         }
-                        fcntl(client_socket, F_SETFL, O_NONBLOCK);
+                        
                         struct pollfd fds;
                         fds.fd=  client_socket;
                         fds.events = POLLIN;
@@ -133,8 +142,6 @@ int main(int argc,char **argv)
                         char buff[1024];
                         std::memset(buff, '\0', sizeof(buff));
                         int content = read(all_df[i].fd,buff,1024);
-                        if(content <= 0)
-                            continue;
                         for (size_t j = 0; j < all_client.size(); j++)
                         {
                             if(all_client[j].getfd() == all_df[i].fd)
@@ -157,23 +164,46 @@ int main(int argc,char **argv)
                     {
                         if(all_client[j].getfd() == all_df[i].fd)
                         {
-                            std::ofstream file("output.txt");
-                            if (file.is_open()) {
-                                file<<all_client[j].getreq();
-                            } else {
-                                std::cout << "Unable to open the file." << std::endl;
-                            }
+                            // std::ofstream file("output.txt");
+                            // if (file.is_open()) {
+                            //     file<<all_client[j].getreq();
+                            // } else {
+                            //     std::cout << "Unable to open the file." << std::endl;
+                            // }
                             request req;
-                            server_data ser=find_server(servers, deplicate, all_client[j]);
-                            std::cout<<ser.server_names[0]<<std::endl;
-                            int ret_status = req.processing_request(all_client[j], ser );
                             
-                            if (all_client[j]._requestIsParsed == true)
-                            {
-                                response resp;
-                                all_client[j]._response = resp.generating_response(req, ret_status);
-                                write(all_df[i].fd,all_client[j]._response.c_str(), all_client[j]._response.length());
-                            }
+                            server_data ser=find_server(servers, deplicate, all_client[j]);
+                            std::cout<<ser.server_names[0]<<":"<<ser.port<<std::endl;
+                            // int ret_status = req.processing_request(all_client[j], ser );
+                            // if (all_client[j]._requestIsParsed == true)
+                            // {
+                            //     response resp;
+                            //     all_client[j]._response = resp.generating_response(req, ret_status);
+                            // }
+                                std::ifstream file("root/index.html");
+                                std::string html;
+                                std::string line; 
+                                if (!file.is_open()) {
+                                    std::cerr << "Failed to open the file." << std::endl;
+                                } 
+                                if (file.is_open()) 
+                                {
+                                    while (std::getline(file, line))
+                                        html+= line;
+                                    file.close();
+                                }
+                                
+                                std::string headers = "HTTP/1.1 200 OK\r\n";
+                                headers += "Content-Type: text/html\r\n";
+                                headers += "Set-Cookie: Darkmode=true\r\n";
+                                headers += "Set-Cookie: sessionID=abc123; Path=/; Secure; HttpOnly\r\n";
+
+                                headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
+                                headers += "Connection: Closed\r\n\r\n";
+
+                                headers +=  headers + html;  
+                                write(all_df[i].fd,headers.c_str(),headers.length());
+
                             close(all_df[i].fd);
                             all_df.erase(all_df.begin() + i);
                             all_client.erase(all_client.begin() + j);         

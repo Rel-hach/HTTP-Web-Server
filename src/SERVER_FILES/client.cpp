@@ -56,6 +56,8 @@ void client::appendreq(char const *req, int count)
         {
             this->ischunked= true;
         }
+        
+        
     }
     this->req.append(req,count);
 }
@@ -99,6 +101,7 @@ void client::setservr_name(char const *first_req)
         if(index1 != (int)std::string::npos && index2 != (int)std::string::npos )
         {
             this->server_name = buff.substr(index1 , index2 - index1);
+            
         }
     }
 }
