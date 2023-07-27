@@ -173,41 +173,17 @@ int main(int argc,char **argv)
                             request req;
                             
                             server_data ser=find_server(servers, deplicate, all_client[j]);
-                            std::cout<<ser.server_names[0]<<":"<<ser.port<<std::endl;
-                            // int ret_status = req.processing_request(all_client[j], ser );
-                            // if (all_client[j]._requestIsParsed == true)
-                            // {
-                            //     response resp;
-                            //     all_client[j]._response = resp.generating_response(req, ret_status);
-                            // }
-                                std::ifstream file("root/index.html");
-                                std::string html;
-                                std::string line; 
-                                if (!file.is_open()) {
-                                    std::cerr << "Failed to open the file." << std::endl;
-                                } 
-                                if (file.is_open()) 
-                                {
-                                    while (std::getline(file, line))
-                                        html+= line;
-                                    file.close();
-                                }
-                                
-                                std::string headers = "HTTP/1.1 200 OK\r\n";
-                                headers += "Content-Type: text/html\r\n";
-                                headers += "Set-Cookie: Darkmode=true\r\n";
-                                headers += "Set-Cookie: sessionID=abc123; Path=/; Secure; HttpOnly\r\n";
-
-                                headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
-                                headers += "Connection: Closed\r\n\r\n";
-
-                                headers +=  headers + html;  
-                                write(all_df[i].fd,headers.c_str(),headers.length());
-
+                            int ret_status = req.processing_request(all_client[j], ser );
+                            if (all_client[j]._requestIsParsed == true)
+                            {
+                                response resp;
+                                all_client[j]._response = resp.generating_response(req, ret_status, ser);
+                                all_client[j]._sentBytes += send(all_df[i].fd, all_client[j]._response.c_str(), all_client[j]._response.length(), 0);
+                            }
                             close(all_df[i].fd);
                             all_df.erase(all_df.begin() + i);
                             all_client.erase(all_client.begin() + j);         
-                            break;      
+                            break;
                         }
                     }        
                 }
