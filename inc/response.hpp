@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "request.hpp"
+#include "server_data.hpp"
 
 #define BUILD_ANSWER    10000
 
@@ -11,50 +12,26 @@
 
 #define REDIRECTION 301
 
-class Location
-{
-    public:
-        Location();
-        Location(std::string Name, std::vector<std::string>& Index, std::string Homepage, std::string Root, std::vector<std::string>& Methods, bool redirec)
-        {
-            this->locationName  = Name;
-            this->index = Index;
-            this->homePage = Homepage;
-            this->root = Root;
-            this->methods = Methods;
-            this->redirection = redirec;
-            this->autoIndex = "OFF";
-
-        }
-        std::string                 locationName;
-        std::string                 homePage;
-        std::vector<std::string>    index;
-        std::vector<std::string>    methods;
-        std::string                 root;
-        std::string                 redirectionPath;
-        bool                        isUpload;
-        std::string                 autoIndex;
-        bool                        redirection;
-        size_t                      clientMaxBodySize; 
-        std::string                 cgiExtention;
-};
-
 class response
 {
     public:
-        // config
+        //server data
         std::string                 _homePage;
-        std::vector<std::string>    _index;
-        std::vector<std::string>    _methods;             
-        std::string                 _root;
-        std::string                 _unchunked_body;             
-        std::string                 _autoIndex;
-        bool                        _redirection;
         size_t                      _clientMaxBodySize;
+        // location data
+        std::vector<std::string>    _indexes;
+        std::vector<std::string>    _allowed_methods;             
+        std::string                 _root;
+        std::string                 _autoIndex;
+        std::string                 _upload;
+        bool                        _redirection;
+        int                         _redirection_code;
+        std::string                 _redirection_url;
         std::string                 _realPath;
-        std::string                 _cgiExtention;
-        std::string                 _fileName;
     public:
+        std::string _fileName;
+        std::string _cgiExtention;
+        std::string _unchunked_body;             
         std::string _contentType;
         bool        _method_isFound;
         std::string _bheaders;
@@ -98,8 +75,8 @@ class response
         void    determine_contentType();
         void    preparing_responseHeaders();
         void    getting_responsCode();
-        std::string    generating_response(request& request, int returnStatus);
-        void    get_pathAndLocationInfos(std::map<std::string, Location> locations, std::string uri);
+        std::string    generating_response(request& request, int returnStatus, server_data& serverr);
+        void    get_pathAndLocationInfos (server_data &serverrs, std::string uri);
         std::string getErrorPage();
         std::string readPage(std::string page);
         bool        successAnswer(int status);
