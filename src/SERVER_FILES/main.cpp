@@ -70,34 +70,6 @@ std::vector<server_data> felter_server(std::vector<server_data>& servers) {
 
 int main(int argc,char **argv) 
 {   
-        
-        
-        
-    // std::ifstream file("root/1.mp4", std::ios::binary);
-    // std::string html;
-    // std::string line;
-    // if (!file.is_open()) {
-    //     std::cerr << "Failed to open the file." << std::endl;
-    //     return 1; // Return an error code to indicate failure
-    // }
-
-    // const int buffer_size = 1024;
-    // char buffer[buffer_size];
-    // while (file.read(buffer, buffer_size)) {
-    //     html.append(buffer, file.gcount());
-    // }
-
-    // file.close();
-
-    // std::string response;
-    // response += "HTTP/1.1 200 OK\r\n";
-    // response += "Content-Type: video/mp4\r\n";
-    // response += "Set-Cookie: Darkmode=true\r\n";
-    // response += "Set-Cookie: sessionID=abc123; Path=/; Secure; HttpOnly\r\n";
-    // response += "Content-Length: " + std::to_string(html.length())  + "\r\n\r\n";
-    // std::string full_response = response + html;
-    
-
     std::vector<server_data> servers;
 
 	try
