@@ -3,109 +3,52 @@
     host = "127.0.0.1"
 # this is a comment skip it
     server_name = "webserv.com"
-    root = "    img "
+    root = "www/index.html"
     client_max_body_size = "2G"
 
 
-    [[server.error_page]]
-        401 = "/errors/4xx.html"
-        403 = "/errors/4xx.html"
-        501 = "/errors/5xx.html"
-        500 = "/errors/5xx.html"
-        502 = "/errors/5xx.html"
-        503 = "/errors/5xx.html"
-        504 = "/errors/5xx.html"
+#    [[server.error_page]]
+#        401 = "/errors/4xx.html"
+#        403 = "/errors/4xx.html"
+#        501 = "/errors/5xx.html"
+#        500 = "/errors/5xx.html"
+#        502 = "/errors/5xx.html"
+#        503 = "/errors/5xx.html"
+#        504 = "/errors/5xx.html"
+
+# this location will redirect you to the url.
 
     [[server.location]]
-        uri = "%.go$"
-	    index = ["index.html", "index.htm", "index.php"]
-    	root = "    img "
-    	autoindex = "ON"
-		#root should be added
-        allow_methods = ["GET", "POST"]
-        cgi_path = "./www/cgi-bin"
+        uri = "/redirecting"
+        return 301 https://www.google.com
 
+# you can upload
     [[server.location]]
-        uri = "%.py$"
+        uri = "/uploading"
+		root = "www/upload"
+        index = ["index.html"]
         allow_methods = ["GET", "POST"]
-        cgi_path = "www/cgi-bin"
-		root = "jgjgjgjgjgjgj/gj"
-		upload = "ok"
+	#	delete_module = "enabled"
 
+# shows autoindex (directory)
     [[server.location]]
-        uri = "/"
-        allow_methods = ["GET", "POST"]
+        uri = "/autoindexing"
+        root = "www/testAutoIndex"
+        allow_methods = ["GET"]
         autoindex = "ON"
-
+    
+# website 
     [[server.location]]
-        uri = "/upload"
+        uri = "/website"
+        allow_methods = ["GET", "POST"]
+        index = ["index.html", "video.html", "contact.html", "about.html"]
+        root = "www/fullywebsite"
 
-    [[server.location]]
-        uri = "/assets"
+#   delete a file if the module "websev_http_dav_module" is enabled.
 
-
-    [[server.location]]
-        uri = "/yo"
-
-    [[server.location]]
-        uri = "/redirection"
-
-[[server]]
-    port = 8081
-    root = "srcs"
-    host = "127.0.0.1"
-    server_name = "example_1.com"
-
-
-
-
-[[server]]
-    port = 8081
-    root = "srcs"
-    host = "127.0.0.1"
-    server_name = "example_2.com"
-
-
-[[server]]
-    port = 9090
-    host = "127.0.0.1"
-    server_name = "example_3.com"
-    root = "./srcs"
-
-    [[server.location]]
-        uri = "/l3erbi"
-	    index = ["index.html", "index.htm", "index.php"]
-    	root = "    img "
-    	autoindex = "ON"
-
-    [[server.error_page]]
-        401 = "/errors/4xx.html"
-
-[[server]]
-    port = 9000
-    host = "127.0.0.1"
-    server_name = "wordpress.com"
-    root = "srcs"
-
-    [[server.error_page]]
-        401 = "/errors/4xx.html"
-        501 = "/errors/5xx.html"
-# listen
-# root
-# uri
-#
-#location /php {
-#		allowed_methods GET,POST;
-#		cgiPath cgi-bin/php-cgi;
-#		cgiExt php;
-#	}
-#location /python {
-#	cgiPath /usr/local/bin/python3;
-#	cgiExt py;
-#}
-#
-#location cgi-bin {
-#      root ./;                                                 # cgi-bin location, mandatory parameter
-#      cgi_path /usr/bin/python3 /bin/bash;                     # location of interpreters installed on the current system, mandatory parameter
-#      cgi_ext .py .sh;                                         # extensions for executable files, mandatory parameter
-#  }
+#    [[server.location]]
+#       uri = "/deleting"
+#       root = "www/upload
+#       delete_module = "enabled"
+#       allow_methods = ["GET", "DELETE"]
+#       index = ["index.html"]
