@@ -20,6 +20,7 @@ class client
         bool        _requestIsParsed;
         bool ischunked;
         std::string server_name;
+        size_t      _sentBytes;
     private:
         std::string req;
         int fd;
