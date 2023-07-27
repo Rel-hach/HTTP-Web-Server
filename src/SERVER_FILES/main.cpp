@@ -11,7 +11,6 @@ std::vector<std::string>  find_server_name(client client)
     if(index !=(int) std::string::npos)
     {
         tools::splitting_string(client.server_name, ":", clean_name);
-        std::cout<<clean_name[1]<<std::endl;
         return clean_name;
     }
     clean_name.push_back(client.server_name);
@@ -70,7 +69,34 @@ std::vector<server_data> felter_server(std::vector<server_data>& servers) {
 }
 
 int main(int argc,char **argv) 
-{
+{   
+        
+        
+        
+    // std::ifstream file("root/1.mp4", std::ios::binary);
+    // std::string html;
+    // std::string line;
+    // if (!file.is_open()) {
+    //     std::cerr << "Failed to open the file." << std::endl;
+    //     return 1; // Return an error code to indicate failure
+    // }
+
+    // const int buffer_size = 1024;
+    // char buffer[buffer_size];
+    // while (file.read(buffer, buffer_size)) {
+    //     html.append(buffer, file.gcount());
+    // }
+
+    // file.close();
+
+    // std::string response;
+    // response += "HTTP/1.1 200 OK\r\n";
+    // response += "Content-Type: video/mp4\r\n";
+    // response += "Set-Cookie: Darkmode=true\r\n";
+    // response += "Set-Cookie: sessionID=abc123; Path=/; Secure; HttpOnly\r\n";
+    // response += "Content-Length: " + std::to_string(html.length())  + "\r\n\r\n";
+    // std::string full_response = response + html;
+    
 
     std::vector<server_data> servers;
 
@@ -127,13 +153,13 @@ int main(int argc,char **argv)
                             close(all_df[i].fd);
                             return 1;
                         }
-                        
+                        fcntl(client_socket, F_SETFL, O_NONBLOCK);
                         struct pollfd fds;
                         fds.fd=  client_socket;
                         fds.events = POLLIN;
                         all_df.push_back(fds);
                         client newclient = client(fds.fd);
-                        newclient._serverIndex = i;
+                        // newclient._serverIndex = i;
                         all_client.push_back(newclient);
                         std::cout<< "server ==> "<< all_df[i].fd << "   accept connection cleient ==> " << client_socket<<std::endl;
                     }
@@ -142,6 +168,10 @@ int main(int argc,char **argv)
                         char buff[1024];
                         std::memset(buff, '\0', sizeof(buff));
                         int content = read(all_df[i].fd,buff,1024);
+                        if (content == -1) {
+                            std::cerr << "Error: read failed\n";
+                            return 1;
+                        }
                         for (size_t j = 0; j < all_client.size(); j++)
                         {
                             if(all_client[j].getfd() == all_df[i].fd)
@@ -164,50 +194,29 @@ int main(int argc,char **argv)
                     {
                         if(all_client[j].getfd() == all_df[i].fd)
                         {
-                            // std::ofstream file("output.txt");
-                            // if (file.is_open()) {
-                            //     file<<all_client[j].getreq();
-                            // } else {
-                            //     std::cout << "Unable to open the file." << std::endl;
-                            // }
-                            request req;
                             
+                            request req;
                             server_data ser=find_server(servers, deplicate, all_client[j]);
                             std::cout<<ser.server_names[0]<<":"<<ser.port<<std::endl;
-                            // int ret_status = req.processing_request(all_client[j], ser );
-                            // if (all_client[j]._requestIsParsed == true)
+                            int ret_status = req.processing_request(all_client[j], ser );
+                            if (all_client[j]._requestIsParsed == true)
+                            {
+                                response resp;
+                                all_client[j]._response = resp.generating_response(req, ret_status);
+                            }
+                            
+                            // if(all_client[j].sendLenth <= (int)full_response.length())
                             // {
-                            //     response resp;
-                            //     all_client[j]._response = resp.generating_response(req, ret_status);
+                            //     write(all_df[i].fd,full_response.c_str()+all_client[j].sendLenth,1024);
+                            //     all_client[j].sendLenth+=1024;
                             // }
-                                std::ifstream file("root/index.html");
-                                std::string html;
-                                std::string line; 
-                                if (!file.is_open()) {
-                                    std::cerr << "Failed to open the file." << std::endl;
-                                } 
-                                if (file.is_open()) 
-                                {
-                                    while (std::getline(file, line))
-                                        html+= line;
-                                    file.close();
-                                }
-                                
-                                std::string headers = "HTTP/1.1 200 OK\r\n";
-                                headers += "Content-Type: text/html\r\n";
-                                headers += "Set-Cookie: Darkmode=true\r\n";
-                                headers += "Set-Cookie: sessionID=abc123; Path=/; Secure; HttpOnly\r\n";
-
-                                headers += "Content-Length: " + std::to_string(html.length()) + "\r\n";
-                                headers += "Connection: Closed\r\n\r\n";
-
-                                headers +=  headers + html;  
-                                write(all_df[i].fd,headers.c_str(),headers.length());
-
-                            close(all_df[i].fd);
-                            all_df.erase(all_df.begin() + i);
-                            all_client.erase(all_client.begin() + j);         
-                            break;      
+                            // else
+                            // {
+                                close(all_df[i].fd);
+                                all_df.erase(all_df.begin() + i);
+                                all_client.erase(all_client.begin() + j);         
+                                break;       
+                            // }
                         }
                     }        
                 }
@@ -229,8 +238,6 @@ int main(int argc,char **argv)
 	{
 		std::cerr << e.what() << '\n';
 	}
-
-
     return 0;
 }
 

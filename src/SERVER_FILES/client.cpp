@@ -17,6 +17,7 @@ client::client(int fd)
     this->contentread = 0;
     this->firstbuff = false;
     this->server_name="";
+    this->sendLenth = 0;
 
 }
 
@@ -56,7 +57,7 @@ void client::appendreq(char const *req, int count)
         {
             this->ischunked= true;
         }
-        
+
         
     }
     this->req.append(req,count);
