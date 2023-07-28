@@ -71,25 +71,5 @@ std::vector<server_data> parse_server(std::string config_file)
 	}
 	file.close();
 	std::cout << "size ="<< servers.size() << std::endl;
-	servers[0].locations["%.go$"].print_location();
-//	servers[0].print();
 	return servers;
 }
-
-// int main (int argc, char *argv[])
-// {
-// 	std::vector<server_data> servers;
-// 	try
-// 	{
-// 		if (argc != 2)
-// 			throw std::invalid_argument("Error: invalid number of arguments");
-// 		servers = parse_server(argv[1]);
-// 	}
-// 	catch(const std::exception& e)
-// 	{
-// 		std::cerr << e.what() << '\n';
-// 		return 1;
-// 	}
-// 	}
-// 	return 0;
-// }

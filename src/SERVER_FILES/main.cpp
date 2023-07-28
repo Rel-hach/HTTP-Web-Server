@@ -221,7 +221,6 @@ int main(int argc,char **argv)
     return 0;
 }
 
-<<<<<<< HEAD
 /*
 
     std::vector<server> servers;
@@ -233,5 +232,3 @@ int main(int argc,char **argv)
 
 
 */
-=======
->>>>>>> 9fee0154eaea831dadd82fc993409ef0cabfd203

@@ -255,7 +255,7 @@ int    response::executing_method()
             if (permissionForExecuting() == true)
             {
                 if (_method == DELETE && permissionForDeleting())
-                    std::cout << "Execute_cgi_delete()";
+                    std::cout << "Execute_cgi_delete(*this)";
                 else if (_method != DELETE)
                     std::cout << "Execute_cgi()";
                 else
