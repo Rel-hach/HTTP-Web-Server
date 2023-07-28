@@ -1,19 +1,17 @@
 #include "../../../inc/response.hpp"
 #include "../../../inc/tools.hpp"
+#include "../../../inc/server_data.hpp"
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstring>
 #include <dirent.h>
 
-Location::Location()
-{
-}
-
 
 response::response()
 {
         _homePage = "www/index.html";
-        // _index;
+        _indexes.clear();
+        _upload = "OFF";
         // _methods;             
         _root = "";
         _autoIndex = "OFF";
@@ -45,7 +43,7 @@ void response::determine_contentType()
 
     if (tools::splitting_string(_realPath, "/", tokens) > 0)
     {
-        size_t dot = tokens[tokens.size() - 1].find('.');
+        size_t dot = tokens[tokens.size() - 1].find_last_of('.');
         if (dot != std::string::npos)
         {
             _extension = tokens[tokens.size() - 1].substr(dot);
@@ -54,7 +52,7 @@ void response::determine_contentType()
             else if (_extension == ".css")
                 _contentType = "text/css";
             else if (_extension == ".js")
-                _contentType = "application/javascript";
+                _contentType = "application/javascript"; // Add this line to handle .js files
             else if (_extension == ".json")
                 _contentType = "application/json";
             else if (_extension == ".xml")
@@ -120,7 +118,9 @@ void    response::preparing_responseHeaders()
     if (_status == REDIRECTION)
     {
         _respHeaders += "Location: ";
-        _respHeaders += _redirectionPath;
+        _respHeaders += _redirection_url;
+        _respHeaders += "\r\n";
+        _respHeaders += "Cache-Control: no-cache";
         return ;
     }
 
@@ -130,8 +130,11 @@ void    response::preparing_responseHeaders()
     _respHeaders += "\r\n";
 
     // Content-Type Header
-    _respHeaders += "Content-Type: ";
-    _respHeaders += _contentType;
+    if (_method == GET || _method == POST)
+    {
+        _respHeaders += "Content-Type: ";
+        _respHeaders += _contentType;
+    }
 }
 
 
@@ -169,9 +172,9 @@ void response::getting_responsCode()
 
 bool    response::method_isFound()
 {
-    for (size_t i = 0; i < _methods.size(); ++i)
+    for (size_t i = 0; i < _allowed_methods.size(); ++i)
     {
-        if (_method == _methods[i])
+        if (_method == _allowed_methods[i])
             return (true);
     }
     return (true);
@@ -190,7 +193,6 @@ void    response::store_requestInfos(request& req)
     _isMultipart = req._isMultipart;
     if (_isMultipart)
         _boundry = req._boundry;
-    _redirection = req._isRedirect;
     if (_ischunked)
         _body = req._unchunked_body;
     else
@@ -198,37 +200,18 @@ void    response::store_requestInfos(request& req)
 }
 
 
-std::string    response::generating_response(request& request, int returnStatus)
+std::string    response::generating_response(request& request, int returnStatus, server_data& serverr)
 {
     int status;
-    std::vector<std::string> Index;
-    Index.push_back("/index.html");
-    std::vector<std::string> Methods;
-    Methods.push_back("GET");
-    Methods.push_back("DELETE");
-    Methods.push_back("POST");
-
-    Location    location1("/Test_one",Index, "/www/html/index.html", "www/html/GET_PAGE", Methods, true);
-    Location    location2("/Test_two",Index, "/www/html/index.html", "www/html/GET_PAGE", Methods, false);
-    Location    location3("/Test_tree",Index, "/www/html/index.html", "www/html/GET_PAGE", Methods, false);
-
-    std::map<std::string, Location> locations;
-    locations.insert(std::make_pair("/test_one", location1));
-    locations.insert(std::make_pair("/test_two", location2));
-    locations.insert(std::make_pair("/upload", location3));
-
-
-    // location3.isUpload = true;
-
 
     store_requestInfos(request);
 
-    get_pathAndLocationInfos (locations, _path);
+    get_pathAndLocationInfos (serverr, _path);
 
     if (returnStatus != GO_NEXT)
         _status = returnStatus;
 
-    else if (_realPath.empty())
+    else if (_realPath.empty() && _redirection == false)
         _status = Not_Found;
     
     else if (method_isFound() == false)
@@ -250,14 +233,10 @@ std::string    response::generating_response(request& request, int returnStatus)
     }
 
     else if (redirectionAnswer(_status))
-    {
         preparing_responseHeaders();
-    }
 
     else if (successAnswer(_status))
-    {
         preparing_responseHeaders();
-    }
 
     return (_respHeaders + "\r\n\r\n" + _fileContent);
 }
@@ -270,12 +249,18 @@ int    response::executing_method()
     {
         determine_contentType();
 
+        // if cgi : GET - DELETE - POST 
         if (_extension == _cgiExtention)
         {
             if (permissionForExecuting() == true)
-                std::cout << "return ( Execute_cgi(*this) )";
-            else
-                return (_status);
+            {
+                if (_method == DELETE && permissionForDeleting())
+                    std::cout << "Execute_cgi_delete()";
+                else if (_method != DELETE)
+                    std::cout << "Execute_cgi()";
+                else
+                    return (Forbidden);
+            }
         }
 
         if (_method == "GET")
@@ -288,31 +273,47 @@ int    response::executing_method()
 
         else if (_method == "POST")
         {
-            stroring_requestBody();
+            return (stroring_requestBody());
         }
 
         else if (_method == "DELETE")
         {
+            //websev_http_dav_module = "ON";
             // must return 405 method not allowed. sbin ();
-            if (permissionForDeleting())
-            {
-                if (unlink(_realPath.c_str()) == -1)
-                    return (Internal_Server);
-                else
+            // if (permissionForDeleting())
+            // {
+            //     if (unlink(_realPath.c_str()) == -1)
+            //         return (Internal_Server);
+            //     else
+            //     {
+            //         // _fileContent = readPage(DELETE_FILE);
+            //         // _contentLength = _fileContent.size();
+            //         return (No_Content);
+            //     }
+            // }
+            // return (_status);
+            
+            /*
+                if (_method == DELETE && delete_module == enabled && permissionForDeleting())
                 {
-                    _fileContent = readPage(DELETE_FILE);
-                    return (No_Content);
+                    if (unlink(_realPath.c_str() == -1))
+                        return (Internal_server);
+                    else
+                        return (No_Content);
                 }
-            }
-            return (_status);
+                else
+                    return (Method_Not_Allowed);
+
+            */
+            return (Method_Not_Allowed);
         }
     }
 
     else if (_autoIndex == "OFF" && _method == "GET")
     {
-        for (size_t i = 0; i < _index.size(); i++)
+        for (size_t i = 0; i < _indexes.size(); i++)
         {
-            _realPath += _index[i];
+            _realPath += _indexes[i];
             determine_contentType();
 
             if ( _extension == _cgiExtention) // this part must be removed.
@@ -361,8 +362,9 @@ int    response::executing_method()
 
 int     response::stroring_requestBody()
 {
-    // if (_root.empty() || _isupload == false)
-    //     return (Forbidden);
+    _upload = "ON";
+    if (_upload != "ON")
+        return (Forbidden);
     DIR *dh = opendir(_root.c_str());
     if (dh == NULL)
     {
@@ -540,64 +542,90 @@ std::string  response::readPage(std::string page)
 
 
 
-void    response::get_pathAndLocationInfos (std::map<std::string, Location> locations, std::string uri)
+void    response::get_pathAndLocationInfos (server_data &serverr, std::string uri)
 {
+
     if (uri.empty())
         return ;
+
+    std::map<std::string, location> locations = serverr.locations;
 
     if (!_referer.empty() && _referer.find('.') == std::string::npos)
     {
         if (uri.find(_referer) == std::string::npos)
             uri = _referer + uri;
     }
-
-    std::cout << "uri : " << uri << std::endl;
     
     std::string temp = uri;
 
-    std::map<std::string, Location>::iterator it;
+    std::cout << "URI : " << std::endl;
+    std::map<std::string, location>::iterator it;
 
+    for (it = locations.begin(); it != locations.end(); ++it)
+    {
+        std::cout << "location : "<< it->first << std::endl;
+    }
 
     for (size_t i = temp.size(); i > 0 ; i--)
     {
         if ((it = locations.find(temp)) != locations.end())
         {
-            if (uri > it->first && uri[it->first.size()] == '/')
-            {
-                _fileName = uri.substr(it->first.size() + 1);
+            _locationName = it->first;
+            if ( (uri == _locationName ) || ((uri.size() > _locationName.size()) && ( uri [_locationName.size()] == '/')) )
                 break ;
-            }
-            else if (uri == it->first)
-                break ;
+            else
+                _locationName = "";
         }
         temp = temp.substr(0, i);
     }
      
     if (it != locations.end())
     {
-        _locationName = it->first;
-        _methods = it->second.methods;
-        _index = it->second.index;
-        _redirection = it->second.redirection;
-        _redirectionPath = it->second.redirectionPath;
-        _isupload = it->second.isUpload;
-        _autoIndex = "OFF";
+        std::cout << "LOCATION FOUND : " << _locationName << std::endl;
         _root = it->second.root;
-        _clientMaxBodySize = it->second.clientMaxBodySize;
-        if ( uri.size() > it->first.size() )
+        _allowed_methods = it->second.allow_methods;
+        _indexes = it->second.index;
+        // if (_locationName.compare("/redirecting") == 0)
+        // {
+        //     _redirection_code = 301;
+        //     _redirection_url = "https://www.google.com";
+        // }
+        // _upload = it->second.upload;;
+        if (!_redirection_url.empty() && _redirection_code == REDIRECTION)
         {
+            _status = REDIRECTION;
+            _redirection = true;
+        }
+        _isupload = it->second.upload;
+        _autoIndex = it->second.autoindex;
+
+        // index kaywsl khawi 
+
+        if ( uri.size() > _locationName.size() )
+        {
+            std::cout << _realPath << std::endl;
             if (uri[temp.size()] == '/')
+            {
                 _realPath = _root + uri.substr(temp.size());
+                _fileName = uri.substr(_locationName.size() + 1);
+                std::cout << "_fileName : " << _fileName << std::endl;
+            }
         }
 
-        else if (it->first.size() == uri.size())
+        else if (_locationName.size() == uri.size())
+        {
             _realPath = _root;
+        }
     }
 
     else if (uri == "/" && _method == "GET")
     {
-        _realPath = "www/index.html";
+        _realPath = serverr.home;
     }
+
+    _errorPages = serverr.error_pages;
+    _clientMaxBodySize = std::stoul(serverr.client_max_body_size);
+
 }
 
 
@@ -625,12 +653,7 @@ std::string    response::getErrorPage()
 }
 
 
-
-
-
-// AUTO-INDEX
-
-
+/* -------------------------------------------------- */
 
 
 int     response::listing_requestDirectory()
@@ -664,7 +687,7 @@ int     response::listing_requestDirectory()
 }
 
 
-
+/* -------------------------------------------------- */
 
 
 bool        response::successAnswer(int status)

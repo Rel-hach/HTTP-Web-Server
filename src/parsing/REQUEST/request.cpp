@@ -25,10 +25,10 @@
         this->_isCgi = false;
     }
 
-    int   request::processing_request( client& clientt, server& serv )
+    int   request::processing_request( client& clientt, server_data & serv )
     {
-        (void)serv;
 
+        (void)(serv);
         std::string request = clientt.getreq();
 
         if (request.empty() || isspace(request[0]))
@@ -42,13 +42,10 @@
         _headersBody.clear();
         _body.clear();
 
-        int i = 0;
-        if ((i = tools::splitting_string(request, "\r\n\r\n", tokens)) > 1)
+   
+        if ((tools::splitting_string(request, "\r\n\r\n", tokens)) > 1)
         {
-            std::cout << "_request LENGHT : " << request.length() << std::endl;
             _body = request.substr(request.find("\r\n\r\n") + 4);
-            std::cout << "_body LENGHT : " << _body.length() << std::endl;
-
         }
         
         if (tools::splitting_string(tokens[0], "\r\n", _headers) > 1)

@@ -24,7 +24,7 @@ void fill_vector(std::vector<std::string> &vec, std::string &values){
 			value += values[i];
 		i++;
 	}
-}
+} 
 
 std::pair<std::string, std::string> fill_pair(std::string &line){
 	std::string key;
