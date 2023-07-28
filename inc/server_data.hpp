@@ -25,7 +25,7 @@ public:
 	~server_data();
  
 	std::string host;
-	int port;
+	std::vector<int> port;
 	std::vector<std::string> server_names;
 	std::string home;
 	std::string client_max_body_size;

@@ -25,9 +25,14 @@ server_data &server_data::operator=(const server_data &server)
 
 void server_data::print(){
 	std::cout << "host = " << host << std::endl;
-	std::cout << "port = " << port << std::endl;
-	std::cout << "home = " << home << std::endl;
 	size_t i = 0;
+	while (i < port.size())
+	{
+		std::cout << "port[" << i << "] = " << port[i] << std::endl;
+		i++;
+	}
+	std::cout << "home = " << home << std::endl;
+	i = 0;
 	while (i < server_names.size())
 	{
 		std::cout << "server_name[" << i << "] = " << server_names[i] << std::endl;

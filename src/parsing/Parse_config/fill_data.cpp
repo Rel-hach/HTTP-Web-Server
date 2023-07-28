@@ -4,18 +4,20 @@
 #include "../../../inc/server_data.hpp"
 #include "../../../inc/location.hpp"
 #include "../../../inc/tools.hpp"
+
 void fill_vector(std::vector<std::string> &vec, std::string &values){
 	std::string value;
 	int i = 0;
 	trim(values, " \t[]");
 	while (values[i])
 	{
-		if (values[i] == ',' || values[i + 1] == '\0')
+		if (values[i] == ',' || values[i + 1] == '\0' || values[i] == '\"')
 		{
 			if (values[i + 1] == '\0')
 				value += values[i];
 			trim(value, " \t\"");
-			vec.push_back(value);
+			if (!value.empty())
+				vec.push_back(value);
 			value.clear();
 		}
 		else
@@ -37,6 +39,11 @@ std::pair<std::string, std::string> fill_pair(std::string &line){
 	return (std::make_pair(key, value));
 }
 
+void check_int(std::string &value){
+	if (atoi(value.c_str()) < 0 || atoi(value.c_str()) > 65535 || value.find_first_not_of("0123456789") != std::string::npos)
+		throw std::invalid_argument("Error: invalid port");
+}
+
 void fill_server(server_data &server, std::string &line){
 	std::string key;
 	std::string value;
@@ -52,9 +59,13 @@ void fill_server(server_data &server, std::string &line){
 		server.host = value;
 	else if (key == "port")
 	{
-		if (atoi(value.c_str()) < 0 || atoi(value.c_str()) > 65535 || value.find_first_not_of("0123456789") != std::string::npos)
-			throw std::invalid_argument("Error: invalid port");
-		server.port = atoi(value.c_str());
+		std::vector<std::string> ports;
+		tools::splitting_string(value, " ,\"", ports);
+		for (size_t i = 0; i < ports.size(); i++)
+		{
+			check_int(value);
+			server.port.push_back(atoi(ports[i].c_str()));
+		}
 	}
 	else if (key == "server_name")
 		fill_vector(server.server_names, value);

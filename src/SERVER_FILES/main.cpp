@@ -23,7 +23,7 @@ int main(int argc,char **argv)
         //staart server and bind and lesten
         for (size_t i = 0; i < servers.size(); i++)
         {
-            server Server = server(servers[i].port,servers[i].host);
+            server Server = server(servers[i].port[0],servers[i].host);
             all_server.push_back(Server);
             if(Server.startServer())
                 return 1;
