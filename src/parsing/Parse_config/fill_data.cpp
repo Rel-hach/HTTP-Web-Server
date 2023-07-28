@@ -60,10 +60,10 @@ void fill_server(server_data &server, std::string &line){
 	else if (key == "port")
 	{
 		std::vector<std::string> ports;
-		tools::splitting_string(value, " ,\"", ports);
+		tools::splitting_string(value, " ", ports);
 		for (size_t i = 0; i < ports.size(); i++)
 		{
-			check_int(value);
+			check_int(ports[i]);
 			server.port.push_back(atoi(ports[i].c_str()));
 		}
 	}
