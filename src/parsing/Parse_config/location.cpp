@@ -23,6 +23,7 @@ location &location::operator=(const location &location)
 	this->autoindex = location.autoindex;
 	this->root = location.root;
 	this->upload = location.upload;
+	this->index = location.index;
 	this->cgi_extensions = location.cgi_extensions;
 	this->return_code = location.return_code;
 	this->allow_methods = location.allow_methods;
