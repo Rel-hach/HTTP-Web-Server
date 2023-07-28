@@ -1,6 +1,6 @@
 [[server]]
     port = 8000
-    host = "127.0.0.1"
+    host = 127.0.0.1
 # this is a comment skip it
     server_name = "webserv.com"
     root = "    img "
@@ -18,7 +18,7 @@
 
     [[server.location]]
         uri = "%.go$"
-	    index = ["index.html", "index.htm", "index.php"]
+	    index = ["html", "htm", "php"]
     	root = "    img "
     	autoindex = "ON"
 		#root should be added

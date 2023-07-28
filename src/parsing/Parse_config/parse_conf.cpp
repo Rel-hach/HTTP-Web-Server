@@ -70,7 +70,9 @@ std::vector<server_data> parse_server(std::string config_file)
 		}
 	}
 	file.close();
-	servers[0].locations[uri_p.first].print_location();
+	std::cout << "size ="<< servers.size() << std::endl;
+	servers[0].locations["%.go$"].print_location();
+//	servers[0].print();
 	return servers;
 }
 
