@@ -1,82 +1,54 @@
 [[server]]
     port = 8000
-    host = 127.0.0.1
+    host = "127.0.0.1"
 # this is a comment skip it
     server_name = "webserv.com"
     root = "www/index.html"
     client_max_body_size = "2G"
 
 
-    [[server.error_page]]
-        401 = "/errors/4xx.html"
-        403 = "/errors/4xx.html"
-        501 = "/errors/5xx.html"
-        500 = "/errors/5xx.html"
-        502 = "/errors/5xx.html"
-        503 = "/errors/5xx.html"
-        504 = "/errors/5xx.html"
+#    [[server.error_page]]
+#        401 = "/errors/4xx.html"
+#        403 = "/errors/4xx.html"
+#        501 = "/errors/5xx.html"
+#        500 = "/errors/5xx.html"
+#        502 = "/errors/5xx.html"
+#        503 = "/errors/5xx.html"
+#        504 = "/errors/5xx.html"
+
+# this location will redirect you to the url.
 
     [[server.location]]
         uri = "/redirecting"
-        return = 301 https://www.google.com
+        return 301 https://www.google.com
 
+# you can upload
     [[server.location]]
-        uri = "/website"
-        root = "www/fullyWebsite"
-        index = ["index.html", "video.html", "contact.html"]
+        uri = "/uploading"
+		root = "www/upload"
+        index = ["index.html"]
         allow_methods = ["GET", "POST"]
-    
+	#	delete_module = "enabled"
+
+# shows autoindex (directory)
     [[server.location]]
         uri = "/autoindexing"
         root = "www/testAutoIndex"
-        autoindex = "ON"
         allow_methods = ["GET"]
-
-[[server]]
-    port = 8001
-    host = 127.0.0.1
-# this is a comment skip it
-    server_name = "webserv.com"
-    root = "www/index.html"
-    client_max_body_size = "2G"
-
-    [[server.error_page]]
-        401 = "/errors/4xx.html"
-        403 = "/errors/4xx.html"
-        501 = "/errors/5xx.html"
-        500 = "/errors/5xx.html"
-        502 = "/errors/5xx.html"
-        503 = "/errors/5xx.html"
-        504 = "/errors/5xx.html"
+        autoindex = "ON"
     
+# website 
     [[server.location]]
-        uri = "/uploading"
-        root = "www/upload"
-        index = ["index.html"]
-        # post_module = "enabled";
+        uri = "/website"
         allow_methods = ["GET", "POST"]
-    
-    [[server.location]]
-        uri = "/deleting"
-        root = "www/upload"
-        index = ["index.html"]
-        # delete_module = "enabled";
-        allow_methods = ["GET", "DELETE"]
+        index = ["index.html", "video.html", "contact.html", "about.html"]
+        root = "www/fullywebsite"
 
-    [[server.location]]
-        uri = "/cgi_add_2_numbers"
-        extension = ".py"
-        cgi_path = "www/cgi-bin"
-    
+#   delete a file if the module "websev_http_dav_module" is enabled.
 
-    [[server.location]]
-        uri = "/cookies"
-        extension = ".php"
-        cgi_path = "www/cgi-bin"
-    
-    [[server.location]]
-        uri = "/session"
-        extension = ".php"
-        cgi_path = "www/cgi-bin"
-    
-    
+#    [[server.location]]
+#       uri = "/deleting"
+#       root = "www/upload
+#       delete_module = "enabled"
+#       allow_methods = ["GET", "DELETE"]
+#       index = ["index.html"]
