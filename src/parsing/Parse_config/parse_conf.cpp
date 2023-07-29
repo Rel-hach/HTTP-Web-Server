@@ -2,12 +2,21 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <sstream>
 #include <cwctype>
 #include <stdlib.h>
 #include "../../../inc/tools.hpp"
+
+void check_is_empty(std::vector<server_data> &servers){
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		if (servers[i].is_empty != ( EMPTY | SERVER_NAME | PORT | HOST ))
+			throw std::invalid_argument("Error: empty interesting information");
+	}
+}
 
 std::vector<server_data> parse_server(std::string config_file)
 {
@@ -34,6 +43,7 @@ std::vector<server_data> parse_server(std::string config_file)
 //			it = servers.back().locations.begin();
 			std::cout << "\033[4;33mfound server\033[0m" << std::endl;
 			servers.push_back(server_data());
+			servers.back().is_empty = EMPTY;
 			flag = SERVER;
 		}
 		else if (line == "[[server.location]]")
@@ -52,7 +62,7 @@ std::vector<server_data> parse_server(std::string config_file)
 		else 
 		{
 			if (flag == SERVER)
-				fill_server(servers, servers.back(), line);
+				fill_server(servers.back(), line);
 			else if (flag == LOCATION && line != "[[server.location]]")
 			{
 				if (pseudo_flag){
@@ -70,6 +80,8 @@ std::vector<server_data> parse_server(std::string config_file)
 		}
 	}
 	file.close();
+	std::cout << "checking..." << std::endl;
+	check_is_empty(servers);
 	std::cout << "size ="<< servers.size() << std::endl;
 	std::cout << "server[0].locations.at[/redirecting] ="  << std::endl; 
 	servers[0].locations.at("/redirecting").print_location();

@@ -6,6 +6,10 @@ server_data::server_data()
 {
 }
 
+server_data::server_data(server_data &server){
+	*this = server;
+}
+
 server_data::server_data(const server_data &server)
 {
 	*this = server;
@@ -21,6 +25,10 @@ server_data &server_data::operator=(const server_data &server)
 	this->locations = server.locations;
 	this->error_pages = server.error_pages;
 	return *this;
+}
+
+e_empty operator|(e_empty a, e_empty b){
+  return static_cast<e_empty>(static_cast<int>(a) | static_cast<int>(b));
 }
 
 void server_data::print(){

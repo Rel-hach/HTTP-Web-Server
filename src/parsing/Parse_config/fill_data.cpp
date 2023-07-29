@@ -65,7 +65,7 @@ void check_if_duplicated(std::vector<server_data> &servers, std::vector<std::str
 	}
 }
 
-void fill_server(std::vector<server_data>servers, server_data &server, std::string &line){
+void fill_server(server_data &server, std::string &line){
 	std::string key;
 	std::string value;
 	char eq;
@@ -75,9 +75,14 @@ void fill_server(std::vector<server_data>servers, server_data &server, std::stri
 	std::getline(ss, value);
 	check_value_key(value, key);
 	trim(value, " \t\"");	
+//	server.is_empty = empty;
 
 	if (key == "host")
+	{
+		server.is_empty = server.is_empty | HOST;
+		std::cout << "\nis_empty\n" << server.is_empty << key << std::endl;
 		server.host = value;
+	}
 	else if (key == "port")
 	{
 		std::vector<std::string> ports;
@@ -85,14 +90,15 @@ void fill_server(std::vector<server_data>servers, server_data &server, std::stri
 		for (size_t i = 0; i < ports.size(); i++)
 		{
 			check_int(ports[i]);
+			server.is_empty = server.is_empty | PORT;
+			std::cout << "\nis_empty\n" << server.is_empty << key << std::endl;
 			server.port.push_back(atoi(ports[i].c_str()));
 		}
 	}
 	else if (key == "server_name")
 	{
-		std::vector<std::string> server_names;
-		tools::splitting_string(value, " ", server_names);
-		check_if_duplicated(servers, server_names);
+		server.is_empty = server.is_empty | SERVER_NAME;
+		std::cout << "\nis_empty\n" << server.is_empty << key << std::endl;
 		fill_vector(server.server_names, value);
 	}
 	else if (key == "root")
