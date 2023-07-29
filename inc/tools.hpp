@@ -207,7 +207,7 @@ int check_if_closed(std::string value);
 void check_value_key(std::string &value, std::string &key);
 void fill_vector(std::vector<std::string> &vec, std::string &values);
 std::pair<std::string, std::string> fill_pair(std::string &line);
-void fill_server(server_data &server, std::string &line);
+void fill_server(std::vector<server_data>servers, server_data &server, std::string &line);
 void fill_location(location &location, std::string &line);
 void fill_error_page(std::map<int , std::string> &error_page, std::string &line);
 

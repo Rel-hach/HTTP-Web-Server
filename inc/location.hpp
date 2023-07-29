@@ -22,6 +22,8 @@ public:
 	std::vector<std::string> cgi_extensions;//should be handled
 	size_t return_code;
 	std::string return_path;
+//	std::string delete_module;
+//	std::string post_module;
 protected:
 private:
 

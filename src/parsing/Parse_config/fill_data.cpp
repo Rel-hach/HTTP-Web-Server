@@ -44,7 +44,28 @@ void check_int(std::string &value){
 		throw std::invalid_argument("Error: invalid port");
 }
 
-void fill_server(server_data &server, std::string &line){
+void check_if_duplicated(std::vector<server_data> &servers, std::vector<std::string >&values){
+	std::string value;
+	for (size_t i = 0; i < values.size(); i++)
+	{
+		for (size_t j = i + 1; j < values.size(); j++)
+		{
+			if (values[i] == values[j])
+				throw std::invalid_argument("Error: duplicated server_name");
+		}
+		value = values[i];
+		for (size_t i = 0; i < servers.size(); i++)
+		{
+			for (size_t j = 0; j < servers[i].server_names.size(); j++)
+			{
+				if (servers[i].server_names[j] == value)
+					throw std::invalid_argument("Error: duplicated server_name");
+			}
+		}
+	}
+}
+
+void fill_server(std::vector<server_data>servers, server_data &server, std::string &line){
 	std::string key;
 	std::string value;
 	char eq;
@@ -68,7 +89,12 @@ void fill_server(server_data &server, std::string &line){
 		}
 	}
 	else if (key == "server_name")
+	{
+		std::vector<std::string> server_names;
+		tools::splitting_string(value, " ", server_names);
+		check_if_duplicated(servers, server_names);
 		fill_vector(server.server_names, value);
+	}
 	else if (key == "root")
 		server.home = value;
 	else if (key == "client_max_body_size")
@@ -112,6 +138,8 @@ void fill_location(location &location, std::string &line){
 	{
 		std::vector<std::string> tokens;
 		tools::splitting_string(value, " ", tokens);
+		if (tokens.size() != 2 || tokens[0].find_first_not_of("0123456789") != std::string::npos || tokens[0].empty() || tokens[1].empty())
+			throw std::invalid_argument("Error: invalid return value");
 		location.return_code = atoi(tokens[0].c_str());
 		location.return_path = tokens[1];
 	}

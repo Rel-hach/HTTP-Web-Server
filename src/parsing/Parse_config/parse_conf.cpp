@@ -52,7 +52,7 @@ std::vector<server_data> parse_server(std::string config_file)
 		else 
 		{
 			if (flag == SERVER)
-				fill_server(servers.back(), line);
+				fill_server(servers, servers.back(), line);
 			else if (flag == LOCATION && line != "[[server.location]]")
 			{
 				if (pseudo_flag){
@@ -71,5 +71,7 @@ std::vector<server_data> parse_server(std::string config_file)
 	}
 	file.close();
 	std::cout << "size ="<< servers.size() << std::endl;
+	std::cout << "server[0].locations.at[/redirecting] ="  << std::endl; 
+	servers[0].locations.at("/redirecting").print_location();
 	return servers;
 }

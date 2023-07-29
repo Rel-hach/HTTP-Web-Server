@@ -2,7 +2,7 @@
     port = 8000
     host = "127.0.0.1"
 # this is a comment skip it
-    server_name = "webserv.com"
+    server_name = "webserv.com" "webserv.com"
     root = "www/index.html"
     client_max_body_size = "2G"
 
@@ -18,9 +18,12 @@
 
 # this location will redirect you to the url.
 
+#[[server]]
+#	port = 8001
+#	server_name = "webserv.com"
     [[server.location]]
         uri = "/redirecting"
-        return 301 https://www.google.com
+        return = 301 https://www.google.com
 
 # you can upload
     [[server.location]]
