@@ -3,7 +3,7 @@
     host = 127.0.0.1
 # this is a comment skip it
     server_name = "webserv.com"
-    root = "    img "
+    root = "www/index.html"
     client_max_body_size = "2G"
 
 
@@ -17,85 +17,66 @@
         504 = "/errors/5xx.html"
 
     [[server.location]]
-        uri = "%.go$"
-	    index = ["html", "htm", "php"]
-    	root = "    img "
-    	autoindex = "ON"
-		#root should be added
-        allow_methods = ["GET", "POST"]
-        cgi_path = "./www/cgi-bin"
+        uri = "/redirecting"
+        return = 301 https://www.google.com
 
     [[server.location]]
-        uri = "%.py$"
+        uri = "/website"
+        root = "www/fullyWebsite"
+        index = ["index.html", "video.html", "contact.html"]
         allow_methods = ["GET", "POST"]
-        cgi_path = "www/cgi-bin"
-		root = "jgjgjgjgjgjgj/gj"
-		upload = "ok"
-
+    
     [[server.location]]
-        uri = "/"
-        allow_methods = ["GET", "POST"]
+        uri = "/autoindexing"
+        root = "www/testAutoIndex"
         autoindex = "ON"
-
-    [[server.location]]
-        uri = "/upload"
-
-    [[server.location]]
-        uri = "/assets"
-
-
-    [[server.location]]
-        uri = "/yo"
-
-    [[server.location]]
-        uri = "/redirection"
+        allow_methods = ["GET"]
 
 [[server]]
-    port = 8081
-    root = "srcs"
-    host = "127.0.0.1"
-    server_name = "example_1.com"
-
-[[server]]
-    port = 9090
-    host = "127.0.0.1"
-    server_name = "example_2.com"
-    root = "./srcs"
-
-    [[server.location]]
-        uri = "/l3erbi"
-	    index = ["index.html", "index.htm", "index.php"]
-    	root = "    img "
-    	autoindex = "ON"
+    port = 8001
+    host = 127.0.0.1
+# this is a comment skip it
+    server_name = "webserv.com"
+    root = "www/index.html"
+    client_max_body_size = "2G"
 
     [[server.error_page]]
         401 = "/errors/4xx.html"
-
-[[server]]
-    port = 9000
-    host = "127.0.0.1"
-    server_name = "wordpress.com"
-    root = "srcs"
-
-    [[server.error_page]]
-        401 = "/errors/4xx.html"
+        403 = "/errors/4xx.html"
         501 = "/errors/5xx.html"
-# listen
-# root
-# uri
-#
-#location /php {
-#		allowed_methods GET,POST;
-#		cgiPath cgi-bin/php-cgi;
-#		cgiExt php;
-#	}
-#location /python {
-#	cgiPath /usr/local/bin/python3;
-#	cgiExt py;
-#}
-#
-#location cgi-bin {
-#      root ./;                                                 # cgi-bin location, mandatory parameter
-#      cgi_path /usr/bin/python3 /bin/bash;                     # location of interpreters installed on the current system, mandatory parameter
-#      cgi_ext .py .sh;                                         # extensions for executable files, mandatory parameter
-#  }
+        500 = "/errors/5xx.html"
+        502 = "/errors/5xx.html"
+        503 = "/errors/5xx.html"
+        504 = "/errors/5xx.html"
+    
+    [[server.location]]
+        uri = "/uploading"
+        root = "www/upload"
+        index = ["index.html"]
+        # post_module = "enabled";
+        allow_methods = ["GET", "POST"]
+    
+    [[server.location]]
+        uri = "/deleting"
+        root = "www/upload"
+        index = ["index.html"]
+        # delete_module = "enabled";
+        allow_methods = ["GET", "DELETE"]
+
+    [[server.location]]
+        uri = "/cgi_add_2_numbers"
+        extension = ".py"
+        cgi_path = "www/cgi-bin"
+    
+
+    [[server.location]]
+        uri = "/cookies"
+        extension = ".php"
+        cgi_path = "www/cgi-bin"
+    
+    [[server.location]]
+        uri = "/session"
+        extension = ".php"
+        cgi_path = "www/cgi-bin"
+    
+    
