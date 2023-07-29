@@ -245,11 +245,10 @@ std::string    response::generating_response(request& request, int returnStatus,
 
 int    response::executing_method()
 {
+  
     if ((int)_realPath.find('.') != -1)
     {
         determine_contentType();
-
-        // if cgi : GET - DELETE - POST 
         if (_extension == _cgiExtention)
         {
             if (permissionForExecuting() == true)
@@ -313,7 +312,7 @@ int    response::executing_method()
     {
         for (size_t i = 0; i < _indexes.size(); i++)
         {
-            _realPath += _indexes[i];
+            _realPath += "/" + _indexes[i];
             determine_contentType();
 
             if ( _extension == _cgiExtention) // this part must be removed.
@@ -362,6 +361,7 @@ int    response::executing_method()
 
 int     response::stroring_requestBody()
 {
+    std::cout << "JA \n\n";
     _upload = "ON";
     if (_upload != "ON")
         return (Forbidden);
@@ -437,7 +437,6 @@ int     response::storing_multipleParts()
 
         ofs << filecontent;
         ofs.close();
-
     }
     _fileContent = readPage(UPLOAD_FILE);
     return (201);
@@ -511,15 +510,25 @@ bool    response::permissionForDeleting()
 
 
 
-int    response::reading_fileContent()
+int response::reading_fileContent()
 {
-    std::ifstream ifs(_realPath.c_str());
+    std::ifstream ifs(_realPath.c_str(), std::ios::binary);
 
-    std::string string ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-    _fileContent.assign(string);
-    _contentLength = _fileContent.size();
-    string.clear();
-    return (true);
+    ifs.seekg(0, std::ios::end);
+    std::streampos length = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
+
+    char* buffer = new char[length];
+
+    ifs.read(buffer, length);
+
+    _contentLength = length;
+
+    _fileContent = std::string(buffer, length);
+
+    delete[] buffer;
+
+    return true;
 }
 
 
@@ -528,23 +537,33 @@ int    response::reading_fileContent()
 
 std::string  response::readPage(std::string page)
 {
-    std::ifstream ifs(page.c_str());
+  std::ifstream ifs(page.c_str(), std::ios::binary);
 
-    return std::string ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+    ifs.seekg(0, std::ios::end);
+    std::streampos length = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
+
+    char* buffer = new char[length];
+
+    ifs.read(buffer, length);
+
+    _contentLength = length;
+
+    std::string content = std::string(buffer, length);
+
+    delete[] buffer;
+
+    return (content);
 }
-
-
 
 
 // GET PATH AND LOCATION INFOS
 
 
 
-
-
 void    response::get_pathAndLocationInfos (server_data &serverr, std::string uri)
 {
-
+    
     if (uri.empty())
         return ;
 
@@ -558,20 +577,14 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
     
     std::string temp = uri;
 
-    std::cout << "URI : " << std::endl;
     std::map<std::string, location>::iterator it;
-
-    for (it = locations.begin(); it != locations.end(); ++it)
-    {
-        std::cout << "location : "<< it->first << std::endl;
-    }
 
     for (size_t i = temp.size(); i > 0 ; i--)
     {
         if ((it = locations.find(temp)) != locations.end())
         {
             _locationName = it->first;
-            if ( (uri == _locationName ) || ((uri.size() > _locationName.size()) && ( uri [_locationName.size()] == '/')) )
+            if ((uri == _locationName ) || ((uri.size() > _locationName.size()) && (uri [_locationName.size()] == '/')))
                 break ;
             else
                 _locationName = "";
@@ -581,25 +594,25 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
      
     if (it != locations.end())
     {
-        std::cout << "LOCATION FOUND : " << _locationName << std::endl;
         _root = it->second.root;
         _allowed_methods = it->second.allow_methods;
         _indexes = it->second.index;
-        // if (_locationName.compare("/redirecting") == 0)
-        // {
-        //     _redirection_code = 301;
-        //     _redirection_url = "https://www.google.com";
-        // }
-        // _upload = it->second.upload;;
+        _upload = it->second.upload;;
+
+        _redirection_code = it->second.return_code;
+        _redirection_url = it->second.return_path;
+
+        std::cout << "_redirection_url : " << _redirection_url << std::endl; 
         if (!_redirection_url.empty() && _redirection_code == REDIRECTION)
         {
             _status = REDIRECTION;
             _redirection = true;
         }
         _isupload = it->second.upload;
-        _autoIndex = it->second.autoindex;
 
-        // index kaywsl khawi 
+        if (it->second.autoindex == "ON")
+            _autoIndex = it->second.autoindex;
+        _autoIndex = "ON";
 
         if ( uri.size() > _locationName.size() )
         {
@@ -608,7 +621,6 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
             {
                 _realPath = _root + uri.substr(temp.size());
                 _fileName = uri.substr(_locationName.size() + 1);
-                std::cout << "_fileName : " << _fileName << std::endl;
             }
         }
 
@@ -625,17 +637,10 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
 
     _errorPages = serverr.error_pages;
     _clientMaxBodySize = std::stoul(serverr.client_max_body_size);
-
 }
 
 
-
-
-
 // ERROR PAGE
-
-
-
 
 
 std::string    response::getErrorPage()
