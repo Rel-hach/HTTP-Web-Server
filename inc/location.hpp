@@ -19,11 +19,11 @@ public:
 	std::string root;//should be handled
 	bool upload;// = false;//should be handled
 	std::vector<std::string> index;
-	std::vector<std::string> cgi_extensions;//should be handled
+	std::string cgi_extension;//should be handled
 	size_t return_code;
 	std::string return_path;
-//	std::string delete_module;
-//	std::string post_module;
+	std::string delete_module;
+	std::string post_module;
 protected:
 private:
 

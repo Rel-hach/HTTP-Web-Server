@@ -24,6 +24,7 @@
     [[server.location]]
         uri = "/redirecting"
         return = 301 https://www.google.com
+		cgi_extension = ".php"
 
 # you can upload
     [[server.location]]
@@ -31,7 +32,7 @@
 		root = "www/upload"
         index = ["index.html"]
         allow_methods = ["GET", "POST"]
-	#	delete_module = "enabled"
+		delete_module = "enable"
 
 # shows autoindex (directory)
     [[server.location]]

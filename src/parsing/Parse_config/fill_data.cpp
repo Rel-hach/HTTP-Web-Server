@@ -75,7 +75,6 @@ void fill_server(server_data &server, std::string &line){
 	std::getline(ss, value);
 	check_value_key(value, key);
 	trim(value, " \t\"");	
-//	server.is_empty = empty;
 
 	if (key == "host")
 	{
@@ -114,6 +113,8 @@ void fill_location(location &location, std::string &line){
 	std::stringstream ss(line);
 	ss >> key;
 	ss >> eq;
+	if (eq != '=')
+		throw std::invalid_argument("Error: invalid location key");
 	std::getline(ss, value);
 	check_value_key(value, key);
 //	trim(value, " \t\"");
@@ -135,8 +136,8 @@ void fill_location(location &location, std::string &line){
 	}
 	else if (key == "index")
 		fill_vector(location.index, value);
-	else if (key == "cgi_extensions")
-		fill_vector(location.cgi_extensions, value);
+	else if (key == "cgi_extension")
+		location.cgi_extension = value;
 	else if (key == "return")
 	{
 		std::vector<std::string> tokens;
@@ -146,11 +147,22 @@ void fill_location(location &location, std::string &line){
 		location.return_code = atoi(tokens[0].c_str());
 		location.return_path = tokens[1];
 	}
-	else
+	else if (key == "delete_module")
 	{
-		std::cout << "key exception = " << key;
-		throw std::invalid_argument("Error: invalid location key");
+		if (value == "enable" || value == "disable")
+			location.delete_module = value;
+		else
+			throw std::invalid_argument("Error: invalid delete_module value");
 	}
+	else if (key == "post_module")
+	{
+		if (value == "enable" || value == "disable")
+			location.post_module = value;
+		else
+			throw std::invalid_argument("Error: invalid post_module value");
+	}
+	else
+		throw std::invalid_argument("Error: invalid location key");
 }
 
 void fill_error_page(std::map<int , std::string> &error_page, std::string &line){
@@ -164,8 +176,6 @@ void fill_error_page(std::map<int , std::string> &error_page, std::string &line)
 	ss >> eq;
 	std::getline(ss, value);
 	trim(value, " \t\"");
-	std::cout << "key = " << key;
-	std::cout << " value = " << value << std::endl;
 	if (key < 400 || key > 599 || k.find_first_not_of("0123456789") != std::string::npos || k.empty())
 		throw std::invalid_argument("Error: invalid error_page key");
 	else if (value.empty() || value[0] != '/' || value.substr(value.find_last_of(".")) != ".html")

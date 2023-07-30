@@ -24,9 +24,11 @@ location &location::operator=(const location &location)
 	this->root = location.root;
 	this->upload = location.upload;
 	this->index = location.index;
-	this->cgi_extensions = location.cgi_extensions;
+	this->cgi_extension = location.cgi_extension;
 	this->return_code = location.return_code;
-	this->allow_methods = location.allow_methods;
+	this->return_path = location.return_path;
+	this->post_module = location.post_module;
+	this->delete_module = location.delete_module;
 	return *this;
 }
 
@@ -46,12 +48,11 @@ void location::print_location(){
 	for (size_t i = 0; i < index.size(); i++)
 		std::cout << index[i] << " ";
 	std::cout << std::endl;
-	std::cout << "cgi_extensions = ";
-	for (size_t i = 0; i < cgi_extensions.size(); i++)
-		std::cout << cgi_extensions[i] << " ";
-	std::cout << std::endl;
+	std::cout << "cgi_extension = " << cgi_extension << std::endl;
 	std::cout << "return_code = " << return_code << std::endl;
 	std::cout << "return_path = " << return_path << std::endl;
+	std::cout << "post_module = " << post_module << std::endl;
+	std::cout << "delete_module = " << delete_module << std::endl;
 }
 
 location::~location()
