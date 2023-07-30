@@ -10,12 +10,10 @@
 #include <stdlib.h>
 #include "../../../inc/tools.hpp"
 
-void check_is_empty(std::vector<server_data> &servers){
-	for (size_t i = 0; i < servers.size(); i++)
-	{
-		if (servers[i].is_empty != ( EMPTY | SERVER_NAME | PORT | HOST ))
-			throw std::invalid_argument("Error: empty interesting information");
-	}
+void check_is_empty(server_data &server){
+		if (server.is_empty != ( EMPTY | SERVER_NAME | PORT | HOST ))
+			std::cout << "Warning: server " << " is empty" << server.is_empty << std::endl;
+//			throw std::invalid_argument("Error: empty interesting information");
 }
 
 std::vector<server_data> parse_server(std::string config_file)
@@ -40,6 +38,8 @@ std::vector<server_data> parse_server(std::string config_file)
 			continue;
 		else if (line == "[[server]]")
 		{
+			if (servers.size() > 1)
+				check_is_empty(servers.back());
 			servers.push_back(server_data());
 			servers.back().is_empty = EMPTY;
 			flag = SERVER;
@@ -74,6 +74,6 @@ std::vector<server_data> parse_server(std::string config_file)
 		}
 	}
 	file.close();
-	check_is_empty(servers);
+	check_is_empty(servers.back());
 	return servers;
 }
