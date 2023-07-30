@@ -238,6 +238,7 @@ std::string    response::generating_response(request& request, int returnStatus,
     else if (successAnswer(_status))
         preparing_responseHeaders();
 
+
     return (_respHeaders + "\r\n\r\n" + _fileContent);
 }
 
@@ -254,9 +255,9 @@ int    response::executing_method()
             if (permissionForExecuting() == true)
             {
                 if (_method == DELETE && permissionForDeleting())
-                    std::cout << "Execute_cgi_delete(*this)";
+                    std::cout << "Execute_cgi_delete()";
                 else if (_method != DELETE)
-                    std::cout << "Execute_cgi()";
+                    return(Execute_cgi(*this));
                 else
                     return (Forbidden);
             }

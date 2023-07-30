@@ -11,7 +11,6 @@
 // #endif
 
 
-
 std::vector<std::string>  find_server_name(client client, std::string port)
 {
     std::vector<std::string> clean_name;
@@ -27,7 +26,7 @@ std::vector<std::string>  find_server_name(client client, std::string port)
     return clean_name;
 }
 
-server_data find_server(std::vector<server_data>& servers,std::vector<server_data>& deplicate, client client)
+server_data find_server(std::vector<server_data>& servers, client client)
 {
     server_data server_exicte;
     std::vector<std::string> server_name =find_server_name(client,std::to_string(servers[0].port[0]));
@@ -41,14 +40,6 @@ server_data find_server(std::vector<server_data>& servers,std::vector<server_dat
             return server_exicte;
         }
     }
-    for (size_t i = 0; i < deplicate.size(); i++)
-    {
-        if(std::to_string(deplicate[i].port[0]) == server_name[1] && deplicate[i].server_names[0] == server_name[0])
-        {
-            server_exicte=deplicate[i];
-            return server_exicte;
-        }
-    } 
     for (size_t i = 0; i < servers.size(); i++)
     {
         if(std::to_string(servers[i].port[0]) == server_name[1])
@@ -60,23 +51,7 @@ server_data find_server(std::vector<server_data>& servers,std::vector<server_dat
     server_exicte = servers[0];
     return server_exicte;
 }
-std::vector<server_data> filter_server(std::vector<server_data>& servers) {
-    std::vector<server_data> deplicate;
-    for (size_t i = servers.size(); i > 0; i--) {
-        bool is_duplicate = false;
-        for (size_t j = i - 1; j > 0; j--) {
-            if (i != j && servers[i - 1].port == servers[j - 1].port && servers[i - 1].host == servers[j - 1].host) {
-                is_duplicate = true;
-                break;
-            }
-        }
-        if (is_duplicate) {
-            deplicate.push_back(servers[i - 1]);
-            servers.erase(servers.begin() + i - 1);
-        }
-    }
-    return deplicate;
-}
+
 int main(int argc,char **argv) 
 {   
     std::vector<server_data> servers;
@@ -85,39 +60,49 @@ int main(int argc,char **argv)
 		if (argc != 2)
 			throw std::invalid_argument("Error: invalid number of arguments");
 		servers = parse_server(argv[1]);
-        std::vector<server_data> deplicate = filter_server(servers); 
+        // std::vector<server_data> deplicate = filter_server(servers); 
         std::vector<pollfd> all_df;
         std::vector<server> all_server;
         std::vector<client> all_client;
         std::vector<int> fd_server;
         std::string req;
-        std::vector<int> port_bind;
+        std::map<std::string, std::vector<int> >  port_Ip_bind;
         //staart server and bind and lesten
         for (size_t i = 0; i < servers.size(); i++)
         {
-            for (size_t j = 0; j < servers[i].port.size(); j++)
-            {
-                std::vector<int>::iterator it = std::find(port_bind.begin(), port_bind.end(), servers[i].port[i]); 
-                if(it == fd_server.end())
-                {
-                    server Server = server(servers[i].port[i],servers[i].host);
-                    all_server.push_back(Server);
-                    if(Server.startServer())
-                        return 1;
-                    struct pollfd fds;
-                    fds.fd= Server.getSockert();
-                    fds.events = POLLIN;
-                    all_df.push_back(fds);
-                    fd_server.push_back(Server.getSockert());
-                    if(Server.bindServer())
-                        return 1;
-                    if(Server.listenSrver())
-                        return 1;
-                    std::cout<<servers[i].port[i]<<std::endl;
-                    port_bind.push_back(servers[i].port[i]);
-                }   
+            const std::string& ip = servers[i].host;
+            const std::vector<int>& ports = servers[i].port;
+
+            std::map<std::string, std::vector<int> >::iterator it = port_Ip_bind.find(ip);
+            if (it != port_Ip_bind.end()) {
+                for (size_t j = 0; j < ports.size(); j++) {
+                    if (std::find(it->second.begin(), it->second.end(), ports[j]) == it->second.end()) {
+                        it->second.push_back(ports[j]);
+                    }
+                }
+            } else 
+                port_Ip_bind[ip] = ports;
+        }
+
+        for (std::map<std::string, std::vector<int> >::iterator it = port_Ip_bind.begin(); it != port_Ip_bind.end(); ++it) {
+            for (size_t i = 0; i < it->second.size(); i++) {
+                server Server = server(it->second[i],it->first);
+                all_server.push_back(Server);
+                if(Server.startServer())
+                    return 1;
+                struct pollfd fds;
+                fds.fd= Server.getSockert();
+                fds.events = POLLIN;
+                all_df.push_back(fds);
+                fd_server.push_back(Server.getSockert());
+                if(Server.bindServer())
+                    return 1;
+                if(Server.listenSrver())
+                    return 1;
+                std::cout<<it->first <<"========"<<it->second[i]<<std::endl;
             }
         }
+
         signal(SIGPIPE, SIG_IGN);
         while (true)
         {
@@ -199,7 +184,7 @@ int main(int argc,char **argv)
                         if(!all_client[j].proccessing)
                         {
                             request req;
-                            server_data ser=find_server(servers, deplicate, all_client[j]);
+                            server_data ser=find_server(servers, all_client[j]);
                             int ret_status = req.processing_request(all_client[j], ser );
                             if (all_client[j]._requestIsParsed == true)
                             {

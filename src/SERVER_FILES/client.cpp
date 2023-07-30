@@ -84,7 +84,6 @@ std::string client::getreq() const
     return this->req;
 }
 
-
 void client::appendreq(char const *req, int count)
 {
     if(!this->firstbuff)
