@@ -18,9 +18,10 @@
 
 # this location will redirect you to the url.
 
-#[[server]]
-#	port = 8001
-#	server_name = "webserv.com"
+[[server]]
+	port = 8001
+	host = "127.0.0.1"
+	server_name = "webserv.com"
     [[server.location]]
         uri = "/redirecting"
         return = 301 https://www.google.com
@@ -58,6 +59,7 @@
 #       index = ["index.html"]
 [[server]]
     host = "127.0.0.1"
+	port = 8001
 # this is a comment skip it
     server_name = "webserv.com" "webserv.com"
     root = "www/index.html"

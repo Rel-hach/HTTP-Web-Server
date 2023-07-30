@@ -12,8 +12,7 @@
 
 void check_is_empty(server_data &server){
 		if (server.is_empty != ( EMPTY | SERVER_NAME | PORT | HOST ))
-			std::cout << "Warning: server " << " is empty" << server.is_empty << std::endl;
-//			throw std::invalid_argument("Error: empty interesting information");
+			throw std::invalid_argument("Error: empty interesting information");
 }
 
 std::vector<server_data> parse_server(std::string config_file)
