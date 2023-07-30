@@ -168,6 +168,7 @@ int main(int argc,char **argv)
                             std::cerr << "Error: read failed\n";
                             return 1;
                         }
+                        // 408 Request Timeout
                         for (size_t j = 0; j < all_client.size(); j++)
                         {
                             if(all_client[j].getfd() == all_df[i].fd)
