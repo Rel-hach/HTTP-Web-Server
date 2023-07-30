@@ -2,7 +2,7 @@
     port = 8000 9000 8001
     host = "127.0.0.1"
 # this is a comment skip it
-    server_name = "webserv.com" "webserv.com"
+    server_name = "webserv1.com" "webserv.com"
     root = "www/index.html"
     client_max_body_size = "2G"
 
