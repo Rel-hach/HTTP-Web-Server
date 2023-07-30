@@ -98,7 +98,7 @@ void client::appendreq(char const *req, int count)
             this->contentread = (-1 * lastposition) ;
             std::string lent = input.substr(firstposition + 15,lastposition - firstposition);
             if(lent.length())
-                this->contentlenght= std::stoi(lent);
+                this->contentlenght= std::atoi(lent.c_str());
             this->ischunked= false;
         }
         else if (input.find("Transfer-Encoding: chunked") !=  std::string::npos)

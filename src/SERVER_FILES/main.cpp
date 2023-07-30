@@ -91,22 +91,32 @@ int main(int argc,char **argv)
         std::vector<client> all_client;
         std::vector<int> fd_server;
         std::string req;
+        std::vector<int> port_bind;
         //staart server and bind and lesten
         for (size_t i = 0; i < servers.size(); i++)
         {
-            server Server = server(servers[i].port[0],servers[i].host);
-            all_server.push_back(Server);
-            if(Server.startServer())
-                return 1;
-            struct pollfd fds;
-            fds.fd= Server.getSockert();
-            fds.events = POLLIN;
-            all_df.push_back(fds);
-            fd_server.push_back(Server.getSockert());
-            if(Server.bindServer())
-                return 1;
-            if(Server.listenSrver())
-                return 1;
+            for (size_t j = 0; j < servers[i].port.size(); j++)
+            {
+                std::vector<int>::iterator it = std::find(port_bind.begin(), port_bind.end(), servers[i].port[i]); 
+                if(it == fd_server.end())
+                {
+                    server Server = server(servers[i].port[i],servers[i].host);
+                    all_server.push_back(Server);
+                    if(Server.startServer())
+                        return 1;
+                    struct pollfd fds;
+                    fds.fd= Server.getSockert();
+                    fds.events = POLLIN;
+                    all_df.push_back(fds);
+                    fd_server.push_back(Server.getSockert());
+                    if(Server.bindServer())
+                        return 1;
+                    if(Server.listenSrver())
+                        return 1;
+                    std::cout<<servers[i].port[i]<<std::endl;
+                    port_bind.push_back(servers[i].port[i]);
+                }   
+            }
         }
         signal(SIGPIPE, SIG_IGN);
         while (true)
@@ -162,7 +172,7 @@ int main(int argc,char **argv)
                         {
                             if(all_client[j].getfd() == all_df[i].fd)
                             {
-                                // all_client[j].setservr_name(buff);
+                                all_client[j].setservr_name(buff);
                                 all_client[j].appendreq(buff,content);
                                 all_client[j].addTocontentread(content);
                                 if(( all_client[j].ischunked && all_client[j].getreq().find("\r\n0\r\n\r\n") != std::string::npos)
