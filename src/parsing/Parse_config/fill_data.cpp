@@ -80,7 +80,6 @@ void fill_server(server_data &server, std::string &line){
 	if (key == "host")
 	{
 		server.is_empty = server.is_empty | HOST;
-		std::cout << "\nis_empty\n" << server.is_empty << key << std::endl;
 		server.host = value;
 	}
 	else if (key == "port")
@@ -91,14 +90,12 @@ void fill_server(server_data &server, std::string &line){
 		{
 			check_int(ports[i]);
 			server.is_empty = server.is_empty | PORT;
-			std::cout << "\nis_empty\n" << server.is_empty << key << std::endl;
 			server.port.push_back(atoi(ports[i].c_str()));
 		}
 	}
 	else if (key == "server_name")
 	{
 		server.is_empty = server.is_empty | SERVER_NAME;
-		std::cout << "\nis_empty\n" << server.is_empty << key << std::endl;
 		fill_vector(server.server_names, value);
 	}
 	else if (key == "root")

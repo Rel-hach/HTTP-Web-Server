@@ -17,7 +17,7 @@ enum e_empty {
   EMPTY = 0,
   SERVER_NAME = 1,
   PORT = 2,
-  HOST = 3
+  HOST = 4
 };
 
 e_empty operator|(e_empty a, e_empty b);
