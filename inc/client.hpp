@@ -9,7 +9,6 @@
 #include <vector>
 #include <fcntl.h>
 
-
 class client
 {
     public:
@@ -20,7 +19,9 @@ class client
         bool        _requestIsParsed;
         bool ischunked;
         std::string server_name;
-        int sendLenth;
+        long sendLenth;
+        std::string res;
+        bool proccessing;
     private:
         std::string req;
         int fd;

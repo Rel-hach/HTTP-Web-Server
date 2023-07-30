@@ -4,26 +4,37 @@
 #include "../../inc/client.hpp"
 #include "../../inc/tools.hpp"
 #include "../../inc/response.hpp"
-std::vector<std::string>  find_server_name(client client)
+
+// #ifndef __IFDEFINED
+// #define __IFDEFINED 1
+// #define if(x) if((printf("BEFORE: LINE: %i, FILE: %s\n", __LINE__, __FILE__)) && (x) && (printf("AFTER: LINE: %i, FILE: %s\n", __LINE__, __FILE__)))
+// #endif
+
+
+
+std::vector<std::string>  find_server_name(client client, std::string port)
 {
     std::vector<std::string> clean_name;
     int index = client.server_name.find(":");
     if(index !=(int) std::string::npos)
     {
         tools::splitting_string(client.server_name, ":", clean_name);
-        return clean_name;
+        if(clean_name[0].length() && clean_name[1].length())
+            return clean_name;
     }
     clean_name.push_back(client.server_name);
-    clean_name.push_back("8000");
+    clean_name.push_back(port);
     return clean_name;
 }
 
 server_data find_server(std::vector<server_data>& servers,std::vector<server_data>& deplicate, client client)
 {
     server_data server_exicte;
-    std::vector<std::string> server_name =find_server_name(client);
+    std::vector<std::string> server_name =find_server_name(client,std::to_string(servers[0].port[0]));
+    std::cout<<server_name[0]<<server_name[1]<<std::endl;
     for (size_t i = 0; i < servers.size(); i++)
     {
+
         if(std::to_string(servers[i].port[0]) == server_name[1] && servers[i].server_names[0] == server_name[0])
         {
             server_exicte=servers[i];
@@ -46,46 +57,40 @@ server_data find_server(std::vector<server_data>& servers,std::vector<server_dat
             return server_exicte;
         }
     }
+    server_exicte = servers[0];
     return server_exicte;
 }
-
-std::vector<server_data> felter_server(std::vector<server_data>& servers) {
+std::vector<server_data> filter_server(std::vector<server_data>& servers) {
     std::vector<server_data> deplicate;
-    for (size_t i = 0; i < servers.size(); i++) {
+    for (size_t i = servers.size(); i > 0; i--) {
         bool is_duplicate = false;
-        for (size_t j = 0; j < servers.size(); j++) {
-            if (i != j && servers[i].port == servers[j].port && servers[i].host == servers[j].host) {
+        for (size_t j = i - 1; j > 0; j--) {
+            if (i != j && servers[i - 1].port == servers[j - 1].port && servers[i - 1].host == servers[j - 1].host) {
                 is_duplicate = true;
                 break;
             }
         }
         if (is_duplicate) {
-            deplicate.push_back(servers[i]);
-            servers.erase(servers.begin() + i);
-            i--; 
+            deplicate.push_back(servers[i - 1]);
+            servers.erase(servers.begin() + i - 1);
         }
     }
     return deplicate;
 }
-
 int main(int argc,char **argv) 
 {   
     std::vector<server_data> servers;
-
 	try
 	{
 		if (argc != 2)
 			throw std::invalid_argument("Error: invalid number of arguments");
-        std::cout<<"hi"<<std::endl;
 		servers = parse_server(argv[1]);
-        std::cout<<"hi"<<std::endl;
-        std::vector<server_data> deplicate = felter_server(servers); 
+        std::vector<server_data> deplicate = filter_server(servers); 
         std::vector<pollfd> all_df;
         std::vector<server> all_server;
         std::vector<client> all_client;
         std::vector<int> fd_server;
         std::string req;
-
         //staart server and bind and lesten
         for (size_t i = 0; i < servers.size(); i++)
         {
@@ -98,17 +103,15 @@ int main(int argc,char **argv)
             fds.events = POLLIN;
             all_df.push_back(fds);
             fd_server.push_back(Server.getSockert());
-            // i need bind of all port
             if(Server.bindServer())
                 return 1;
             if(Server.listenSrver())
                 return 1;
         }
-        // pooling and accept connection and parsing requist
         signal(SIGPIPE, SIG_IGN);
         while (true)
         {
-            int rev =  poll(&all_df[0], all_df.size(), 1);
+            int rev =  poll(&all_df[0], all_df.size(),-1);
             if (rev == -1) {
                 std::cerr << "Error: Polling failed\n";
                 return 1;
@@ -122,22 +125,20 @@ int main(int argc,char **argv)
                         if (client_socket == -1)
                         {
                             std::cerr << "Error: client connection failed\n";
-                            close(all_df[i].fd);
+                            close(all_df[i].fd); 
                             return 1;
                         }
-                        fcntl(client_socket, F_SETFL, O_NONBLOCK);
+                        // fcntl(client_socket, F_SETFL, O_NONBLOCK); // commanted by ahabachi
                         struct pollfd fds;
                         fds.fd=  client_socket;
                         fds.events = POLLIN;
                         all_df.push_back(fds);
-                        client newclient = client(fds.fd);
-                        // newclient._serverIndex = i;
-                        all_client.push_back(newclient);
+                        all_client.push_back(client(fds.fd));
                         std::cout<< "server ==> "<< all_df[i].fd << "   accept connection cleient ==> " << client_socket<<std::endl;
                     }
                     else
                     {
-                        char buff[1024];
+                        char buff[1024]; 
                         std::memset(buff, '\0', sizeof(buff));
                         int content = read(all_df[i].fd,buff,1024);
                         if (content == -1) {
@@ -148,7 +149,7 @@ int main(int argc,char **argv)
                         {
                             if(all_client[j].getfd() == all_df[i].fd)
                             {
-                                all_client[j].setservr_name(buff);
+                                // all_client[j].setservr_name(buff);
                                 all_client[j].appendreq(buff,content);
                                 all_client[j].addTocontentread(content);
                                 if(( all_client[j].ischunked && all_client[j].getreq().find("\r\n0\r\n\r\n") != std::string::npos)
@@ -162,52 +163,64 @@ int main(int argc,char **argv)
                 }
                 else if(all_df[i].revents & POLLOUT)
                 { 
-                    for (size_t j = 0; j < all_client.size(); j++)
+                    size_t j = 0;
+                    for (; j < all_client.size(); j++)
                     {
                         if(all_client[j].getfd() == all_df[i].fd)
                         {
-                            
+                            break;
+                        }
+                    }
+                       
+
+                        if(!all_client[j].proccessing)
+                        {
                             request req;
                             server_data ser=find_server(servers, deplicate, all_client[j]);
-
                             int ret_status = req.processing_request(all_client[j], ser );
                             if (all_client[j]._requestIsParsed == true)
                             {
                                 response resp;
-
                                 all_client[j]._response = resp.generating_response(req, ret_status, ser);
-                                send(all_df[i].fd, all_client[j]._response.c_str(), all_client[j]._response.length(), 0);
                             }
-                            close(all_df[i].fd);
-                            all_df.erase(all_df.begin() + i);
-                            all_client.erase(all_client.begin() + j);         
-                            break;
-                               
-                            }
-                            
-                            // if(all_client[j].sendLenth <= (int)full_response.length())
-                            // {
-                            //     write(all_df[i].fd,full_response.c_str()+all_client[j].sendLenth,1024);
-                            //     all_client[j].sendLenth+=1024;
-                            // }
-                            // else
-                            // {
-                                // close(all_df[i].fd);
-                                // all_df.erase(all_df.begin() + i);
-                                // all_client.erase(all_client.begin() + j);         
-                                // break;       
-
-                        
-                    }        
+                            all_client[j].proccessing=true;
+                        }
+                        int buffwrite = 0;
+                        if(all_client[j].sendLenth < (long)all_client[j]._response.length())
+                        {
+                            if( (long)all_client[j]._response.length() - all_client[j].sendLenth < 10240)
+                                buffwrite =  (long)all_client[j]._response.length() - all_client[j].sendLenth;
+                            else
+                                buffwrite = 1024;
+                                write(all_df[i].fd, all_client[j]._response.c_str() + all_client[j].sendLenth, buffwrite);
+                            all_client[j].sendLenth+=buffwrite;
+                        }
+                        else
+                        {
+                                close(all_df[i].fd);
+                                all_df.erase(all_df.begin() + i);
+                                all_client.erase(all_client.begin() + j);         
+                        } 
+                        continue;      
                 }
                 else if (all_df[i].revents  & POLLHUP) {
-                    close(all_df[i].fd);
-                    all_df.erase(all_df.begin() + i);
-                } else if (all_df[i].revents  & POLLERR) {
+                    std::cout<<"ok!"<<std::endl;
+                    for (size_t j = 0; j < all_client.size(); j++)
+                    {
+                        if(all_client[j].getfd() == all_df[i].fd)
+                        {
+                                close(all_df[i].fd);
+                                all_df.erase(all_df.begin() + i);
+                                all_client.erase(all_client.begin() + j);         
+                                break; 
+                        }
+                    }        
+                }  else if (all_df[i].revents  & POLLERR) {
                     std::cerr << "Error on socket " << all_df[i].fd << std::endl;
                     close(all_df[i].fd);
                     all_df.erase(all_df.begin() + i);
-                } else if (all_df[i].revents  & POLLNVAL) {
+                }  else if (all_df[i].revents  & POLLNVAL) {
+                    std::cout<<"ok"<<std::endl;
                     close(all_df[i].fd);
                     all_df.erase(all_df.begin() + i);
                 }
@@ -221,14 +234,3 @@ int main(int argc,char **argv)
     return 0;
 }
 
-/*
-
-    std::vector<server> servers;
-
-    for (int i = 0; i servers.size(); i++)
-    {
-        
-    }
-
-
-*/
