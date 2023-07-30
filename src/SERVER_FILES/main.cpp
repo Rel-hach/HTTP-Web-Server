@@ -5,10 +5,7 @@
 #include "../../inc/tools.hpp"
 #include "../../inc/response.hpp"
 
-// #ifndef __IFDEFINED
-// #define __IFDEFINED 1
-// #define if(x) if((printf("BEFORE: LINE: %i, FILE: %s\n", __LINE__, __FILE__)) && (x) && (printf("AFTER: LINE: %i, FILE: %s\n", __LINE__, __FILE__)))
-// #endif
+
 
 
 std::vector<std::string>  find_server_name(client client, std::string port)
@@ -28,26 +25,27 @@ std::vector<std::string>  find_server_name(client client, std::string port)
 
 server_data find_server(std::vector<server_data>& servers, client client)
 {
-    server_data server_exicte;
-    std::vector<std::string> server_name =find_server_name(client,std::to_string(servers[0].port[0]));
-    std::cout<<server_name[0]<<server_name[1]<<std::endl;
-    for (size_t i = 0; i < servers.size(); i++)
-    {
+     server_data server_exicte;
+     (void)client;
+    // std::vector<std::string> server_name =find_server_name(client,std::to_string(servers[0].port[0]));
+    // std::cout<<server_name[0]<<server_name[1]<<std::endl;
+    // for (size_t i = 0; i < servers.size(); i++)
+    // {
 
-        if(std::to_string(servers[i].port[0]) == server_name[1] && servers[i].server_names[0] == server_name[0])
-        {
-            server_exicte=servers[i];
-            return server_exicte;
-        }
-    }
-    for (size_t i = 0; i < servers.size(); i++)
-    {
-        if(std::to_string(servers[i].port[0]) == server_name[1])
-        {
-            server_exicte=servers[i];
-            return server_exicte;
-        }
-    }
+    //     if(std::to_string(servers[i].port[0]) == server_name[1] && servers[i].server_names[0] == server_name[0])
+    //     {
+    //         server_exicte=servers[i];
+    //         return server_exicte;
+    //     }
+    // }
+    // for (size_t i = 0; i < servers.size(); i++)
+    // {
+    //     if(std::to_string(servers[i].port[0]) == server_name[1])
+    //     {
+    //         server_exicte=servers[i];
+    //         return server_exicte;
+    //     }
+    // }
     server_exicte = servers[0];
     return server_exicte;
 }
@@ -60,14 +58,13 @@ int main(int argc,char **argv)
 		if (argc != 2)
 			throw std::invalid_argument("Error: invalid number of arguments");
 		servers = parse_server(argv[1]);
-        // std::vector<server_data> deplicate = filter_server(servers); 
         std::vector<pollfd> all_df;
         std::vector<server> all_server;
         std::vector<client> all_client;
         std::vector<int> fd_server;
         std::string req;
         std::map<std::string, std::vector<int> >  port_Ip_bind;
-        //staart server and bind and lesten
+        
         for (size_t i = 0; i < servers.size(); i++)
         {
             const std::string& ip = servers[i].host;
@@ -83,7 +80,7 @@ int main(int argc,char **argv)
             } else 
                 port_Ip_bind[ip] = ports;
         }
-
+        //staart server and bind and lesten
         for (std::map<std::string, std::vector<int> >::iterator it = port_Ip_bind.begin(); it != port_Ip_bind.end(); ++it) {
             for (size_t i = 0; i < it->second.size(); i++) {
                 server Server = server(it->second[i],it->first);
@@ -136,7 +133,6 @@ int main(int argc,char **argv)
                             close(all_df[i].fd); 
                             return 1;
                         }
-                        // fcntl(client_socket, F_SETFL, O_NONBLOCK); // commanted by ahabachi
                         struct pollfd fds;
                         fds.fd=  client_socket;
                         fds.events = POLLIN;
@@ -185,6 +181,7 @@ int main(int argc,char **argv)
                         {
                             request req;
                             server_data ser=find_server(servers, all_client[j]);
+                            std::cout<<ser.server_names[0]<<"\n";
                             int ret_status = req.processing_request(all_client[j], ser );
                             if (all_client[j]._requestIsParsed == true)
                             {
