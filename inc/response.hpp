@@ -10,6 +10,7 @@
 #define UPLOAD_FILE "www/cases/success_upload.html"
 #define DELETE_FILE "www/cases/success_deletion.html"
 
+
 #define REDIRECTION 301
 
 class response
@@ -84,5 +85,5 @@ class response
         bool        errorAnswer(int status);     
 };
 
-
+int Execute_cgi(response &res);
 #endif
