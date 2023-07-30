@@ -118,7 +118,20 @@ int main(int argc,char **argv)
             }
             for (size_t i = 0; i < all_df.size(); i++)
             {
-                if (all_df[i].revents & POLLIN ) {
+                if (all_df[i].revents  & POLLHUP) {
+                    
+                    for (size_t j = 0; j < all_client.size(); j++)
+                    {
+                        if(all_client[j].getfd() == all_df[i].fd)
+                        {
+                                close(all_df[i].fd);
+                                all_df.erase(all_df.begin() + i);
+                                all_client.erase(all_client.begin() + j);         
+                                break; 
+                        }
+                    }        
+                } 
+                else if (all_df[i].revents & POLLIN ) {
                     std::vector<int>::iterator it = std::find(fd_server.begin(), fd_server.end(), all_df[i].fd); 
                     if (it != fd_server.end()) {
                         int client_socket = accept(all_df[i].fd, (sockaddr*) &all_server[std::distance(fd_server.begin(), it)].getClientAdtess(), &all_server[std::distance(fd_server.begin(), it)].getClientAdtessSize()); 
@@ -161,6 +174,7 @@ int main(int argc,char **argv)
                         }
                     }
                 }
+              
                 else if(all_df[i].revents & POLLOUT)
                 { 
                     size_t j = 0;
@@ -171,8 +185,6 @@ int main(int argc,char **argv)
                             break;
                         }
                     }
-                       
-
                         if(!all_client[j].proccessing)
                         {
                             request req;
@@ -192,7 +204,12 @@ int main(int argc,char **argv)
                                 buffwrite =  (long)all_client[j]._response.length() - all_client[j].sendLenth;
                             else
                                 buffwrite = 1024;
-                                write(all_df[i].fd, all_client[j]._response.c_str() + all_client[j].sendLenth, buffwrite);
+                                int res = write(all_df[i].fd, all_client[j]._response.c_str() + all_client[j].sendLenth, buffwrite);
+                                if(res == -1)
+                                {
+                                        std::cerr << "Error: write failed\n";
+                                        return 1;
+                                }
                             all_client[j].sendLenth+=buffwrite;
                         }
                         else
@@ -203,24 +220,11 @@ int main(int argc,char **argv)
                         } 
                         continue;      
                 }
-                else if (all_df[i].revents  & POLLHUP) {
-                    std::cout<<"ok!"<<std::endl;
-                    for (size_t j = 0; j < all_client.size(); j++)
-                    {
-                        if(all_client[j].getfd() == all_df[i].fd)
-                        {
-                                close(all_df[i].fd);
-                                all_df.erase(all_df.begin() + i);
-                                all_client.erase(all_client.begin() + j);         
-                                break; 
-                        }
-                    }        
-                }  else if (all_df[i].revents  & POLLERR) {
+                 else if (all_df[i].revents  & POLLERR) {
                     std::cerr << "Error on socket " << all_df[i].fd << std::endl;
                     close(all_df[i].fd);
                     all_df.erase(all_df.begin() + i);
                 }  else if (all_df[i].revents  & POLLNVAL) {
-                    std::cout<<"ok"<<std::endl;
                     close(all_df[i].fd);
                     all_df.erase(all_df.begin() + i);
                 }
