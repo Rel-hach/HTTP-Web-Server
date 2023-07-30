@@ -117,10 +117,7 @@ void fill_location(location &location, std::string &line){
 		throw std::invalid_argument("Error: invalid location key");
 	std::getline(ss, value);
 	check_value_key(value, key);
-//	trim(value, " \t\"");
 	location.upload = _upload;
-	std::cout << "key = " << key;
-	std::cout << " value = " << value << std::endl;
 	if (key == "allow_methods")
 		fill_vector(location.allow_methods, value);
 	else if (key == "cgi_path")

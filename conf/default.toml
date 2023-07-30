@@ -56,3 +56,9 @@
 #       delete_module = "enabled"
 #       allow_methods = ["GET", "DELETE"]
 #       index = ["index.html"]
+[[server]]
+    host = "127.0.0.1"
+# this is a comment skip it
+    server_name = "webserv.com" "webserv.com"
+    root = "www/index.html"
+    client_max_body_size = "2G"
