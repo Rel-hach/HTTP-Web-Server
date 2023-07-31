@@ -256,8 +256,8 @@ int    response::executing_method()
     tools::splitting_string(_realPath, "/" , tokens);
     if ((int)tokens[tokens.size() -1].find('.') != -1)
     {
-         std::cout << "_realPath 2" << _realPath << std::endl;
         determine_contentType();
+        std::cout << _extension << std::endl;
         if (_extension == _cgiExtention)
         {
             if (permissionForExecuting() == true)
@@ -562,6 +562,7 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
 
         _post_module = it->second.post_module;
         _delete_module = it->second.delete_module;
+        _cgiExtention = it->second.cgi_extension;
 
         if (it->second.autoindex == "ON")
             _autoIndex = it->second.autoindex;
