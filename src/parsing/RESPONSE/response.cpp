@@ -12,7 +12,6 @@ response::response()
         _homePage = "www/index.html";
         _indexes.clear();
         _upload = "OFF";
-        // _methods;             
         _root = "";
         _autoIndex = "OFF";
         _redirection = false;
@@ -35,6 +34,7 @@ response::response()
         _autoIndex = "OFF";
         _boundry = "";
 }
+
 
 
 void response::determine_contentType()
@@ -106,6 +106,7 @@ void response::determine_contentType()
 }
 
 
+
 void    response::preparing_responseHeaders()
 {
     getting_responsCode();
@@ -159,6 +160,8 @@ void response::getting_responsCode()
         _responseCode = "404 Not Found";
     else if (_status == 405)
         _responseCode = "405 Method Not Allowed";
+    else if (_status == 413)
+        _responseCode = "413 Request entity too large";
     else if (_status == 500)
         _responseCode = "500 Internal Server Error";
     else if (_status == 501)
@@ -170,6 +173,7 @@ void response::getting_responsCode()
 }
 
 
+
 bool    response::method_isFound()
 {
     for (size_t i = 0; i < _allowed_methods.size(); ++i)
@@ -179,6 +183,7 @@ bool    response::method_isFound()
     }
     return (true);
 }
+
 
 
 void    response::store_requestInfos(request& req)
@@ -198,6 +203,7 @@ void    response::store_requestInfos(request& req)
     else
         _body = req._body;
 }
+
 
 
 std::string    response::generating_response(request& request, int returnStatus, server_data& serverr)
@@ -246,16 +252,18 @@ std::string    response::generating_response(request& request, int returnStatus,
 
 int    response::executing_method()
 {
-  
-    if ((int)_realPath.find('.') != -1)
+    std::vector<std::string> tokens;
+    tools::splitting_string(_realPath, "/" , tokens);
+    if ((int)tokens[tokens.size() -1].find('.') != -1)
     {
+         std::cout << "_realPath 2" << _realPath << std::endl;
         determine_contentType();
         if (_extension == _cgiExtention)
         {
             if (permissionForExecuting() == true)
             {
                 if (_method == DELETE && permissionForDeleting())
-                    std::cout << "Execute_cgi_delete()";
+                    return (Execute_cgi(*this));
                 else if (_method != DELETE)
                     return(Execute_cgi(*this));
                 else
@@ -277,64 +285,41 @@ int    response::executing_method()
         }
 
         else if (_method == "DELETE")
-        {
-            //websev_http_dav_module = "ON";
-            // must return 405 method not allowed. sbin ();
-            // if (permissionForDeleting())
-            // {
-            //     if (unlink(_realPath.c_str()) == -1)
-            //         return (Internal_Server);
-            //     else
-            //     {
-            //         // _fileContent = readPage(DELETE_FILE);
-            //         // _contentLength = _fileContent.size();
-            //         return (No_Content);
-            //     }
-            // }
-            // return (_status);
-            
-            /*
-                if (_method == DELETE && delete_module == enabled && permissionForDeleting())
-                {
-                    if (unlink(_realPath.c_str() == -1))
-                        return (Internal_server);
-                    else
-                        return (No_Content);
-                }
+        {   
+            if (_delete_module == "enable" && permissionForDeleting())
+            {
+                if (unlink(_realPath.c_str() )== -1)
+                    return (Internal_Server);
                 else
-                    return (Method_Not_Allowed);
-
-            */
-            return (Method_Not_Allowed);
+                    return (No_Content);
+            }
+            else
+                return (Method_Not_Allowed);
         }
     }
 
-    else if (_autoIndex == "OFF" && _method == "GET")
+    else if (_method == "GET" && _autoIndex == "OFF")
     {
         for (size_t i = 0; i < _indexes.size(); i++)
         {
             _realPath += "/" + _indexes[i];
             determine_contentType();
 
-            if ( _extension == _cgiExtention) // this part must be removed.
+            if ( _extension == _cgiExtention)
             {
                 if (permissionForExecuting())
-                    std::cout << "return (execute_cgi())";
+                    return(Execute_cgi(*this));
                 else
                     return (_status);
             }
 
-            else
+            if (permissionForReading())
             {
-                if (permissionForReading())
-                {
                     return (200);
-                }
-    
-                else
-                    return (_status);
             }
+            _realPath.substr(0, _indexes[i].size() - 1);
         }
+        return (_status);
     }
 
     else if (_autoIndex == "ON" && _method == "GET")
@@ -354,17 +339,15 @@ int    response::executing_method()
     else
         return (Bad_Request);
     
+    
     return (GO_NEXT);
 }
 
 
 
-
 int     response::stroring_requestBody()
 {
-    std::cout << "JA \n\n";
-    _upload = "ON";
-    if (_upload != "ON")
+    if (_post_module != "enable")
         return (Forbidden);
     DIR *dh = opendir(_root.c_str());
     if (dh == NULL)
@@ -392,7 +375,6 @@ int     response::stroring_requestBody()
 
     return (201);
 }
-
 
 
 
@@ -443,9 +425,6 @@ int     response::storing_multipleParts()
     return (201);
 }
 
-
-
-// permissions for reading | writing | executing
 
 
 bool    response::permissionForReading()
@@ -506,59 +485,33 @@ bool    response::permissionForDeleting()
 }
 
 
-// reading File Content 
-
-
-
 
 int response::reading_fileContent()
 {
     std::ifstream ifs(_realPath.c_str(), std::ios::binary);
 
-    ifs.seekg(0, std::ios::end);
-    std::streampos length = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
-
-    char* buffer = new char[length];
-
-    ifs.read(buffer, length);
-
-    _contentLength = length;
-
-    _fileContent = std::string(buffer, length);
-
-    delete[] buffer;
-
-    return true;
+    std::stringstream stream;
+    stream << ifs.rdbuf();
+    _fileContent = stream.str();
+    ifs.close();
+    return (true);
 }
 
-
-// reading Requested Page
 
 
 std::string  response::readPage(std::string page)
 {
-  std::ifstream ifs(page.c_str(), std::ios::binary);
+    std::ifstream ifs(page.c_str(), std::ios::binary);
 
-    ifs.seekg(0, std::ios::end);
-    std::streampos length = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
+    if (!ifs.is_open())
+        return ("");
 
-    char* buffer = new char[length];
+    std::stringstream stream;
+    stream << ifs.rdbuf();
+    ifs.close();
 
-    ifs.read(buffer, length);
-
-    _contentLength = length;
-
-    std::string content = std::string(buffer, length);
-
-    delete[] buffer;
-
-    return (content);
+    return (stream.str());
 }
-
-
-// GET PATH AND LOCATION INFOS
 
 
 
@@ -598,26 +551,23 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
         _root = it->second.root;
         _allowed_methods = it->second.allow_methods;
         _indexes = it->second.index;
-        _upload = it->second.upload;;
-
         _redirection_code = it->second.return_code;
         _redirection_url = it->second.return_path;
 
-        std::cout << "_redirection_url : " << _redirection_url << std::endl; 
         if (!_redirection_url.empty() && _redirection_code == REDIRECTION)
         {
             _status = REDIRECTION;
             _redirection = true;
         }
-        _isupload = it->second.upload;
+
+        _post_module = it->second.post_module;
+        _delete_module = it->second.delete_module;
 
         if (it->second.autoindex == "ON")
             _autoIndex = it->second.autoindex;
-        _autoIndex = "ON";
 
         if ( uri.size() > _locationName.size() )
         {
-            std::cout << _realPath << std::endl;
             if (uri[temp.size()] == '/')
             {
                 _realPath = _root + uri.substr(temp.size());
@@ -637,23 +587,22 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
     }
 
     _errorPages = serverr.error_pages;
-    _clientMaxBodySize = std::stoul(serverr.client_max_body_size);
+
 }
 
-
-// ERROR PAGE
 
 
 std::string    response::getErrorPage()
 {
-    std::string errorPage;
+    std::string errorPage = "";
     if (_errorPages.find(_status) != _errorPages.end())
-        errorPage = readPage(errorPage);
-    else
+    {
+        errorPage = readPage(_errorPages[_status]);
+    }
+    if (errorPage == "")
     {
         errorPage = tools::getting_errorPage(_status);
     }
-
     _contentLength = errorPage.size();
     return (errorPage);
 }
@@ -670,7 +619,7 @@ int     response::listing_requestDirectory()
     if (D == NULL)
         return (403);
     
-    std::string autoindex_page =  "<html><title>AUTOINDEX</title><body>";
+    std::string autoindex_page =  "<html><title> A U T O I N D E X </title><body><center>";
     autoindex_page += directory;
     autoindex_page += "</br></br></br>";
 
@@ -686,7 +635,7 @@ int     response::listing_requestDirectory()
         }
     }
 
-    autoindex_page += "</body></html>";
+    autoindex_page += "</center></body></html>";
     _fileContent = autoindex_page;
     closedir(D);
     return (200);
