@@ -142,9 +142,9 @@ int main(int argc,char **argv)
                     }
                     else
                     {
-                        char buff[102400]; 
+                        char buff[1024 * 1000]; 
                         std::memset(buff, '\0', sizeof(buff));
-                        int content = read(all_df[i].fd,buff,102400);
+                        int content = read(all_df[i].fd,buff,1024 * 1000);
                         if (content == -1) {
                             std::cerr << "Error: read failed\n";
                             return 1;
