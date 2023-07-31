@@ -65,11 +65,13 @@
 
         if (_method == POST)
         {
-            std::cout << "_contentLength : " << _contentLength << std::endl;
             if (_contentLength > serv.client_max_body_size)
                 return (clientt._requestIsParsed = true, Reqeust_Entity_Too_Large);
 
-            if ((_body.length() != _contentLength ) || _body.empty())
+            if ((!_isChunked && (_body.length() != _contentLength )) || _body.empty())
+                return (clientt._requestIsParsed = true, Bad_Request);
+            
+            if ((_isChunked && (_unchunked_body.length() != _contentLength ) )|| _unchunked_body.empty())
                 return (clientt._requestIsParsed = true, Bad_Request);
         }
         return (clientt._requestIsParsed = true, GO_NEXT);
@@ -162,18 +164,13 @@
 
     int    request::checking_headerByHeader(std::string& key, std::string& value)
     {
-        // the host contains the hostname and the port of the server, the client want to connect to
         if (key == "" || value == "")
             return Bad_Request;
         
-        if ((key.find_first_of(" \t") != std::string::npos))
+        else if ((key.find_first_of(" \t") != std::string::npos))
             return Bad_Request;
-        
 
-        // if ((value.find_first_of(" \t") != std::string::npos))
-        //     return Bad_Request;
-
-        if (key == "Host")
+        else if (key == "Host")
         {
             int position = value.find(':');
             if (position != -1 && !_hasHostHeader)
@@ -193,12 +190,10 @@
             }
         }
 
-        // connection type - close or keep-alive
-        if (key == "Connection")
+        else if (key == "Connection")
             _connection = value;
 
-        // transfer-encoding and chunked then ischunked else NOT_IMPLEMENTED
-        if (key == "Transfer-Encoding")
+        else if (key == "Transfer-Encoding")
         {
             if (_isChunked == false && value == "chunked")
             {
@@ -211,7 +206,7 @@
                 return (Not_Implemented);
         }
 
-        if (key == "Content-Length")
+        else if (key == "Content-Length")
         {
             if (_hasContentLenght || (value.empty() || value.find_first_not_of("0123456789") != std::string::npos))
                 return (Bad_Request);
@@ -220,10 +215,10 @@
             _hasContentLenght = true;
         }
 
-        if (key == "Cookie")
+        else if (key == "Cookie")
             _cookie = value;
 
-        if (key == "Referer")
+        else if (key == "Referer")
         {
             value = value.substr(value.find_first_of("0123456789"));
             if (!value.empty() && value.find('/') != std::string::npos)
@@ -233,8 +228,7 @@
             }
         }
      
-        // content type => multipart/form-data or application/x-www-form-urlencoded else not supported.
-        if (key == "Content-Type")
+        else if (key == "Content-Type")
         {
             int multilpart = value.find("multipart/form-data");
            
@@ -308,5 +302,6 @@
                 return (false);
             n = _body.find("\r\n", start);
         }
+        _contentLength = _unchunked_body.length();
         return true;
     }
