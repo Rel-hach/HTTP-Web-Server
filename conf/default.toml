@@ -41,8 +41,11 @@
         allow_methods = ["GET"]
         autoindex = "ON"
 
-
-
+    
+    [[server.location]]
+       uri = "/cgi"
+       cgi_extension = ".py"
+       root = src/cgi/test1.py
 
 
 [[server]]
@@ -79,4 +82,3 @@
        delete_module = "enable"
        allow_methods = ["GET", "DELETE"]
        index = ["index.html"]
-
