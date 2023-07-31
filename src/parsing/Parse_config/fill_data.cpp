@@ -100,7 +100,22 @@ void fill_server(server_data &server, std::string &line){
 	else if (key == "root")
 		server.home = value;
 	else if (key == "client_max_body_size")
-		server.client_max_body_size = value;
+	{
+		int pos = value.find_first_not_of("0123456789");
+		if (pos == -1)
+			throw std::invalid_argument("Error: unit is missing");
+		std::string max = value.substr(0, pos);
+		std::string unit = value.substr(pos);
+		if (max.empty() || unit.empty())
+			throw std::invalid_argument("Error: value or unit is missing");
+		
+		if (unit == "G" || unit == "g" || unit == "GB" || unit == "gb")
+			server.client_max_body_size = std::stoul(max) * 1024 * 1024 * 1024;
+		else if (unit == "M" || unit == "m" || unit == "MB" || unit == "mb")
+			server.client_max_body_size = std::stoul(max) * 1024;
+		else
+			throw std::invalid_argument("Error: bad unit");
+	}
 	else 
 		throw std::invalid_argument("Error: invalid server key at `" + line + "`");
 }
@@ -123,14 +138,14 @@ void fill_location(location &location, std::string &line){
 	else if (key == "cgi_path")
 		fill_vector(location.cgi_path, value);
 	else if (key == "autoindex")
-		location.autoindex = value;
-	else if (key == "root")
-		location.root = value;
-	else if (key == "upload" && value == "ok")
 	{
-		location.upload = true;
-		_upload = true;
+		if (value == "ON" || value == "OFF")
+			location.autoindex = value;
+		else
+			throw std::invalid_argument("Error: invalid autoindex value");
 	}
+	else if (key == "root")
+			location.root = value;
 	else if (key == "index")
 		fill_vector(location.index, value);
 	else if (key == "cgi_extension")
@@ -149,7 +164,9 @@ void fill_location(location &location, std::string &line){
 		if (value == "enable" || value == "disable")
 			location.delete_module = value;
 		else
+		{
 			throw std::invalid_argument("Error: invalid delete_module value");
+		}
 	}
 	else if (key == "post_module")
 	{
@@ -175,7 +192,7 @@ void fill_error_page(std::map<int , std::string> &error_page, std::string &line)
 	trim(value, " \t\"");
 	if (key < 400 || key > 599 || k.find_first_not_of("0123456789") != std::string::npos || k.empty())
 		throw std::invalid_argument("Error: invalid error_page key");
-	else if (value.empty() || value[0] != '/' || value.substr(value.find_last_of(".")) != ".html")
+	else if (value.empty() || value.substr(value.find_last_of(".")) != ".html")
 		throw std::invalid_argument("Error: invalid error_page value");
 	error_page[key] = value;
 }
