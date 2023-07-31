@@ -27,8 +27,6 @@
 
     int   request::processing_request( client& clientt, server_data & serv )
     {
-
-        (void)(serv);
         std::string request = clientt.getreq();
 
         if (request.empty() || isspace(request[0]))
@@ -67,24 +65,25 @@
 
         if (_method == POST)
         {
-            // if (_contentLength > serv.clienMaxBody)
-            //     return (Reqeust_Entity_Too_Large);
-            // if ((_body.length() != _contentLength ) || _body.empty())
-            //     return (clientt._requestIsParsed = true, Bad_Request);
+            std::cout << "_contentLength : " << _contentLength << std::endl;
+            if (_contentLength > serv.client_max_body_size)
+                return (clientt._requestIsParsed = true, Reqeust_Entity_Too_Large);
+
+            if ((_body.length() != _contentLength ) || _body.empty())
+                return (clientt._requestIsParsed = true, Bad_Request);
         }
         return (clientt._requestIsParsed = true, GO_NEXT);
     }
 
 
+
     int   request::checking_startLine( std::string sline )
     {
-        // if the line is empty or has a space at the beginning.
         if (sline.empty() || isspace(sline[0]))
             return (Bad_Request);
 
         std::vector<std::string> tokens;
 
-        // split the line with spaces to start line components.
         if (tools::splitting_string(sline, " ", tokens) != 3)
             return (Bad_Request);
         
@@ -92,20 +91,16 @@
         _path       = tokens[1];
         _version    = tokens[2];
 
-        // those methods have not been implemented.
         if (_method == "HEAD" || _method == "PATCH" || _method == "PUT" || _method == "OPTIONS" || _method == "MKCOL" || _method == "COPY" || _method == "MOVE")
             return (Not_Implemented);
 
-        // something else means not a method, return bad request.
         if (_method != "GET" && _method != "DELETE" && _method != "POST")
             return (Bad_Request);
 
         
-        // the size of the request shouldn't be more than 2048 chars long. 
         if (_path.size() > 2048)
             return (URI_Too_Long);
 
-        // check if there is a ? if yes : then split the url into [querry] & [path].
         size_t position = _path.find('?');
         if (position != std::string::npos)
         {
@@ -116,15 +111,15 @@
         if (_path.empty() || _path[0] != '/')
             return (Bad_Request);
         
-        if (_path.find("..") != std::string::npos)
+        if (_path.find("/..") != std::string::npos)
             return (Bad_Request);
 
-        // compare the version of HTTP ! it should be HTTP/1.1
         if (_version.compare(SUPPORTED_HTTP_VER) != 0)
             return (HTTP_Version_Not_Supported);
 
         return (GO_NEXT);
     }
+
 
 
     int   request::checking_headers( std::vector<std::string> headers )
