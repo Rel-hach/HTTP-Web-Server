@@ -3,3 +3,4 @@ build/
 .DS_Store
 output.*
 www/html/GET_PAGE/*
+Webserv
