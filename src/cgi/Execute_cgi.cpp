@@ -27,11 +27,12 @@ char** vector_to_char(std::vector<std::string> env_cgi) {
     }
     env[i] = NULL;
     return env;
-}
+} 
 // location/file.py
 int Execute_cgi(response &res) {
     std::vector<std::string> env_cgi;
     // res._method
+     std::cout<<"Child process exited abnormally"<<std::endl;
     env_cgi.push_back("name=mohamed");//set env
     // res._extension
     char **_env = vector_to_char(env_cgi);
@@ -52,7 +53,7 @@ int Execute_cgi(response &res) {
         dup2(pipefd[1], STDOUT_FILENO);
         if(res._extension== ".php")
         {
-            char* argv[]={(char*)"php",(char*)"coockies.php",nullptr};
+            char* argv[]={(char*)"php",(char*)"file.php",nullptr};
             execve("/usr/bin/php",argv,_env);
         }
         if(res._extension== ".py")
