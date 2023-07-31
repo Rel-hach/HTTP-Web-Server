@@ -37,7 +37,7 @@ public:
 	std::vector<int> port;
 	std::vector<std::string> server_names;
 	std::string home;
-	std::string client_max_body_size;
+	size_t client_max_body_size;
 	std::map<std::string, location> locations;
 	std::map<int, std::string> error_pages;
 	e_empty is_empty;
