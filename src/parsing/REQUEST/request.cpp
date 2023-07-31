@@ -17,13 +17,14 @@
         this->_port = 80;
         this->_status = GO_NEXT;
         this->_referer = "";
-
         this->_isChunked = false;
         this->_hasContentLenght = false;
         this->_isMultipart = false;
         this->_isRedirect = false;
         this->_isCgi = false;
     }
+
+
 
     int   request::processing_request( client& clientt, server_data & serv )
     {
@@ -162,6 +163,7 @@
     }
 
 
+
     int    request::checking_headerByHeader(std::string& key, std::string& value)
     {
         if (key == "" || value == "")
@@ -211,7 +213,6 @@
             if (_hasContentLenght || (value.empty() || value.find_first_not_of("0123456789") != std::string::npos))
                 return (Bad_Request);
             _contentLength = std::stoul(value);
-            std::cout << "CONTENT-LENGTH : " << _contentLength << std::endl;
             _hasContentLenght = true;
         }
 
@@ -257,6 +258,7 @@
     }
 
 
+
     bool    request::check_hexadecimalLine(std::string& line)
     {
         int found = line.find_first_not_of("0123456789ABCDEFabcdef");
@@ -266,6 +268,7 @@
     }
 
 
+
     bool    request::chunk_ending_correctly( std::string end )
     {
         if (end == "\r\n")
@@ -273,6 +276,8 @@
         else
             return (false);
     }
+
+
 
     bool    request::handling_chunked()
     {
