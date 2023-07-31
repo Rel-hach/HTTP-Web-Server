@@ -135,8 +135,6 @@ void fill_location(location &location, std::string &line){
 	location.upload = _upload;
 	if (key == "allow_methods")
 		fill_vector(location.allow_methods, value);
-	else if (key == "cgi_path")
-		fill_vector(location.cgi_path, value);
 	else if (key == "autoindex")
 	{
 		if (value == "ON" || value == "OFF")

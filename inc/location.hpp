@@ -14,7 +14,6 @@ public:
 	~location();
  
 	std::vector<std::string> allow_methods;
-	std::vector<std::string> cgi_path;//maybe a vector 
 	std::string autoindex;//should be handled
 	std::string root;//should be handled
 	bool upload;// = false;//should be handled

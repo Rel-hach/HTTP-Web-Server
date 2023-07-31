@@ -19,7 +19,6 @@ location &location::operator=(const location &location)
 	if (this == &location)
 		return *this;
 	this->allow_methods = location.allow_methods;
-	this->cgi_path = location.cgi_path;
 	this->autoindex = location.autoindex;
 	this->root = location.root;
 	this->upload = location.upload;
@@ -36,10 +35,6 @@ void location::print_location(){
 	std::cout << "allow_methods = ";
 	for (size_t i = 0; i < allow_methods.size(); i++)
 		std::cout << allow_methods[i] << " ";
-	std::cout << std::endl;
-	std::cout << "cgi_path = ";
-	for (size_t i = 0; i < cgi_path.size(); i++)
-		std::cout << cgi_path[i] << " ";
 	std::cout << std::endl;
 	std::cout << "autoindex = " << autoindex << std::endl;
 	std::cout << "root = " << root << std::endl;

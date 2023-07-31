@@ -142,9 +142,9 @@ int main(int argc,char **argv)
                     }
                     else
                     {
-                        char buff[1024]; 
+                        char buff[102400]; 
                         std::memset(buff, '\0', sizeof(buff));
-                        int content = read(all_df[i].fd,buff,1024);
+                        int content = read(all_df[i].fd,buff,102400);
                         if (content == -1) {
                             std::cerr << "Error: read failed\n";
                             return 1;
@@ -160,6 +160,7 @@ int main(int argc,char **argv)
                                 if(( all_client[j].ischunked && all_client[j].getreq().find("\r\n0\r\n\r\n") != std::string::npos)
                                     || (all_client[j].getreq().length() && !all_client[j].ischunked && all_client[j].getcontentlenght() <= all_client[j].getcontentread()))
                                 {
+                                    std::cout<<"Ok"<<std::endl;
                                     all_df[i].events = POLLOUT;
                                 }
                             }
