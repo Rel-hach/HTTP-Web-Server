@@ -30,6 +30,8 @@ class response
         std::string                 _redirection_url;
         std::string                 _realPath;
     public:
+        std::string _delete_module;
+        std::string _post_module;
         std::string _fileName;
         std::string _cgiExtention;
         std::string _unchunked_body;             
