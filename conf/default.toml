@@ -1,5 +1,8 @@
 [[server]]
     port = 8000
+    host = "127.0.0.1"
+    server_name = "webserv1.com" 
+    root = "www/index.html"
     
 # this is a comment skip it
     server_name = "webserv.com" 
