@@ -76,7 +76,7 @@
                 return (clientt._requestIsParsed = true, Bad_Request);
             }
             
-            if ((_isChunked && (_unchunked_body.length() != _contentLength ) )|| _unchunked_body.empty())
+            if ((_isChunked && (_unchunked_body.length() != _contentLength ) ) || _unchunked_body.empty())
             {
                 return (clientt._requestIsParsed = true, Bad_Request);
             }

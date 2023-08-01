@@ -35,11 +35,16 @@ char** vector_to_char(std::vector<std::string> env_cgi) {
 //php
 //script
 int Execute_cgi(response &res) {
-    // std::vector<std::string> env_cgi;
+    std::vector<std::string> env_cgi;
     
 //     // res._method
 //      std::cout<<res._method<<std::endl;
-//     env_cgi.push_back("name=mohamed");//set env
+
+        std::cout<<res._method <<std::endl;
+        std::cout<<res._querry <<std::endl;
+
+
+
 //     // res._extension
 //     char **_env = vector_to_char(env_cgi);
 //     int pipefd[2];

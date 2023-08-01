@@ -14,6 +14,7 @@ response::response()
         _upload = "OFF";
         _root = "";
         _autoIndex = "OFF";
+        _querry = "";
         _redirection = false;
         _clientMaxBodySize = 0;
         _realPath = "";
@@ -202,6 +203,7 @@ void    response::store_requestInfos(request& req)
         _body = req._unchunked_body;
     else
         _body = req._body;
+    _querry = req._querry;
 }
 
 

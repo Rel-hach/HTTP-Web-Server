@@ -32,6 +32,7 @@ class response
     public:
         std::string _delete_module;
         std::string _post_module;
+        std::string _querry;
         std::string _fileName;
         std::string _cgiExtention;
         std::string _unchunked_body;             
