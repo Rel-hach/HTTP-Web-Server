@@ -68,7 +68,8 @@ void fill_server(server_data &server, std::string &line){
 		{
 			check_int(ports[i]);
 			server.is_empty = server.is_empty | PORT;
-			server.port.push_back(value);
+			server.port.push_back(atoi(ports[i].c_str()));
+			server.port.push_back(ports[i]);
 		}
 	}
 	else if (key == "server_name")
