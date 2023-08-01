@@ -38,7 +38,7 @@
     
     [[server.location]]
         uri = "/autoindexing"
-		root = "www/html"
+		root = "www/testAutoIndex"
         allow_methods = ["GET"]
         autoindex = "ON"
 
