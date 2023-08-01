@@ -237,8 +237,7 @@ std::string    response::generating_response(request& request, int returnStatus,
     if (errorAnswer(_status))
     {
         _fileContent = getErrorPage();
-        
-        
+        _contentType = "text/html";
         preparing_responseHeaders();
     }
 
@@ -372,6 +371,7 @@ int     response::stroring_requestBody()
             ofs << _body;
             ofs.close();
             _fileContent = readPage(UPLOAD_FILE);
+            _contentType = "text/html";
         }
         else
             return (Internal_Server);
@@ -425,6 +425,7 @@ int     response::storing_multipleParts()
 
         ofs << filecontent;
         ofs.close();
+        //_contentType = "text/html";
     }
     _fileContent = readPage(UPLOAD_FILE);
     return (201);
