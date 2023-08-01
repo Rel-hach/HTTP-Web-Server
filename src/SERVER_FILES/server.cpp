@@ -1,10 +1,10 @@
 #include "../../inc/server.hpp"
 
-server::server(int port,std::string host)
+server::server(std::string port,std::string host)
 {
     this->server_address.sin_family = AF_INET;
     this->server_address.sin_addr.s_addr = inet_addr(host.c_str());
-    this->server_address.sin_port = htons(port);
+    this->server_address.sin_port = htons(std::atoi(port.c_str()));
     this->client_address_size =  sizeof(this->client_address);
 }
 

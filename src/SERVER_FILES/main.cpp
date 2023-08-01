@@ -27,14 +27,14 @@ server_data find_server(std::vector<server_data>& servers, client client)
 {
     server_data server_exicte;
     (void)client;
-    std::vector<std::string> host =  find_server_name(client,std::to_string(servers[0].port[0]));
+    std::vector<std::string> host =  find_server_name(client,servers[0].port[0]);
     if(host[0] == "localhost")
         host[0] = "127.0.0.1";
     
     // std::cout<<host[0] <<"______"<<host[1]<<std::endl;
     for (size_t i = 0; i < servers.size(); i++)
     {
-        std::vector<int>::iterator it = std::find(servers[i].port.begin(), servers[i].port.end(), std::atoi(host[1].c_str()));
+        std::vector<std::string>::iterator it = std::find(servers[i].port.begin(), servers[i].port.end(), host[1].c_str());
         std::vector<std::string>::iterator it1 = std::find(servers[i].server_names.begin(), servers[i].server_names.end(), host[0]);
         if((host[0] == servers[i].host  && it != servers[i].port.end()) || (it != servers[i].port.end() && it1 != servers[i].server_names.end()))
         {
@@ -58,14 +58,14 @@ int main(int argc,char **argv)
         std::vector<client> all_client;
         std::vector<int> fd_server;
         std::string req;
-        std::map<std::string, std::vector<int> >  port_Ip_bind;
+        std::map<std::string, std::vector<std::string> >  port_Ip_bind;
         
         for (size_t i = 0; i < servers.size(); i++)
         {
             const std::string& ip = servers[i].host;
-            const std::vector<int>& ports = servers[i].port;
+            const std::vector<std::string>& ports = servers[i].port;
 
-            std::map<std::string, std::vector<int> >::iterator it = port_Ip_bind.find(ip);
+            std::map<std::string, std::vector<std::string> >::iterator it = port_Ip_bind.find(ip);
             if (it != port_Ip_bind.end()) {
                 for (size_t j = 0; j < ports.size(); j++) {
                     if (std::find(it->second.begin(), it->second.end(), ports[j]) == it->second.end()) {
@@ -76,7 +76,7 @@ int main(int argc,char **argv)
                 port_Ip_bind[ip] = ports;
         }
         //staart server and bind and lesten
-        for (std::map<std::string, std::vector<int> >::iterator it = port_Ip_bind.begin(); it != port_Ip_bind.end(); ++it) {
+        for (std::map<std::string, std::vector<std::string> >::iterator it = port_Ip_bind.begin(); it != port_Ip_bind.end(); ++it) {
             for (size_t i = 0; i < it->second.size(); i++) {
                 server Server = server(it->second[i],it->first);
                 all_server.push_back(Server);
@@ -176,7 +176,7 @@ int main(int argc,char **argv)
                         {
                             request req;
                             server_data ser=find_server(servers, all_client[j]);
-                            // std::cout<< ser.server_names[0]<<std::endl;
+                            std::cout<< ser.server_names[0]<<std::endl;
                             int ret_status = req.processing_request(all_client[j], ser );
                             if (all_client[j]._requestIsParsed == true)
                             {
