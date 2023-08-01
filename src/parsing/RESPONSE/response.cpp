@@ -244,7 +244,8 @@ std::string    response::generating_response(request& request, int returnStatus,
     else if (successAnswer(_status))
         preparing_responseHeaders();
 
-
+    // std::cout << "h : " << _respHeaders << std::endl;
+    // std::cout<<_fileContent<<std::endl;
     return (_respHeaders + "\r\n\r\n" + _fileContent);
 }
 
@@ -257,7 +258,7 @@ int    response::executing_method()
     if ((int)tokens[tokens.size() -1].find('.') != -1)
     {
         determine_contentType();
-        std::cout << _extension << std::endl;
+        // std::cout << _extension << std::endl;
         if (_extension == _cgiExtention)
         {
             if (permissionForExecuting() == true)
@@ -450,6 +451,7 @@ bool    response::permissionForReading()
 
 bool    response::permissionForExecuting()
 {
+    std::cout<<_realPath<<std::endl;
     if (access(_realPath.c_str(), F_OK) == -1)
     {
         _status = Not_Found;
