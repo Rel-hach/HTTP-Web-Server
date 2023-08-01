@@ -1,12 +1,10 @@
 [[server]]
     port = 8000
-    host = "127.0.0.1"
+    
 # this is a comment skip it
-    server_name = "webserv1.com" "webserv.com"
+    server_name = "webserv.com" 
     root = "www/index.html"
     client_max_body_size = "1G"
-
-
     [[server.error_page]]
         413 = "errors/index_400.html"
 #       403 = "errors/4xx.html"
@@ -43,15 +41,17 @@
 
     
     [[server.location]]
-       uri = "/cgi"
+       uri = "/cgi_session"
        cgi_extension = ".py"
        root = src/cgi/test1.py
+       allow_methods = ["GET", "POST"]
+
 
 
 [[server]]
-    port = 8001
+    port = 8001 9000
     host = "127.0.0.1"
-    server_name = "webserv.com" "webserv.com"
+    server_name = "webserv1.com" 
     root = "www/index.html"
     client_max_body_size = "2G"
 

@@ -25,27 +25,23 @@ std::vector<std::string>  find_server_name(client client, std::string port)
 
 server_data find_server(std::vector<server_data>& servers, client client)
 {
-     server_data server_exicte;
-     (void)client;
-    // std::vector<std::string> server_name =find_server_name(client,std::to_string(servers[0].port[0]));
-    // std::cout<<server_name[0]<<server_name[1]<<std::endl;
-    // for (size_t i = 0; i < servers.size(); i++)
-    // {
-
-    //     if(std::to_string(servers[i].port[0]) == server_name[1] && servers[i].server_names[0] == server_name[0])
-    //     {
-    //         server_exicte=servers[i];
-    //         return server_exicte;
-    //     }
-    // }
-    // for (size_t i = 0; i < servers.size(); i++)
-    // {
-    //     if(std::to_string(servers[i].port[0]) == server_name[1])
-    //     {
-    //         server_exicte=servers[i];
-    //         return server_exicte;
-    //     }
-    // }
+    server_data server_exicte;
+    (void)client;
+    std::vector<std::string> host =  find_server_name(client,std::to_string(servers[0].port[0]));
+    if(host[0] == "localhost")
+        host[0] = "127.0.0.1";
+    
+    std::cout<<host[0] <<"______"<<host[1]<<std::endl;
+    for (size_t i = 0; i < servers.size(); i++)
+    {
+        std::vector<int>::iterator it = std::find(servers[i].port.begin(), servers[i].port.end(), std::atoi(host[1].c_str()));
+        std::vector<std::string>::iterator it1 = std::find(servers[i].server_names.begin(), servers[i].server_names.end(), host[0]);
+        if((host[0] == servers[i].host  && it != servers[i].port.end()) || (it != servers[i].port.end() && it1 != servers[i].server_names.end()))
+        {
+            std::cout<<"med"<<std::endl;
+            return servers[i];
+        }
+    }
     server_exicte = servers[0];
     return server_exicte;
 }
@@ -160,7 +156,6 @@ int main(int argc,char **argv)
                                 if(( all_client[j].ischunked && all_client[j].getreq().find("\r\n0\r\n\r\n") != std::string::npos)
                                     || (all_client[j].getreq().length() && !all_client[j].ischunked && all_client[j].getcontentlenght() <= all_client[j].getcontentread()))
                                 {
-                                    std::cout<<"Ok"<<std::endl;
                                     all_df[i].events = POLLOUT;
                                 }
                             }
@@ -182,7 +177,7 @@ int main(int argc,char **argv)
                         {
                             request req;
                             server_data ser=find_server(servers, all_client[j]);
-                            std::cout<<ser.server_names[0]<<"\n";
+                            std::cout<< ser.server_names[0]<<std::endl;
                             int ret_status = req.processing_request(all_client[j], ser );
                             if (all_client[j]._requestIsParsed == true)
                             {
