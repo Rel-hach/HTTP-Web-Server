@@ -1,5 +1,5 @@
 [[server]]
-    port = 8000
+    port = 8000 8002
     host = "127.0.0.1
     server_name = "webserv.com" 
     
@@ -60,7 +60,7 @@
 
 
 [[server]]
-    port = 8001 9000 
+    port = 8000 9000 
     host = "127.0.0.1"
     server_name = "webserv1.com" 
     client_max_body_size = "2G"
