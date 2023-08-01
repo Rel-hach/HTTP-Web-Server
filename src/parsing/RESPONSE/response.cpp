@@ -182,7 +182,7 @@ bool    response::method_isFound()
         if (_method == _allowed_methods[i])
             return (true);
     }
-    return (true);
+    return (false);
 }
 
 
@@ -233,10 +233,12 @@ std::string    response::generating_response(request& request, int returnStatus,
         _status = status;
     }
 
+    // std::cout << "STATUS : " << _status << std::endl;
     if (errorAnswer(_status))
     {
         _fileContent = getErrorPage();
-        determine_contentType();
+        
+        
         preparing_responseHeaders();
     }
 
@@ -453,7 +455,6 @@ bool    response::permissionForReading()
 
 bool    response::permissionForExecuting()
 {
-    std::cout<<_realPath<<std::endl;
     if (access(_realPath.c_str(), F_OK) == -1)
     {
         _status = Not_Found;
@@ -568,7 +569,7 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
         _post_module = it->second.post_module;
         _delete_module = it->second.delete_module;
         _cgiExtention = it->second.cgi_extension;
-
+        
         if (it->second.autoindex == "ON")
             _autoIndex = it->second.autoindex;
 
@@ -610,6 +611,7 @@ std::string    response::getErrorPage()
         errorPage = tools::getting_errorPage(_status);
     }
     _contentLength = errorPage.size();
+    std::cout << _contentLength << std::endl;
     return (errorPage);
 }
 
