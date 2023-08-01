@@ -137,13 +137,13 @@ int main(int argc,char **argv)
                     }
                     else
                     {
-                        char buff[1024 * 1000]; 
+                        char buff[1024000]; 
                         std::memset(buff, '\0', sizeof(buff));
-                        int content = read(all_df[i].fd,buff,1024 * 1000);
-                        if (content == -1) {
-                            std::cerr << "Error: read failed\n";
-                            return 1;
-                        }
+                        int content = read(all_df[i].fd,buff,1024000);
+                        // if (content == -1) {
+                        //     std::cerr << "Error: read failed\n";
+                        //     return 1;
+                        // }
                         // 408 Request Timeout
                         for (size_t j = 0; j < all_client.size(); j++)
                         {
@@ -176,7 +176,7 @@ int main(int argc,char **argv)
                         {
                             request req;
                             server_data ser=find_server(servers, all_client[j]);
-                            std::cout<< ser.server_names[0]<<std::endl;
+                            // std::cout<< ser.server_names[0]<<std::endl;
                             int ret_status = req.processing_request(all_client[j], ser );
                             if (all_client[j]._requestIsParsed == true)
                             {
@@ -192,12 +192,12 @@ int main(int argc,char **argv)
                                 buffwrite =  (long)all_client[j]._response.length() - all_client[j].sendLenth;
                             else
                                 buffwrite = 1024;
-                                int res = write(all_df[i].fd, all_client[j]._response.c_str() + all_client[j].sendLenth, buffwrite);
-                                if(res == -1)
-                                {
-                                        std::cerr << "Error: write failed\n";
-                                        return 1;
-                                }
+                                 write(all_df[i].fd, all_client[j]._response.c_str() + all_client[j].sendLenth, buffwrite);
+                                // if(res == -1)
+                                // {
+                                //         std::cerr << "Error: write failed\n";
+                                //         return 1;
+                                // }
                             all_client[j].sendLenth+=buffwrite;
                         }
                         else

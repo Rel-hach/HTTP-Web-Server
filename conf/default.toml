@@ -1,10 +1,9 @@
 [[server]]
     port = 8000
+    host = "127.0.0.1
     server_name = "webserv.com" 
-    root = "www/index.html"
     
 # this is a comment skip it
-    server_name = "webserv.com" 
     client_max_body_size = "1G"
 
     [[server.error_page]]
@@ -21,6 +20,11 @@
     [[server.location]]
         uri = "/redirecting"
         return = 301 https://www.google.com
+
+    [[server.location]]
+        uri = "/"
+		root = "www/index.html"
+        allow_methods = ["GET"]
     
     [[server.location]]
         uri = "/uploading"
@@ -37,26 +41,34 @@
     
     [[server.location]]
         uri = "/autoindexing"
-		root = "www/testAutoIndex"
-        allow_methods = ["GET"]
+		root = "www/html"
+        allow_methods = ["GET","POST"]
         autoindex = "ON"
 
     
     [[server.location]]
-       uri = "/cgi"
-       cgi_extension = ".py"
-       root = src/cgi/test1.py
+       uri = "/cgi_php"
+       cgi_extension = ".php"
+       root = src/cgi/file.php
        allow_methods = ["GET", "POST"]
 
+    [[server.location]]
+       uri = "/cgi_python"
+       cgi_extension = ".py"
+       root = src/cgi/file.py
+       allow_methods = ["GET","POST"]
 
 
 [[server]]
-    port = 8001 9000
+    port = 8001 9000 
     host = "127.0.0.1"
     server_name = "webserv1.com" 
-    root = "www/index.html"
     client_max_body_size = "2G"
 
+    [[server.location]]
+        uri = "/"
+		root = "www/index.html"
+        allow_methods = ["GET"]
 
     [[server.error_page]]
         401 = "/errors/4xx.html"
@@ -86,7 +98,13 @@
        index = ["index.html"]
 
     [[server.location]]
-       uri = "/cgi"
+       uri = "/cgi_python"
        cgi_extension = ".py"
        root = src/cgi/test1.py
        allow_methods = ["GET", "POST"]
+
+    [[server.location]]
+       uri = "/cgi_php"
+       cgi_extension = ".php"
+       root = src/cgi/file.php
+       allow_methods = ["POST"]
