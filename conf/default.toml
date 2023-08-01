@@ -8,13 +8,9 @@
 
 
     [[server.error_page]]
-        413 = "errors/index_400.html"
-#       403 = "errors/4xx.html"
-#       501 = "errors/5xx.html"
-#       500 = "errors/5xx.html"
-#       502 = "errors/5xx.html"
-#       503 = "errors/5xx.html"
-#       504 = "errors/5xx.html"
+        400 = "www/html/errors/index_400.html"
+        403 = "www/html/errors/index_403.html"
+        501 = "www/html/errors/index_501.html"
 
 # this location will redirect you to the url.
 
@@ -57,13 +53,13 @@
 
 
     [[server.error_page]]
-        401 = "/errors/4xx.html"
-        403 = "/errors/4xx.html"
-        501 = "/errors/5xx.html"
-        500 = "/errors/5xx.html"
-        502 = "/errors/5xx.html"
-        503 = "/errors/5xx.html"
-        504 = "/errors/5xx.html"
+        401 = "www/html/errors/index_401.html"
+        403 = "www/html/errors/index_403.html"
+        501 = "www/html/errors/index_501.html"
+        500 = "www/html/errors/index_500.html"
+        502 = "www/html/errors/index_502.html"
+        503 = "www/html/errors/index_503.html"
+        504 = "www/html/errors/index_504.html"
 
     [[server.location]]
         uri = "/uploading"
