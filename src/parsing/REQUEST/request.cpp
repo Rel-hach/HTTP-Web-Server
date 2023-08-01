@@ -71,12 +71,12 @@
                 return (clientt._requestIsParsed = true, Reqeust_Entity_Too_Large);
             }
 
-            if ((!_isChunked && (_body.length() != _contentLength )) || _body.empty())
+            if ((!_isChunked && (_body.length() != _contentLength )) && !_body.empty())
             {
                 return (clientt._requestIsParsed = true, Bad_Request);
             }
             
-            if ((_isChunked && (_unchunked_body.length() != _contentLength ) ) || _unchunked_body.empty())
+            if ((_isChunked && (_unchunked_body.length() != _contentLength ) ) && !_unchunked_body.empty())
             {
                 return (clientt._requestIsParsed = true, Bad_Request);
             }
