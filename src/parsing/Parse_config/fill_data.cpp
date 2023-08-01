@@ -40,7 +40,7 @@ std::pair<std::string, std::string> fill_pair(std::string &line){
 }
 
 void check_int(std::string &value){
-	if (atoi(value.c_str()) < 0 || atoi(value.c_str()) > 65535 || value.find_first_not_of("0123456789") != std::string::npos)
+	if (atoi(value.c_str()) < 1024 || atoi(value.c_str()) > 65535 || value.find_first_not_of("0123456789") != std::string::npos)
 		throw std::invalid_argument("Error: invalid port");
 }
 
@@ -68,6 +68,7 @@ void fill_server(server_data &server, std::string &line){
 		{
 			check_int(ports[i]);
 			server.is_empty = server.is_empty | PORT;
+//			server.port.push_back(atoi(ports[i].c_str()));
 			server.port.push_back(ports[i]);
 		}
 	}
@@ -111,6 +112,7 @@ void fill_location(location &location, std::string &line){
 		throw std::invalid_argument("Error: invalid location key");
 	std::getline(ss, value);
 	check_value_key(value, key);
+	trim(value, " \t\"");
 	location.upload = _upload;
 	if (key == "allow_methods")
 		fill_vector(location.allow_methods, value);

@@ -1,6 +1,6 @@
 [[server]]
-    port = 8000 8002
-    host = "127.0.0.1
+    port = 8000
+    host = "127.0.0.1"
     server_name = "webserv.com" 
     
 # this is a comment skip it
@@ -94,11 +94,11 @@
 
     [[server.location]]
         uri = "/redirecting"
-        return = 301 https://www.github.com
+        return = "301 https://www.github.com"
     
     [[server.location]]
        uri = "/deleting"
-       root = "www/upload
+       root = "www/upload"
        delete_module = "enable"
        allow_methods = ["GET", "DELETE"]
        index = ["index.html"]

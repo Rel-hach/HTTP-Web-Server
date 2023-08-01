@@ -34,11 +34,13 @@ int check_if_closed(std::string value){
 	{
 		if (value[i] == '\"')
 			count_quote++;
-		if (value[i] == '[' || value[i] == ']')
+		else if (value[i] == '[' )
 			count_bracket++;
+		else if (value[i] == ']')
+			count_bracket--;
 		i++;
 	}
-	if ((count_quote != 0 && count_quote % 2 != 0) || (count_bracket != 0 && count_bracket != 2))
+	if ((count_quote != 0 && count_quote % 2 != 0) || (count_bracket != 0))
 		return (0);
 	return (1);
 }
@@ -48,10 +50,9 @@ void check_value_key(std::string &value, std::string &key){
 		throw std::invalid_argument("Error: empty key");
 	if (has_bad_char(key)) 
 		throw std::invalid_argument("Error: invalid key");
-	trim(value, " \t\"[]");
 	if (value.empty())
 		throw std::invalid_argument("Error: empty value");
-	if (!check_if_closed(value) && key != "port")
+	if (!check_if_closed(value))
 	{
 		std::cout << key << std::endl;
 		std::cout << value << std::endl;
