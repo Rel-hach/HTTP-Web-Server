@@ -44,27 +44,6 @@ void check_int(std::string &value){
 		throw std::invalid_argument("Error: invalid port");
 }
 
-void check_if_duplicated(std::vector<server_data> &servers, std::vector<std::string >&values){
-	std::string value;
-	for (size_t i = 0; i < values.size(); i++)
-	{
-		for (size_t j = i + 1; j < values.size(); j++)
-		{
-			if (values[i] == values[j])
-				throw std::invalid_argument("Error: duplicated server_name");
-		}
-		value = values[i];
-		for (size_t i = 0; i < servers.size(); i++)
-		{
-			for (size_t j = 0; j < servers[i].server_names.size(); j++)
-			{
-				if (servers[i].server_names[j] == value)
-					throw std::invalid_argument("Error: duplicated server_name");
-			}
-		}
-	}
-}
-
 void fill_server(server_data &server, std::string &line){
 	std::string key;
 	std::string value;
