@@ -31,14 +31,13 @@ server_data find_server(std::vector<server_data>& servers, client client)
     if(host[0] == "localhost")
         host[0] = "127.0.0.1";
     
-    std::cout<<host[0] <<"______"<<host[1]<<std::endl;
+    // std::cout<<host[0] <<"______"<<host[1]<<std::endl;
     for (size_t i = 0; i < servers.size(); i++)
     {
         std::vector<int>::iterator it = std::find(servers[i].port.begin(), servers[i].port.end(), std::atoi(host[1].c_str()));
         std::vector<std::string>::iterator it1 = std::find(servers[i].server_names.begin(), servers[i].server_names.end(), host[0]);
         if((host[0] == servers[i].host  && it != servers[i].port.end()) || (it != servers[i].port.end() && it1 != servers[i].server_names.end()))
         {
-            std::cout<<"med"<<std::endl;
             return servers[i];
         }
     }

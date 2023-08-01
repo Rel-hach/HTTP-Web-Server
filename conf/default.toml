@@ -1,17 +1,21 @@
 [[server]]
     port = 8000
     host = "127.0.0.1"
-    server_name = "webserv1.com" 
+    server_name = "webserv.com" 
     root = "www/index.html"
     
 # this is a comment skip it
     server_name = "webserv.com" 
-    root = "www/index.html"
     client_max_body_size = "1G"
+
     [[server.error_page]]
-        400 = "www/html/errors/index_400.html"
-        403 = "www/html/errors/index_403.html"
-        501 = "www/html/errors/index_501.html"
+        413 = "errors/index_400.html"
+#       403 = "errors/4xx.html"
+#       501 = "errors/5xx.html"
+#       500 = "errors/5xx.html"
+#       502 = "errors/5xx.html"
+#       503 = "errors/5xx.html"
+#       504 = "errors/5xx.html"
 
 # this location will redirect you to the url.
 
@@ -34,13 +38,13 @@
     
     [[server.location]]
         uri = "/autoindexing"
-		root = "www/testAutoIndex"
+		root = "www/html"
         allow_methods = ["GET"]
         autoindex = "ON"
 
     
     [[server.location]]
-       uri = "/cgi_session"
+       uri = "/cgi"
        cgi_extension = ".py"
        root = src/cgi/test1.py
        allow_methods = ["GET", "POST"]
@@ -56,13 +60,13 @@
 
 
     [[server.error_page]]
-        401 = "www/html/errors/index_401.html"
-        403 = "www/html/errors/index_403.html"
-        501 = "www/html/errors/index_501.html"
-        500 = "www/html/errors/index_500.html"
-        502 = "www/html/errors/index_502.html"
-        503 = "www/html/errors/index_503.html"
-        504 = "www/html/errors/index_504.html"
+        401 = "/errors/4xx.html"
+        403 = "/errors/4xx.html"
+        501 = "/errors/5xx.html"
+        500 = "/errors/5xx.html"
+        502 = "/errors/5xx.html"
+        503 = "/errors/5xx.html"
+        504 = "/errors/5xx.html"
 
     [[server.location]]
         uri = "/uploading"
@@ -81,3 +85,9 @@
        delete_module = "enable"
        allow_methods = ["GET", "DELETE"]
        index = ["index.html"]
+
+    [[server.location]]
+       uri = "/cgi"
+       cgi_extension = ".py"
+       root = src/cgi/test1.py
+       allow_methods = ["GET", "POST"]
