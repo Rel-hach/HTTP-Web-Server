@@ -41,6 +41,7 @@ int Execute_cgi(response &res) {
     std::vector<std::string> env_cgi;
     std::cout<<"cgi"<<std::endl;
     env_cgi.push_back("QUERY_STRING="+ res._querry);
+    env_cgi.push_back("CONTENT_LENGTH="+ std::to_string(res._contentLength));
     char ** _env = vector_to_char(env_cgi);
     std::string path;
     std::string namecgi;
@@ -65,7 +66,20 @@ int Execute_cgi(response &res) {
         return 1;
     } else if (pid == 0) 
     {
-        close(pipefd[0]); 
+        std::ofstream outFile("/tmp/file.txt");
+        if (!outFile) {
+            std::cerr << "Error: Failed to open the file." << std::endl;
+            exit(127);
+        }
+        outFile<<res._body;
+        outFile.close();
+        int file_fd = open("/tmp/file.txt", O_RDONLY);
+        if (file_fd == -1) {
+         std::cerr << "Error: Failed to open the file." << std::endl;
+            exit(127);
+        }
+        dup2(file_fd,0);
+        close(file_fd);
         dup2(pipefd[1], STDOUT_FILENO);
         char* argv[]={(char*)namecgi.c_str(),(char*)(res._realPath).c_str(),nullptr};
         execve(path.c_str(),argv,_env);
@@ -74,6 +88,7 @@ int Execute_cgi(response &res) {
     else 
     {   
         close(pipefd[1]);
+        
         int status;
         pid_t child_pid = waitpid(pid, &status, 0);
         if (child_pid == -1) {
@@ -88,10 +103,20 @@ int Execute_cgi(response &res) {
                 std::cerr<<"read failed"<<std::endl;
                 return 1;
             }
-            res._fileContent = buffer;
-            res._contentLength = res._fileContent.length();
-            res._contentType = "text/html";
-            return 200;
+            if(res._locationName == "/cgi_cookies")
+            {
+                res._heder_cookeis = buffer;
+                res._contentType = "text/html";
+                res.is_cookeis = true;
+                return 200;
+            }
+            else
+            {
+                res._fileContent = buffer;
+                res._contentLength = res._fileContent.length();
+                res._contentType = "text/html";
+                return 200;
+            }
         }   
         std::cout<<"time"<<std::endl;  
     }

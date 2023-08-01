@@ -15,6 +15,8 @@ response::response()
         _root = "";
         _autoIndex = "OFF";
         _querry = "";
+        _heder_cookeis = "";
+        is_cookeis = false;
         _redirection = false;
         _clientMaxBodySize = 0;
         _realPath = "";
@@ -115,7 +117,12 @@ void    response::preparing_responseHeaders()
     _respHeaders += "HTTP/1.1 ";
     _respHeaders += _responseCode;
     _respHeaders += "\r\n";
-
+    if(is_cookeis)
+    {
+        _respHeaders += _heder_cookeis;
+        _respHeaders += "\r\n";
+        is_cookeis = false;
+    }
     // Location Header
     if (_status == REDIRECTION)
     {

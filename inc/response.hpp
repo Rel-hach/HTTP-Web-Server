@@ -59,6 +59,8 @@ class response
         bool        _ischunked;
         bool        _isMultipart;
         bool        _isupload;
+        std::string _heder_cookeis;
+        bool  is_cookeis;
         // locations 
         // supportedMethods;
 
