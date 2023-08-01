@@ -531,6 +531,7 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
     
     std::string temp = uri;
 
+
     std::map<std::string, location>::iterator it;
 
     for (size_t i = temp.size(); i > 0 ; i--)
