@@ -34,7 +34,7 @@ public:
 	~server_data();
  
 	std::string host;
-	std::vector<int> port;
+	std::vector<std::string> port;
 	std::vector<std::string> server_names;
 	std::string home;
 	size_t client_max_body_size;

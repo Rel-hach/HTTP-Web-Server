@@ -28,7 +28,7 @@ class server
 		std::vector<server_data> data;
 
     public:
-        server(int port,std::string host);
+        server(std::string port,std::string host);
         sockaddr_in  &getClientAdtess() const ;
         socklen_t  &getClientAdtessSize() const ;
         int getSockert() const ;

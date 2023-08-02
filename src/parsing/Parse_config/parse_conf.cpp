@@ -37,7 +37,7 @@ std::vector<server_data> parse_server(std::string config_file)
 			continue;
 		else if (line == "[[server]]")
 		{
-			if (servers.size() > 1)
+			if (servers.size() >= 1)
 				check_is_empty(servers.back());
 			servers.push_back(server_data());
 			servers.back().is_empty = EMPTY;
