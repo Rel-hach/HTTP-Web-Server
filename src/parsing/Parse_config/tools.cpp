@@ -26,6 +26,16 @@ int has_bad_char(std::string &key){
 	return (0);
 }
 
+int there_is_remain(std::string value){
+	trim(value, " \t");
+	char first = value[0];
+	char last = value[value.length() - 1];
+
+	if ((first == '\"' && last != '\"') || (first == '[' && last != ']'))
+		return 1;
+	return 0;
+}
+
 int check_if_closed(std::string value){
 	int i = 0;
 	int count_quote = 0;
@@ -40,7 +50,7 @@ int check_if_closed(std::string value){
 			count_bracket--;
 		i++;
 	}
-	if ((count_quote != 0 && count_quote % 2 != 0) || (count_bracket != 0))
+	if ((count_quote != 0 && count_quote % 2 != 0) || (count_bracket != 0) || there_is_remain(value))
 		return (0);
 	return (1);
 }
