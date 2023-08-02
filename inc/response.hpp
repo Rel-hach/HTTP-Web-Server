@@ -13,6 +13,8 @@
 
 #define REDIRECTION 301
 
+static std::string oldpath;
+
 class response
 {
     public:
@@ -85,7 +87,16 @@ class response
         std::string readPage(std::string page);
         bool        successAnswer(int status);
         bool        redirectionAnswer(int status);
-        bool        errorAnswer(int status);     
+        bool        errorAnswer(int status);
+
+        void        setroot(const std::string& _oldpath)
+        {
+            oldpath = _oldpath;
+        }
+        const std::string& getroot()
+        {
+            return (oldpath);
+        }
 };
 
 int Execute_cgi(response &res);
