@@ -1,6 +1,7 @@
 #include "../../../inc/response.hpp"
 #include "../../../inc/tools.hpp"
 #include "../../../inc/server_data.hpp"
+#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstring>
@@ -12,7 +13,7 @@ response::response()
         _homePage = "www/index.html";
         _indexes.clear();
         _upload = "OFF";
-        _root = "";
+         _root = "";
         _autoIndex = "OFF";
         _querry = "";
         _redirection = false;
@@ -519,24 +520,60 @@ std::string  response::readPage(std::string page)
     return (stream.str());
 }
 
+bool    is_folder(std::string& str)
+{
+    std::vector<std::string> tokens;
+
+    tools::splitting_string(str, "/", tokens);
+
+    if (tokens[tokens.size() - 1].find('.') == std::string::npos)
+    {
+        return (true);
+    }
+
+    return (false);
+}
 
 
 void    response::get_pathAndLocationInfos (server_data &serverr, std::string uri)
 {
-    
     if (uri.empty())
         return ;
 
     std::map<std::string, location> locations = serverr.locations;
-
-    if (!_referer.empty() && _referer.find('.') == std::string::npos)
+  
+    if (!_referer.empty() && is_folder(_referer) && is_folder(uri))
     {
-        if (uri.find(_referer) == std::string::npos)
-            uri = _referer + uri;
+        std::vector<std::string> tokens;
+        tools::splitting_string(uri, "/", tokens);
+        if (getroot().find(tokens[tokens.size() -1]) == std::string::npos)
+            setroot(getroot() + "/" + tokens[tokens.size() - 1]);
+        else
+        {
+            setroot(getroot().substr(0, getroot().find(tokens[tokens.size() - 1])));
+        }
+        uri = getroot();
     }
-    
-    std::string temp = uri;
 
+    else if (_referer.empty())
+    {
+        setroot(uri);
+    }
+
+    else 
+    {
+        std::vector<std::string> tokens;
+        tools::splitting_string(uri, "/", tokens);
+        uri = getroot();
+        for (size_t i = 0; i < tokens.size(); i++)
+        {
+            if (getroot().find(tokens[i]) == std::string::npos)
+                uri += "/" + tokens[i];
+        }
+    }
+
+
+    std::string temp = uri;
 
     std::map<std::string, location>::iterator it;
 
@@ -580,6 +617,7 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
             {
                 _realPath = _root + uri.substr(temp.size());
                 _fileName = uri.substr(_locationName.size() + 1);
+
             }
         }
 
@@ -621,17 +659,17 @@ std::string    response::getErrorPage()
 
 int     response::listing_requestDirectory()
 {
-    // open the directory
     std::string directory = _realPath;
     DIR *D = opendir(directory.c_str());
     if (D == NULL)
         return (403);
     
-    std::string autoindex_page =  "<html><title> A U T O I N D E X </title><body><center>";
+    std::string autoindex_page =  "<html><title> [A] [U] [T] [O] [I] [N] [D] [E] [X] </title><body><center>";
     autoindex_page += directory;
     autoindex_page += "</br></br></br>";
 
     struct dirent *directoryEntity;
+    std::string folder;
 
     while ((directoryEntity = readdir(D)) != NULL)
     {
