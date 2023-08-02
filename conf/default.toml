@@ -31,11 +31,18 @@
 		post_module = "enable"
     
     [[server.location]]
+        uri = "/website1"
+        allow_methods = ["GET", "POST"]
+        index = ["index.html"]
+        root = "www/simplywebsite"
+    
+    [[server.location]]
         uri = "/website"
         allow_methods = ["GET", "POST"]
-        index = ["index.html", "video.html", "contact.html", "about.html"]
+        index = ["index.html","video.html","contact.html"]
         root = "www/fullywebsite"
     
+
     [[server.location]]
         uri = "/autoindexing"
 		root = "www/testAutoIndex"
