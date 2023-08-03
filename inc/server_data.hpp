@@ -46,5 +46,5 @@ private:
 
 };
 std::vector<server_data> parse_server(std::string config_file);
-server_data defeault_server();
+std::vector<server_data> defeault_server();
 #endif

@@ -81,11 +81,13 @@ std::vector<server_data> parse_server(std::string config_file)
 	return servers;
 }
 
-server_data defeault_server(){
+std::vector<server_data> defeault_server(){
 	server_data server;
+	std::vector<server_data> servers;
 
 	server.host = "127.0.0.1";
 	server.port[0] = "8000";
 	server.server_names[0] = "localhost";
-	return server;
+	servers.push_back(server);
+	return servers;
 }
