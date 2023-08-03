@@ -50,13 +50,14 @@ int main(int argc,char **argv)
     std::vector<server_data> servers;
 	try
 	{
-		if (argc != 2)
+		if (argc > 2)
 		{
-			if (argc == 1)
-				servers[0] = defeault_server();
 			throw std::invalid_argument("Error: invalid number of arguments");
 		}
-		servers = parse_server(argv[1]);
+        if(argc == 1)
+		    servers = parse_server("conf/default.toml");
+		else
+            servers = parse_server(argv[1]);
         std::vector<pollfd> all_df;
         std::vector<server> all_server;
         std::vector<client> all_client;

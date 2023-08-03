@@ -67,8 +67,8 @@ std::vector<server_data> parse_server(std::string config_file)
 					servers.back().locations.insert(std::make_pair(uri_p.second, location()));
 					pseudo_flag = 0;
 				}
-				else if (old_line == "[[server.location]]")
-					throw std::invalid_argument("Error: location must at least have uri");
+				// else if (old_line == "[[server.location]]")
+				// 	throw std::invalid_argument("Error: location must at least have uri");
 				else
 					fill_location(servers.back().locations.at(uri_p.second), line);
 			}

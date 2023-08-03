@@ -78,12 +78,7 @@
     server_name = "webserv1.com" 
     client_max_body_size = "2G"
 
-    [[server.location]]
-        uri = "/"
-		root = "www/index.html"
-        allow_methods = ["GET"]
-
-    [[server.error_page]]
+       [[server.error_page]]
         401 = "/errors/4xx.html"
         403 = "/errors/4xx.html"
         501 = "/errors/5xx.html"
@@ -92,6 +87,13 @@
         503 = "/errors/5xx.html"
         504 = "/errors/5xx.html"
 
+
+    [[server.location]]
+        uri = "/"
+		root = "www/index.html"
+        allow_methods = ["GET"]
+
+ 
     [[server.location]]
         uri = "/uploading"
 		root = "www/upload"
@@ -110,14 +112,6 @@
        allow_methods = ["GET", "DELETE"]
        index = ["index.html"]
 
-    [[server.location]]
-       uri = "/cgi_python"
-       cgi_extension = ".py"
-       root = src/cgi/test1.py
-       allow_methods = ["GET", "POST"]
 
-    [[server.location]]
-       uri = "/cgi_php"
-       cgi_extension = ".php"
-       root = src/cgi/file.php
-       allow_methods = ["POST"]
+
+
