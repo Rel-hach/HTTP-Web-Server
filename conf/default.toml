@@ -65,7 +65,7 @@
     [[server.location]]
        uri = "/cgi_cookies"
        cgi_extension = ".php"
-       root = src/cgi/file.php
+       root = src/cgi/coockies.php
        allow_methods = ["GET","POST"]
 
 
