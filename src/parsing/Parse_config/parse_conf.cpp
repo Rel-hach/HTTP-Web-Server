@@ -36,6 +36,8 @@ std::vector<server_data> parse_server(std::string config_file)
 		trim(line, " \t");
 		if (line[0] == '#' || line.empty())
 			continue;
+		else if (line == old_line)
+			throw std::invalid_argument("Error: duplicate key");
 		else if (line == "[[server]]")
 		{
 			if (servers.size() >= 1)
@@ -47,7 +49,6 @@ std::vector<server_data> parse_server(std::string config_file)
 		else if (line == "[[server.location]]")
 		{
 			flag = LOCATION;
-			old_line = line;
 			pseudo_flag = 1;
 		}
 		else if (line == "[[server.error_page]]")
@@ -67,14 +68,13 @@ std::vector<server_data> parse_server(std::string config_file)
 					servers.back().locations.insert(std::make_pair(uri_p.second, location()));
 					pseudo_flag = 0;
 				}
-				else if (old_line == "[[server.location]]")
-				 	throw std::invalid_argument("Error: location must at least have uri");
 				else
 					fill_location(servers.back().locations.at(uri_p.second), line);
 			}
 			else if (flag == ERROR_PAGE && line != "[[server.error_page]]")
 				fill_error_page(servers.back().error_pages, line);
 		}
+		old_line = line;
 	}
 	file.close();
 	check_is_empty(servers.back());
