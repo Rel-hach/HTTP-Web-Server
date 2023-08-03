@@ -21,8 +21,10 @@ std::vector<server_data> parse_server(std::string config_file)
 	std::vector<server_data> servers;
 	std::string line;
 	std::pair<std::string, std::string> uri_p;
+	std::pair<std::string, std::string> key_value;
 	std::string uri;
 	e_key flag = UNKNOWN;
+	e_key _flag = UNKNOWN;
 	int pseudo_flag = 0;
 	std::string old_line;
 
@@ -36,23 +38,32 @@ std::vector<server_data> parse_server(std::string config_file)
 		trim(line, " \t");
 		if (line[0] == '#' || line.empty())
 			continue;
-		else if (line == old_line)
-			throw std::invalid_argument("Error: duplicate key");
 		else if (line == "[[server]]")
 		{
+			if (_flag == SERVER || _flag == LOCATION || _flag == ERROR_PAGE)
+				throw std::invalid_argument("Error: 2 consecutive keys");
 			if (servers.size() >= 1)
 				check_is_empty(servers.back());
 			servers.push_back(server_data());
 			servers.back().is_empty = EMPTY;
 			flag = SERVER;
+			_flag = flag;
 		}
 		else if (line == "[[server.location]]")
 		{
+			if (_flag == SERVER || _flag == LOCATION || _flag == ERROR_PAGE)
+				throw std::invalid_argument("Error: 2 consecutive keys");
 			flag = LOCATION;
+			_flag = flag;
 			pseudo_flag = 1;
 		}
 		else if (line == "[[server.error_page]]")
+		{
+			if (_flag == SERVER || _flag == LOCATION || _flag == ERROR_PAGE)
+				throw std::invalid_argument("Error: 2 consecutive keys");
 			flag = ERROR_PAGE;
+			_flag = flag;
+		}
 		else if (flag == UNKNOWN)
 			throw std::invalid_argument("Error: invalid key");
 		else 
@@ -69,10 +80,16 @@ std::vector<server_data> parse_server(std::string config_file)
 					pseudo_flag = 0;
 				}
 				else
+				{
+					key_value = fill_pair(line);
+					if (key_value.first == "uri" || key_value.second.empty())
+						throw std::invalid_argument("Error: invalid location key");
 					fill_location(servers.back().locations.at(uri_p.second), line);
+				}
 			}
 			else if (flag == ERROR_PAGE && line != "[[server.error_page]]")
 				fill_error_page(servers.back().error_pages, line);
+			_flag = KEY;
 		}
 		old_line = line;
 	}

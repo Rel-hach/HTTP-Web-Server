@@ -1,89 +1,182 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <link rel="shortcut icon" href="WWW/favicon.ico" type="image/x-icon">
-    <title>WEBSERV/1.1</title>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet"> 
-    <style>
-      /* Set global styles */
-      * {
-        box-sizing: border-box;
-        font-family: 'Open Sans', sans-serif;
-      }
-      
-      /* Set background color */
-      body {
-        background-color: #F5F7FA;
-      }
-      
-      /* Center content */
-      .content {
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Webserv</title>
+    <link rel='preconnect' href='https://fonts.googleapis.com'>
+    <link rel='preconnect' href='https://fonts.googleapis.com'>
+    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+    <link href='https://fonts.googleapis.com/css2?family=Geologica:wght@100&family=Roboto:ital,wght@1,300&display=swap' rel='stylesheet'>
+</head>
+<style>
+
+    body{
+        margin-left: auto;
+        margin-right: auto;
+        width: 400px;
+        background-color: #fff;
+        
+        font-family: 'Geologica', sans-serif;
+font-family: 'Roboto', sans-serif;
+    }
+    form {
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-      }
-      
-      /* Set styles for headings */
-      h1, h2 {
-        margin: 0;
-        color: #1F2937;
+        padding: 10px;
+
+    }
+    div  {
+        margin: 10px;
+    }
+    div  a {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #264653;
+        border: 1px solid #8d8d8d;
+        border-radius: 4px;
+        color: #fff;
+        text-decoration: none;
+
+        
+    }
+    form input {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #8d8d8d;
+        border-radius: 4px;
+        
+    }
+    .link{   
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    .link form input{
+        border:1px solid #8d8d8d;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        text-decoration: none;
+        background-color: #264653;
+        color: #fff;
+        border-radius: 4px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-left: 60px;
+        padding-right: 60px;
+
+        width: 100%;
         text-align: center;
-      }
-      
-      h1 {
-        font-size: 3rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-      }
-      
-      h2 {
-        font-size: 2rem;
-        margin-bottom: 2rem;
-      }
-      
-      /* Set styles for paragraphs */
-      p {
-        margin: 0;
-        color: #4B5563;
-        line-height: 1.5rem;
+        
+    }
+    .btn{
+        background: #264653;
+        border-color:1px solid #a4a4a4;
+        color: #fff;
+    }
+    h1{
         text-align: center;
-      }
-      
-      /* Set styles for collaborator pictures */
-      .collaborator {
-        display: inline-block;
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        margin: 1rem;
-        background-color: #FFFFFF;
-        background-size: cover;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-      }
-      
-      /* Set styles for collaborator names */
-      .name {
-        color: #1F2937;
-        font-size: 1.2rem;
-        margin-top: 1rem;
-        text-align: center;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="content">
-      <h1>WELCOME TO WEBSERV FIRST VERSION HOME PAGE<br><br></h1>
-      <h2>WEBSERV 0.0 is a HTTP/1.1 webserver made in c++ 98</h3>
-      <h2>supports GET, DELETE, and POST methods<br><br></h2>
-      <h3>collaborators : <br><br></h3>
-      <div class="collaborator" style="background-image: url('https://cdn.intra.42.fr/users/23f95527e0919a5c24a02a5802fb68f2/rel-hach.jpg')"></div>
-      <div class="name">rel-hach</div>
-      <div class="collaborator" style="background-image: url('https://cdn.intra.42.fr/users/81b9388ce27bdee2f32173e87617795f/fael-bou.jpg')"></div>
-      <div class="name">fael-bou</div>
-      <div class="collaborator" style="background-image: url('https://cdn.intra.42.fr/users/2d485b3f4a9374ff79fed9ac6f12f75d/mjalloul.jpg')"></div>
-      <div class="name">mjalloul</div>
+        color: #264653;
+    }
+    .titel {
+        display: flex;
+        margin-top: 30px;
+        color: #e76f51;
+        padding: 10px;
+    }
+    hr{
+        width: 33%;
+        background-color: #a4a4a4;
+        border: 1px solid #ffff;
+    }
+    textarea{
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #8d8d8d;
+        border-radius: 4px;
+    }
+    span{
+        color: #2a9d8f;
+    }
+    .copi{
+        margin-top: 30px;
+        text-align: end;
+        margin-right: 10px;
+        margin-left: 10px;
+        padding-left: 10px;
+        padding-right: 10px;
+        color: #c4c4c4;
+    }
+    .copi a{
+        color: #2a9d8f;
+        font-size: 15px ;
+    }
+</style>
+<body>
+    <h1>webserv <span>1337</span></h1>
+    <div class='titel'>
+        <hr>
+        <label for=''>GET Methode</label>
+        <hr>
     </div>
-  </body>
+    <div class='link'>
+        <div >
+            <a href="/vidio ">Get Video</a>
+        </div>
+        <div >
+            <a href="/image ">Get Image</a>
+        </div>
+    </div>
+    <div class='titel'>
+        <hr>
+        <label for=''>POST Methode</label>
+        <hr>
+    </div>
+    <form action='/uploading/file.mp4' method='POST' enctype='multipart/form-data' >
+        <input type='file'  required name='file' accept="video/mp4"  id='' multiple  >
+        <input type='submit' class='btn' value='Upload Vidio'>
+    </form>
+    <form action='/uploading/file.png' method='POST' enctype='multipart/form-data' >
+        <input type='file' required name='file' accept="image/png, image/jpeg"  id='' multiple  >
+        <input type='submit' class='btn' value='Upload Image'>
+    </form>
+    <div class='titel'>
+        <hr>
+        <label for=''>Static Website</label>
+        <hr>
+    </div>
+    <div class='link'>
+        <div >
+            <a href="/website1 ">Website 1</a>
+        </div>
+        <div >
+            <a href="/website ">Website 2</a>
+        </div>
+    </div>
+    <div class='titel'>
+        <hr>
+        <label for=''>CGI</label>
+        <hr>
+    </div>
+    <form action='/cgi_php' method='GET'  >
+        <input type='text' required name='name'  id='' placeholder='name'>
+        <input type='text' required name='age'  id='' placeholder='age'>
+        <input type='submit' class='btn' value='CGI php'>
+    </form>
+    <form action='/cgi_python'  method='GET'  >
+        <input type='text' required name='name'  id='' placeholder='name'>
+        <input type='text' required name='age'  id='' placeholder='age'>
+        <input type='submit' class='btn' value='CGI php'>
+    </form>
+    <form action='/cgi_cookies' method='GET'  >
+        <input type='text' required name='session-id'  id='' placeholder='First name and last name for generating session ID or token.'>
+        <input type='submit' class='btn' value='Cookies and Session'>
+    </form>
+    <h5 class='copi'>@1337 by  <a href='/redirecting_mjalloul'>mjalloul</a> & <a href='/redirecting_fael-bou'>fael-bou</a> & <a href="/redirecting_rel-hach">rel-hach</a></h5>
+    
+</body>
 </html>
