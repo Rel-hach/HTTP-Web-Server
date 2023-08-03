@@ -54,8 +54,6 @@ void check_value_key(std::string &value, std::string &key){
 		throw std::invalid_argument("Error: empty value");
 	if (!check_if_closed(value))
 	{
-		std::cout << key << std::endl;
-		std::cout << value << std::endl;
 		throw std::invalid_argument("Error: invalid value");
 	}
 }

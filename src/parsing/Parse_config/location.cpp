@@ -32,7 +32,6 @@ location &location::operator=(const location &location)
 }
 
 void location::print_location(){
-	std::cout << "allow_methods = ";
 	for (size_t i = 0; i < allow_methods.size(); i++)
 		std::cout << allow_methods[i] << " ";
 	std::cout << std::endl;

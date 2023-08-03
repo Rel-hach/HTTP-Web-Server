@@ -166,7 +166,8 @@ class tools
             std::string httpVersionErr = "<HTTP/1.1 505 \r\nContent-Type: text/html\r\n\r\n<!DOCTYPE html><html><head><title> Not Supported : 505 </title><style>body{font-family: Arial, sans-serif;background-color: #f7f7f7;}.container{margin: 50px auto;text-align: center;}h1{color: #d0021b;font-size: 36px;margin-bottom: 20px;}p{font-size: 18px;margin-bottom: 20px;}button{background-color: #d0021b;color: #fff;border: none;padding: 10px 20px;font-size: 18px;border-radius: 5px;cursor: pointer;}button:hover {background-color: #a30014;}</style></head><body><div class='container'><h1>Not Supported</h1><p>Sorry, version (HTTP) not supported.</p></div></body></html";
             std::string internal_error = "<HTTP/1.1 500 \r\nContent-Type: text/html\r\n\r\n<!DOCTYPE html><html><head><title> Internal server issue : 500 </title><style>body{font-family: Arial, sans-serif;background-color: #f7f7f7;}.container{margin: 50px auto;text-align: center;}h1{color: #d0021b;font-size: 36px;margin-bottom: 20px;}p{font-size: 18px;margin-bottom: 20px;}button{background-color: #d0021b;color: #fff;border: none;padding: 10px 20px;font-size: 18px;border-radius: 5px;cursor: pointer;}button:hover {background-color: #a30014;}</style></head><body><div class='container'><h1>Internal issue</h1><p>Sorry, there is an internal server issue.</p></div></body></html";
             std::string timeOut = "<HTTP/1.1 504 \r\nContent-Type: text/html\r\n\r\n<!DOCTYPE html><html><head><title> Time Out : 504 </title><style>body{font-family: Arial, sans-serif;background-color: #f7f7f7;}.container{margin: 50px auto;text-align: center;}h1{color: #d0021b;font-size: 36px;margin-bottom: 20px;}p{font-size: 18px;margin-bottom: 20px;}button{background-color: #d0021b;color: #fff;border: none;padding: 10px 20px;font-size: 18px;border-radius: 5px;cursor: pointer;}button:hover {background-color: #a30014;}</style></head><body><div class='container'><h1>Timeout</h1><p>Sorry, Gateway timeout.</p></div></body></html";
-            
+            std::string forbid = "<HTTP/1.1 403 \r\nContent-Type: text/html\r\n\r\n<!DOCTYPE html><html><head><title> Forbidden : 403 </title><style>body{font-family: Arial, sans-serif;background-color: #f7f7f7;}.container{margin: 50px auto;text-align: center;}h1{color: #d0021b;font-size: 36px;margin-bottom: 20px;}p{font-size: 18px;margin-bottom: 20px;}button{background-color: #d0021b;color: #fff;border: none;padding: 10px 20px;font-size: 18px;border-radius: 5px;cursor: pointer;}button:hover {background-color: #a30014;}</style></head><body><div class='container'><h1>Timeout</h1><p>Sorry, Gateway timeout.</p></div></body></html";
+
             switch (status)
             {
             case 400 :
@@ -174,6 +175,9 @@ class tools
             
             case 401 :
                 return (unauthorized);
+
+            case 403 :
+                return (forbid);
             
             case 404 :
                 return (not_found);

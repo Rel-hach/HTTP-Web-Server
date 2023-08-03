@@ -12,7 +12,7 @@ std::vector<std::string>  find_server_name(client client, std::string port)
 {
     std::vector<std::string> clean_name;
     int index = client.server_name.find(":");
-    if(index !=(int) std::string::npos)
+    if(index != -1)
     {
         tools::splitting_string(client.server_name, ":", clean_name);
         if(clean_name[0].length() && clean_name[1].length())
@@ -91,7 +91,6 @@ int main(int argc,char **argv)
                     return 1;
                 if(Server.listenSrver())
                     return 1;
-                std::cout<<it->first <<"========"<<it->second[i]<<std::endl;
             }
         }
 
@@ -133,27 +132,42 @@ int main(int argc,char **argv)
                         fds.events = POLLIN;
                         all_df.push_back(fds);
                         all_client.push_back(client(fds.fd));
-                        std::cout<< "server ==> "<< all_df[i].fd << "   accept connection cleient ==> " << client_socket<<std::endl;
+                        // std::cout<< "server ==> "<< all_df[i].fd << "   accept connection cleient ==> " << client_socket<<std::endl;
                     }
                     else
                     {
                         char buff[1024000]; 
                         std::memset(buff, '\0', sizeof(buff));
                         int content = read(all_df[i].fd,buff,1024000);
-                        // if (content == -1) {
-                        //     std::cerr << "Error: read failed\n";
-                        //     return 1;
-                        // }
+                        if (content == -1) {
+                            for (size_t j = 0; j < all_client.size(); j++)
+                            {
+                                if(all_client[j].getfd() == all_df[i].fd)
+                                {
+                                        close(all_df[i].fd);
+                                        all_df.erase(all_df.begin() + i);
+                                        all_client.erase(all_client.begin() + j);         
+                                        break; 
+                                }
+                            }        
+                        }
                         // 408 Request Timeout
                         for (size_t j = 0; j < all_client.size(); j++)
                         {
                             if(all_client[j].getfd() == all_df[i].fd)
                             {
+                                if (content == 0 && !all_client[j].getfirstbuff()) {
+                                    close(all_df[i].fd);
+                                    all_df.erase(all_df.begin() + i);
+                                    all_client.erase(all_client.begin() + j);         
+                                    break;        
+                                }
                                 all_client[j].setservr_name(buff);
                                 all_client[j].appendreq(buff,content);
                                 all_client[j].addTocontentread(content);
-                                if(( all_client[j].ischunked && all_client[j].getreq().find("\r\n0\r\n\r\n") != std::string::npos)
-                                    || (all_client[j].getreq().length() && !all_client[j].ischunked && all_client[j].getcontentlenght() <= all_client[j].getcontentread()))
+                                
+                                if((all_client[j].getreq().length() && !all_client[j].ischunked && all_client[j].getreq().find("\r\n\r\n") != std::string::npos  &&  all_client[j].getcontentlenght() <= all_client[j].getcontentread()) 
+                                || ( all_client[j].ischunked && all_client[j].getreq().find("\r\n0\r\n\r\n") != std::string::npos) )
                                 {
                                     all_df[i].events = POLLOUT;
                                 }
@@ -176,7 +190,7 @@ int main(int argc,char **argv)
                         {
                             request req;
                             server_data ser=find_server(servers, all_client[j]);
-                            std::cout<< ser.server_names[0]<<std::endl;
+                            // std::cout<< ser.server_names[0]<<std::endl;
                             int ret_status = req.processing_request(all_client[j], ser );
                             if (all_client[j]._requestIsParsed == true)
                             {
@@ -192,12 +206,13 @@ int main(int argc,char **argv)
                                 buffwrite =  (long)all_client[j]._response.length() - all_client[j].sendLenth;
                             else
                                 buffwrite = 1024;
-                                 write(all_df[i].fd, all_client[j]._response.c_str() + all_client[j].sendLenth, buffwrite);
-                                // if(res == -1)
-                                // {
-                                //         std::cerr << "Error: write failed\n";
-                                //         return 1;
-                                // }
+                                int res = write(all_df[i].fd, all_client[j]._response.c_str() + all_client[j].sendLenth, buffwrite);
+                                if(res == -1 || res == 0 )
+                                {
+                                    close(all_df[i].fd);
+                                    all_df.erase(all_df.begin() + i);
+                                    all_client.erase(all_client.begin() + j);
+                                }
                             all_client[j].sendLenth+=buffwrite;
                         }
                         else
@@ -205,7 +220,7 @@ int main(int argc,char **argv)
                                 close(all_df[i].fd);
                                 all_df.erase(all_df.begin() + i);
                                 all_client.erase(all_client.begin() + j);         
-                        } 
+                        }
                         continue;      
                 }
                  else if (all_df[i].revents  & POLLERR) {

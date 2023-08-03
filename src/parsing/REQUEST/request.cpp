@@ -46,6 +46,7 @@
         {
             _body = request.substr(request.find("\r\n\r\n") + 4);
         }
+
         
         if (tools::splitting_string(tokens[0], "\r\n", _headers) > 1)
         {
@@ -66,6 +67,10 @@
 
         if (_method == POST)
         {
+            if (_isChunked && _unchunked_body.empty())
+                return (clientt._requestIsParsed = true, Bad_Request);
+            else if  (!_isChunked && _body.empty())
+                return (clientt._requestIsParsed = true, Bad_Request);
             if (_contentLength > serv.client_max_body_size)
             {
                 return (clientt._requestIsParsed = true, Reqeust_Entity_Too_Large);
@@ -157,9 +162,12 @@
             size_t position = it->find(":");
             if (position != std::string::npos)
             {
+                if (it->size() < position + 2)
+                    return (Bad_Request);
                 couple.first = it->substr(0, position);
                 couple.second = it->substr(position + 2);
                 tools::trimming_string(couple.second);
+
                 if ((statuuus = checking_headerByHeader(couple.first,couple.second)) != GO_NEXT)
                 {
                     return (statuuus);

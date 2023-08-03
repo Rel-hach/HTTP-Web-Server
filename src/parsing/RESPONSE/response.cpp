@@ -223,14 +223,14 @@ std::string    response::generating_response(request& request, int returnStatus,
     store_requestInfos(request);
 
     get_pathAndLocationInfos (serverr, _path);
-
+    
     if (returnStatus != GO_NEXT)
         _status = returnStatus;
 
     else if (_realPath.empty() && _redirection == false)
         _status = Not_Found;
     
-    else if (method_isFound() == false)
+    else if (method_isFound() == false && _redirection == false)
         _status = Method_Not_Allowed;
 
     else if (_redirection == true)
@@ -549,36 +549,11 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
 
     std::map<std::string, location> locations = serverr.locations;
   
-    if (!_referer.empty() && is_folder(_referer) && is_folder(uri))
+     if (!_referer.empty() && _referer.find('.') == std::string::npos)
     {
-        std::vector<std::string> tokens;
-        tools::splitting_string(uri, "/", tokens);
-        if (getroot().find(tokens[tokens.size() -1]) == std::string::npos)
-            setroot(getroot() + "/" + tokens[tokens.size() - 1]);
-        else
-        {
-            setroot(getroot().substr(0, getroot().find(tokens[tokens.size() - 1])));
-        }
-        uri = getroot();
+        if (uri.find(_referer) == std::string::npos)
+            uri = _referer + uri;
     }
-
-    else if (_referer.empty())
-    {
-        setroot(uri);
-    }
-
-    else 
-    {
-        std::vector<std::string> tokens;
-        tools::splitting_string(uri, "/", tokens);
-        uri = getroot();
-        for (size_t i = 0; i < tokens.size(); i++)
-        {
-            if (getroot().find(tokens[i]) == std::string::npos)
-                uri += "/" + tokens[i];
-        }
-    }
-
 
     std::string temp = uri;
 
@@ -657,7 +632,6 @@ std::string    response::getErrorPage()
         errorPage = tools::getting_errorPage(_status);
     }
     _contentLength = errorPage.size();
-    std::cout << _contentLength << std::endl;
     return (errorPage);
 }
 

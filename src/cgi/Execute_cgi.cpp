@@ -39,7 +39,6 @@ char** vector_to_char(std::vector<std::string> env_cgi) {
 //script
 int Execute_cgi(response &res) {
     std::vector<std::string> env_cgi;
-    std::cout<<"cgi"<<std::endl;
     env_cgi.push_back("QUERY_STRING="+ res._querry);
     env_cgi.push_back("CONTENT_LENGTH="+ std::to_string(res._contentLength));
     char ** _env = vector_to_char(env_cgi);
@@ -117,8 +116,7 @@ int Execute_cgi(response &res) {
                 res._contentType = "text/html";
                 return 200;
             }
-        }   
-        std::cout<<"time"<<std::endl;  
+        }    
     }
     return 504;
 }
