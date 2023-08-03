@@ -106,6 +106,7 @@ int Execute_cgi(response &res) {
             if(res._locationName == "/cgi_cookies")
             {
                 res._heder_cookeis = buffer;
+                res._fileContent = "succece set coockise and seesion";
                 res._contentType = "text/html";
                 res.is_cookeis = true;
                 return 200;
@@ -119,7 +120,7 @@ int Execute_cgi(response &res) {
             }
         }    
     }
-    return 504;
+    return 500;
 }
 
 

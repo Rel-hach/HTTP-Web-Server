@@ -15,7 +15,7 @@ std::vector<std::string>  find_server_name(client client, std::string port)
     if(index != -1)
     {
         tools::splitting_string(client.server_name, ":", clean_name);
-        if(clean_name[0].length() && clean_name[1].length())
+        if(clean_name[0].empty() != 0 && clean_name[1].empty() != 0 )
             return clean_name;
     }
     clean_name.push_back(client.server_name);
@@ -30,7 +30,6 @@ server_data find_server(std::vector<server_data>& servers, client client)
     std::vector<std::string> host =  find_server_name(client,servers[0].port[0]);
     if(host[0] == "localhost")
         host[0] = "127.0.0.1";
-    
     // std::cout<<host[0] <<"______"<<host[1]<<std::endl;
     for (size_t i = 0; i < servers.size(); i++)
     {
@@ -136,7 +135,8 @@ int main(int argc,char **argv)
                         fds.fd=  client_socket;
                         fds.events = POLLIN;
                         all_df.push_back(fds);
-                        all_client.push_back(client(fds.fd));
+                        client newClient(fds.fd);
+                        all_client.push_back(newClient);
                         // std::cout<< "server ==> "<< all_df[i].fd << "   accept connection cleient ==> " << client_socket<<std::endl;
                     }
                     else
@@ -195,7 +195,6 @@ int main(int argc,char **argv)
                         {
                             request req;
                             server_data ser=find_server(servers, all_client[j]);
-                            // std::cout<< ser.server_names[0]<<std::endl;
                             int ret_status = req.processing_request(all_client[j], ser );
                             if (all_client[j]._requestIsParsed == true)
                             {
@@ -207,17 +206,18 @@ int main(int argc,char **argv)
                         int buffwrite = 0;
                         if(all_client[j].sendLenth < (long)all_client[j]._response.length())
                         {
-                            if( (long)all_client[j]._response.length() - all_client[j].sendLenth < 10240)
+                            if( (long)all_client[j]._response.length() - all_client[j].sendLenth < 1024)
                                 buffwrite =  (long)all_client[j]._response.length() - all_client[j].sendLenth;
                             else
                                 buffwrite = 1024;
-                                int res = write(all_df[i].fd, all_client[j]._response.c_str() + all_client[j].sendLenth, buffwrite);
-                                if(res == -1 || res == 0 )
-                                {
-                                    close(all_df[i].fd);
-                                    all_df.erase(all_df.begin() + i);
-                                    all_client.erase(all_client.begin() + j);
-                                }
+                            int res = write(all_df[i].fd, all_client[j]._response.c_str() + all_client[j].sendLenth, buffwrite);
+                            if(res == -1 || res == 0 )
+                            {
+                                close(all_df[i].fd);
+                                all_df.erase(all_df.begin() + i);
+                                all_client.erase(all_client.begin() + j);
+                                break;
+                            }
                             all_client[j].sendLenth+=buffwrite;
                         }
                         else

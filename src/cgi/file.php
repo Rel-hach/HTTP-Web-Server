@@ -3,9 +3,9 @@
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $handle = fopen("php://stdin", "r");
     $body = trim(fread($handle, 1024));
+    echo $body;
     fclose($handle);
     $pattern = '/name="([^"]+)"\s*\r?\n\r?\n([^-\s]+)/';
-
     preg_match_all($pattern, $body, $matches, PREG_SET_ORDER);
 
     $keysAndValues = [];
