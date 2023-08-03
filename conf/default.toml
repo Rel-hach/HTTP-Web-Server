@@ -8,26 +8,23 @@
 
     [[server.error_page]]
         413 = "errors/index_400.html"
-#       403 = "errors/4xx.html"
-#       501 = "errors/5xx.html"
-#       500 = "errors/5xx.html"
-#       502 = "errors/5xx.html"
-#       503 = "errors/5xx.html"
-#       504 = "errors/5xx.html"
+		401 = "errors/index_401.html"
+		403 = "errors/index_403.html"
+		404 = "errors/index_404.html"
 
 # this location will redirect you to the url.
 
     [[server.location]]
         uri = "/redirecting_mjalloul"
-        return = 301 https://github.com/jalloulmohamed
+        return = "301 https://github.com/jalloulmohamed"
 
     [[server.location]]
         uri = "/redirecting_rel-hach"
-        return = 301 https://github.com/Rel-hach
+        return = "301 https://github.com/Rel-hach"
 
     [[server.location]]
         uri = "/redirecting_fael-bou"
-        return = 301 https://github.com/fatimzehraa
+        return = "301 https://github.com/fatimzehraa"
 
     [[server.location]]
         uri = "/"
@@ -79,7 +76,7 @@
     [[server.location]]
        uri = "/cgi_cookies"
        cgi_extension = ".php"
-       root = src/cgi/cookies.php
+       root = "src/cgi/cookies.php"
        allow_methods = ["GET","POST"]
 
 [[server]]
@@ -89,18 +86,18 @@
     client_max_body_size = "2G"
 
        [[server.error_page]]
-        401 = "/errors/4xx.html"
-        403 = "/errors/4xx.html"
-        501 = "/errors/5xx.html"
-        500 = "/errors/5xx.html"
-        502 = "/errors/5xx.html"
-        503 = "/errors/5xx.html"
-        504 = "/errors/5xx.html"
+        401 = "/errors/index_401.html"
+        403 = "/errors/index_403.html"
+        501 = "/errors/index_501.html"
+        500 = "/errors/index_500.html"
+        502 = "/errors/index_502.html"
+        503 = "/errors/index_503.html"
+        504 = "/errors/index_504.html"
 
 
     [[server.location]]
         uri = "/redirecting_mjalloul"
-        return = 301 https://github.com/jalloulmohamed
+        return = "301 https://github.com/jalloulmohamed"
 
     [[server.location]]
         uri = "/redirecting_rel-hach"
@@ -108,7 +105,7 @@
 
     [[server.location]]
         uri = "/redirecting_fael-bou"
-        return = 301 https://github.com/fatimzehraa
+        return = "301 https://github.com/fatimzehraa"
 
     [[server.location]]
         uri = "/"
@@ -160,5 +157,5 @@
     [[server.location]]
        uri = "/cgi_cookies"
        cgi_extension = ".php"
-       root = src/cgi/cookies.php
+       root = "src/cgi/cookies.php"
        allow_methods = ["GET","POST"]
