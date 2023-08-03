@@ -367,7 +367,11 @@
             size_t size = std::strtol(hexa.c_str(), NULL, 16);
             if (size == 0)
                 break ;
+            if (_body.size() < size + n + 2)
+                return (Bad_Request);
             temp = _body.substr(n + 2, size);
+            if (_body.size() < size + n + 2 + 2)
+                return (Bad_Request);
             end = _body.substr(n + 2 + size, 2);
             if (temp.size() == size && chunk_ending_correctly(end) == true)
             {
