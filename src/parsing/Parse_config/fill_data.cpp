@@ -27,6 +27,7 @@ void fill_vector(std::vector<std::string> &vec, std::string &values){
 } 
 
 std::pair<std::string, std::string> fill_pair(std::string &line){
+	std::vector<std::string> keys;
 	std::string key;
 	std::string value;
 	char eq;
@@ -34,7 +35,7 @@ std::pair<std::string, std::string> fill_pair(std::string &line){
 	ss >> key;
 	ss >> eq;
 	std::getline(ss, value);
-	check_value_key(value, key);
+	check_value_key(value, key, keys);
 	trim(value, " \t\"");	
 	return (std::make_pair(key, value));
 }
@@ -51,9 +52,11 @@ void fill_server(server_data &server, std::string &line){
 	std::stringstream ss(line);
 	ss >> key;
 	ss >> eq;
+	if (eq != '=')
+		throw std::invalid_argument("Error: invalid server key");
 	std::getline(ss, value);
-	check_value_key(value, key);
-	trim(value, " \t\"");	
+	check_value_key(value, key, server.keys);
+	trim(value, " \t\"");
 
 	if (key == "host")
 	{
@@ -111,7 +114,7 @@ void fill_location(location &location, std::string &line){
 	if (eq != '=')
 		throw std::invalid_argument("Error: invalid location key");
 	std::getline(ss, value);
-	check_value_key(value, key);
+	check_value_key(value, key, location.keys);
 	trim(value, " \t\"");
 	location.upload = _upload;
 	if (key == "allow_methods")
@@ -167,6 +170,8 @@ void fill_error_page(std::map<int , std::string> &error_page, std::string &line)
 	std::stringstream ss(line);
 	ss >> key;
 	ss >> eq;
+	if (eq != '=')
+		throw std::invalid_argument("Error: invalid error_page key");
 	std::getline(ss, value);
 	trim(value, " \t\"");
 	if (key < 400 || key > 599 || k.find_first_not_of("0123456789") != std::string::npos || k.empty())

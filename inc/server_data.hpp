@@ -7,10 +7,11 @@
 #include "location.hpp"
 
 enum e_key{
-	SERVER,
-	LOCATION,
-	ERROR_PAGE,
-	UNKNOWN
+	SERVER = 1,
+	LOCATION = 2,
+	ERROR_PAGE = 4,
+	KEY = 8,
+	UNKNOWN = 16
 };
 
 enum e_empty {
@@ -40,6 +41,7 @@ public:
 	size_t client_max_body_size;
 	std::map<std::string, location> locations;
 	std::map<int, std::string> error_pages;
+	std::vector<std::string> keys;
 	e_empty is_empty;
 protected:
 private:

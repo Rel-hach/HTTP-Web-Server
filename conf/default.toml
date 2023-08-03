@@ -17,9 +17,6 @@
 
 # this location will redirect you to the url.
 
-    [[server.location]]
-        uri = "/redirecting"
-        return = 301 https://www.google.com
 
     [[server.location]]
         uri = "/"

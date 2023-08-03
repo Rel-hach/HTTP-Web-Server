@@ -55,11 +55,23 @@ int check_if_closed(std::string value){
 	return (1);
 }
 
-void check_value_key(std::string &value, std::string &key){
+int is_duplicated(std::string &key , std::vector<std::string> &keys){
+	for (size_t i = 0; i < keys.size(); i++)
+	{
+		if (keys[i] == key)
+			return (1);
+	}
+	keys.push_back(key);
+	return (0);
+}
+
+void check_value_key(std::string &value, std::string &key, std::vector<std::string> &keys){
 	if (key.empty())
 		throw std::invalid_argument("Error: empty key");
 	if (has_bad_char(key)) 
 		throw std::invalid_argument("Error: invalid key");
+	if (is_duplicated(key, keys))
+		throw std::invalid_argument("Error: duplicated key");
 	if (value.empty())
 		throw std::invalid_argument("Error: empty value");
 	if (!check_if_closed(value))
