@@ -18,6 +18,7 @@
 # this location will redirect you to the url.
 
     [[server.location]]
+    [[server.location]]
         uri = "/redirecting"
         return = 301 https://www.google.com
 
@@ -68,7 +69,7 @@
     [[server.location]]
        uri = "/cgi_cookies"
        cgi_extension = ".php"
-       root = src/cgi/file.php
+       root = src/cgi/coockies.php
        allow_methods = ["GET","POST"]
 
 

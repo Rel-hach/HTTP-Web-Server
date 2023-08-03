@@ -40,6 +40,7 @@ char** vector_to_char(std::vector<std::string> env_cgi) {
 int Execute_cgi(response &res) {
     std::vector<std::string> env_cgi;
     env_cgi.push_back("QUERY_STRING="+ res._querry);
+    env_cgi.push_back("REQUEST_METHOD="+ res._method);
     env_cgi.push_back("CONTENT_LENGTH="+ std::to_string(res._contentLength));
     char ** _env = vector_to_char(env_cgi);
     std::string path;
