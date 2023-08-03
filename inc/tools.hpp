@@ -215,7 +215,7 @@ class tools
 void trim(std::string &line, std::string str);
 int has_bad_char(std::string &key);
 int check_if_closed(std::string value);
-void check_value_key(std::string &value, std::string &key);
+void check_value_key(std::string &value, std::string &key, std::vector<std::string> &keys);
 void fill_vector(std::vector<std::string> &vec, std::string &values);
 std::pair<std::string, std::string> fill_pair(std::string &line);
 void fill_server(server_data &server, std::string &line);

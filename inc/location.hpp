@@ -23,6 +23,7 @@ public:
 	std::string return_path;
 	std::string delete_module;
 	std::string post_module;
+	std::vector<std::string> keys;
 protected:
 private:
 
