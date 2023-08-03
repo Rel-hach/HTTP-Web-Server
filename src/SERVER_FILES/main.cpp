@@ -51,7 +51,11 @@ int main(int argc,char **argv)
 	try
 	{
 		if (argc != 2)
+		{
+			if (argc == 1)
+				servers[0] = defeault_server();
 			throw std::invalid_argument("Error: invalid number of arguments");
+		}
 		servers = parse_server(argv[1]);
         std::vector<pollfd> all_df;
         std::vector<server> all_server;
@@ -223,7 +227,7 @@ int main(int argc,char **argv)
                         }
                         continue;      
                 }
-                 else if (all_df[i].revents  & POLLERR) {
+                else if (all_df[i].revents  & POLLERR) {
                     std::cerr << "Error on socket " << all_df[i].fd << std::endl;
                     close(all_df[i].fd);
                     all_df.erase(all_df.begin() + i);

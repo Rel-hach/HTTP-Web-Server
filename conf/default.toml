@@ -1,7 +1,7 @@
 [[server]]
     port = 8010
     host = "127.0.0.1"
-    server_name = "webserv.com" 
+    server_name = "webserv.com"
     
 # this is a comment skip it
     client_max_body_size = "1G"
@@ -45,7 +45,6 @@
         allow_methods = ["GET", "POST"]
         index = ["index.html","video.html","contact.html"]
         root = "www/fullywebsite"
-    
 
     [[server.location]]
         uri = "/autoindexing"

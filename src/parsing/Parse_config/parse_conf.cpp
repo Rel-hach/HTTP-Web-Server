@@ -24,6 +24,7 @@ std::vector<server_data> parse_server(std::string config_file)
 	std::string uri;
 	e_key flag = UNKNOWN;
 	int pseudo_flag = 0;
+	std::string old_line;
 
 	file.open(config_file.c_str());
 	if (!file.is_open())
@@ -46,6 +47,7 @@ std::vector<server_data> parse_server(std::string config_file)
 		else if (line == "[[server.location]]")
 		{
 			flag = LOCATION;
+			old_line = line;
 			pseudo_flag = 1;
 		}
 		else if (line == "[[server.error_page]]")
@@ -65,6 +67,8 @@ std::vector<server_data> parse_server(std::string config_file)
 					servers.back().locations.insert(std::make_pair(uri_p.second, location()));
 					pseudo_flag = 0;
 				}
+				else if (old_line == "[[server.location]]")
+					throw std::invalid_argument("Error: location must at least have uri");
 				else
 					fill_location(servers.back().locations.at(uri_p.second), line);
 			}
@@ -75,4 +79,13 @@ std::vector<server_data> parse_server(std::string config_file)
 	file.close();
 	check_is_empty(servers.back());
 	return servers;
+}
+
+server_data defeault_server(){
+	server_data server;
+
+	server.host = "127.0.0.1";
+	server.port[0] = "8000";
+	server.server_names[0] = "localhost";
+	return server;
 }
