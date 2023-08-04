@@ -69,10 +69,8 @@
         {
             if (_isChunked && _unchunked_body.empty())
                 return (clientt._requestIsParsed = true, Bad_Request);
-                
             else if  (!_isChunked && _body.empty())
                 return (clientt._requestIsParsed = true, Bad_Request);
-
             if (_contentLength > serv.client_max_body_size)
             {
                 return (clientt._requestIsParsed = true, Reqeust_Entity_Too_Large);
@@ -180,11 +178,6 @@
                 return (Bad_Request);
         }
 
-        if (_hasHostHeader == false)
-        {
-          return (Bad_Request);
-        }
-
         if (_method == "POST")
         {
           if (_isChunked == false && _hasContentLenght == false)
@@ -212,32 +205,6 @@
         else if ((key.find_first_of(" \t") != std::string::npos))
         {
             return Bad_Request;
-        }
-
-        else if (key == "Host")
-        {
-            int position = value.find(':');
-            if (position != -1 && !_hasHostHeader)
-            {
-                _host = value;
-                _hostname = _host.substr(0, position);
-                std::string port = _host.substr(position + 1);
-                if (port.size() > 5 || port.find_first_not_of("0123456789") != std::string::npos)
-                {
-                    return (Bad_Request);
-                }
-
-
-                if ( std::stoul(port) <= 65535 && std::stoul(port) > 0)
-                {
-                    _port = atoi(port.c_str());
-                }
-                else
-                {
-                    return (Bad_Request);
-                }
-                _hasHostHeader = true;
-            }
         }
 
         else if (key == "Connection")
@@ -370,11 +337,7 @@
             size_t size = std::strtol(hexa.c_str(), NULL, 16);
             if (size == 0)
                 break ;
-            if (_body.size() < size + n + 2)
-                return (Bad_Request);
             temp = _body.substr(n + 2, size);
-            if (_body.size() < size + n + 2 + 2)
-                return (Bad_Request);
             end = _body.substr(n + 2 + size, 2);
             if (temp.size() == size && chunk_ending_correctly(end) == true)
             {
