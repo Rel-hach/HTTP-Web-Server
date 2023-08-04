@@ -548,11 +548,25 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
         return ;
 
     std::map<std::string, location> locations = serverr.locations;
+
+    // if (!_referer.empty() && _referer.find('.') == std::string::npos)
+    // {
+    //     if (uri.find(_referer) == std::string::npos)
+    //         uri = _referer + uri;
+    // }
   
-     if (!_referer.empty() && _referer.find('.') == std::string::npos)
+       if (!_referer.empty() && is_folder(_referer))
     {
-        if (uri.find(_referer) == std::string::npos)
-            uri = _referer + uri;
+        std::string real_uri;
+        std::vector<std::string> tokens;
+        tools::splitting_string(uri, "/", tokens);
+        real_uri = _referer;
+        for (size_t i = 0; i < tokens.size(); i++)
+        {
+            if (_referer.find(tokens[i]) == std::string::npos)
+                real_uri += "/" + tokens[i];
+        }
+        uri = real_uri;
     }
 
     std::string temp = uri;
