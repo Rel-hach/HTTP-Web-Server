@@ -69,8 +69,10 @@
         {
             if (_isChunked && _unchunked_body.empty())
                 return (clientt._requestIsParsed = true, Bad_Request);
+                
             else if  (!_isChunked && _body.empty())
                 return (clientt._requestIsParsed = true, Bad_Request);
+
             if (_contentLength > serv.client_max_body_size)
             {
                 return (clientt._requestIsParsed = true, Reqeust_Entity_Too_Large);
