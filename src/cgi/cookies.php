@@ -1,17 +1,9 @@
 <?php
-function generateToken($name, $lastName) {
-    // Concatenate the name and last name
-    $fullName = $name . $lastName;
-
-    // Hash the concatenated string using SHA-256
-    $token = hash('sha256', $fullName);
-
-    return $token;
-}
-
-// Example usage:
-$name = "John";
-$lastName = "Doe";
-$token = generateToken($name, $lastName);
-echo "Generated Token: " . $token;
+    $querry = $_SERVER["QUERY_STRING"];
+    parse_str($querry, $keysAndValues);
+    $name = $keysAndValues["session-id"];
+    $randomString = bin2hex(random_bytes(10));
+    $data = $name . $randomString;
+    $token = password_hash($data, PASSWORD_BCRYPT);
+    echo "Set-Cookie: session_Id=".$name.";Expires=Wed, 21 Oct 2025 07:28:00 GMT; Path=/";
 ?>

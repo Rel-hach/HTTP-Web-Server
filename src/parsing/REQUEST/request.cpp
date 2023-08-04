@@ -225,7 +225,8 @@
                     return (Bad_Request);
                 }
 
-                if (std::stoul(port) <= 65535 && std::stoul(port) > 0)
+
+                if ( std::stoul(port) <= 65535 && std::stoul(port) > 0)
                 {
                     _port = atoi(port.c_str());
                 }
