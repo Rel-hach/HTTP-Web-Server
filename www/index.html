@@ -115,8 +115,27 @@ font-family: 'Roboto', sans-serif;
         color: #2a9d8f;
         font-size: 15px ;
     }
+    .user {
+        position: absolute;
+        right: 4px;
+        top: 4px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+
+    }
+    .user img {
+        width: 40px;
+        border-radius: 50px;
+        margin: 10px;
+    
+    }
 </style>
 <body>
+    <div id="cookie" class="user">
+        
+    </div>
     <h1>webserv <span>1337</span></h1>
     <div class='titel'>
         <hr>
@@ -177,6 +196,32 @@ font-family: 'Roboto', sans-serif;
         <input type='submit' class='btn' value='Cookies and Session'>
     </form>
     <h5 class='copi'>@1337 by  <a href='/redirecting_mjalloul'>mjalloul</a> & <a href='/redirecting_fael-bou'>fael-bou</a> & <a href="/redirecting_rel-hach">rel-hach</a></h5>
-    
+    <script>
+
+            function getCookie(name) {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Check if the cookie starts with the name we are looking for
+                    if (cookie.startsWith(name + '=')) {
+                        // Return the value of the cookie by extracting it from the string
+                        return cookie.substring(name.length + 1);
+                    }
+                }
+                // If the cookie does not exist, return null
+                return null;
+            }
+
+            // Example usage
+            const cookieName = 'session_Id';
+            const value = getCookie(cookieName);
+            if (value !== null) {
+                let codeExample = `<img src="https://xsgames.co/randomusers/assets/avatars/male/${value.length}.jpg" alt="" srcset="">
+                                    <h4>${value}</h4>`;
+                document.getElementById('cookie').innerHTML += codeExample;
+            } else {
+                console.log('Cookie does not exist.');
+            }
+    </script>
 </body>
 </html>
