@@ -439,7 +439,7 @@ int     response::storing_multipleParts()
 
         ofs << filecontent;
         ofs.close();
-        //_contentType = "text/html";
+        _contentType = "text/html";
     }
     _fileContent = readPage(UPLOAD_FILE);
     return (201);

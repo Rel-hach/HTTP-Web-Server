@@ -42,6 +42,7 @@ int Execute_cgi(response &res) {
     env_cgi.push_back("QUERY_STRING="+ res._querry);
     env_cgi.push_back("REQUEST_METHOD="+ res._method);
     env_cgi.push_back("CONTENT_LENGTH="+ std::to_string(res._contentLength));
+    env_cgi.push_back("CONTENT_TYPE="+ res._contentType);
     char ** _env = vector_to_char(env_cgi);
     std::string path;
     std::string namecgi;
