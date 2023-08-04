@@ -56,7 +56,7 @@ void response::determine_contentType()
             else if (_extension == ".css")
                 _contentType = "text/css";
             else if (_extension == ".js")
-                _contentType = "application/javascript"; // Add this line to handle .js files
+                _contentType = "application/javascript";
             else if (_extension == ".json")
                 _contentType = "application/json";
             else if (_extension == ".xml")
@@ -99,8 +99,14 @@ void response::determine_contentType()
                 _contentType = "audio/ogg";
             else if (_extension == ".flac")
                 _contentType = "audio/flac";
+            else if (_extension == ".woff")
+                _contentType = "font/woff";
+            else if (_extension == ".woff2")
+                _contentType = "font/woff2";
+            else if (_extension == ".ttf")
+                _contentType = "font/ttf";
             else
-                _contentType = "application/octet-stream"; // Un fichier de type inconnu doit être associé à ce type MIME
+                _contentType = "application/octet-stream";
         }
         else
             _contentType = "text/html"; 
@@ -549,24 +555,10 @@ void    response::get_pathAndLocationInfos (server_data &serverr, std::string ur
 
     std::map<std::string, location> locations = serverr.locations;
 
-    // if (!_referer.empty() && _referer.find('.') == std::string::npos)
-    // {
-    //     if (uri.find(_referer) == std::string::npos)
-    //         uri = _referer + uri;
-    // }
-  
-       if (!_referer.empty() && is_folder(_referer))
+    if (!_referer.empty() && is_folder(_referer))
     {
-        std::string real_uri;
-        std::vector<std::string> tokens;
-        tools::splitting_string(uri, "/", tokens);
-        real_uri = _referer;
-        for (size_t i = 0; i < tokens.size(); i++)
-        {
-            if (_referer.find(tokens[i]) == std::string::npos)
-                real_uri += "/" + tokens[i];
-        }
-        uri = real_uri;
+        if (uri.find(_referer) == std::string::npos)
+            uri = _referer + uri;
     }
 
     std::string temp = uri;
